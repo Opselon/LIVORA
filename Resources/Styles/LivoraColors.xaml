@@ -1,0 +1,81 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- LIVORA design tokens. Calm, premium, human — not the default .NET purple. -->
+
+    <!-- Brand -->
+    <Color x:Key="Accent">#3E7C6F</Color>
+    <Color x:Key="AccentSoft">#E4F0ED</Color>
+    <Color x:Key="AccentDeep">#2C5D53</Color>
+
+    <!-- Surfaces (light theme) -->
+    <Color x:Key="BgPrimary">#F7F6F3</Color>
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="SurfaceAlt">#F0EFEB</Color>
+    <Color x:Key="Overlay">#E7E5E0</Color>
+
+    <!-- Text -->
+    <Color x:Key="TextPrimary">#1C1B1A</Color>
+    <Color x:Key="TextSecondary">#6B6963</Color>
+    <Color x:Key="TextTertiary">#9B9890</Color>
+    <Color x:Key="TextOnAccent">#FFFFFF</Color>
+
+    <!-- Semantic metric colors -->
+    <Color x:Key="MetricSleep">#5B6FA8</Color>
+    <Color x:Key="MetricSleepSoft">#E8EBF5</Color>
+    <Color x:Key="MetricActivity">#C97B3D</Color>
+    <Color x:Key="MetricActivitySoft">#F7EDE3</Color>
+    <Color x:Key="MetricRecovery">#3E7C6F</Color>
+    <Color x:Key="MetricRecoverySoft">#E4F0ED</Color>
+    <Color x:Key="MetricWellness">#8A6FA8</Color>
+    <Color x:Key="MetricWellnessSoft">#EFEAF6</Color>
+    <Color x:Key="Positive">#3E7C6F</Color>
+    <Color x:Key="Caution">#C0871F</Color>
+    <Color x:Key="Negative">#B65C4B</Color>
+
+    <!-- Dark theme mirrors -->
+    <Color x:Key="BgPrimaryDark">#141412</Color>
+    <Color x:Key="SurfaceDark">#1F1E1C</Color>
+    <Color x:Key="SurfaceAltDark">#282724</Color>
+    <Color x:Key="OverlayDark">#3A3936</Color>
+    <Color x:Key="TextPrimaryDark">#ECEAE6</Color>
+    <Color x:Key="TextSecondaryDark">#A5A29B</Color>
+    <Color x:Key="TextTertiaryDark">#7A776F</Color>
+    <Color x:Key="AccentSoftDark">#243832</Color>
+    <Color x:Key="MetricSleepSoftDark">#262C3E</Color>
+    <Color x:Key="MetricActivitySoftDark">#3A2D20</Color>
+    <Color x:Key="MetricRecoverySoftDark">#243832</Color>
+    <Color x:Key="MetricWellnessSoftDark">#2E2738</Color>
+
+    <!-- Themed brushes -->
+    <SolidColorBrush x:Key="BgPrimaryBrush" Color="{AppThemeBinding Light={StaticResource BgPrimary}, Dark={StaticResource BgPrimaryDark}}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"/>
+    <SolidColorBrush x:Key="SurfaceAltBrush" Color="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+    <SolidColorBrush x:Key="OverlayBrush" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"/>
+    <SolidColorBrush x:Key="MetricSleepBrush" Color="{StaticResource MetricSleep}"/>
+    <SolidColorBrush x:Key="MetricActivityBrush" Color="{StaticResource MetricActivity}"/>
+    <SolidColorBrush x:Key="MetricRecoveryBrush" Color="{StaticResource MetricRecovery}"/>
+    <SolidColorBrush x:Key="MetricWellnessBrush" Color="{StaticResource MetricWellness}"/>
+    <SolidColorBrush x:Key="MetricSleepSoftBrush" Color="{AppThemeBinding Light={StaticResource MetricSleepSoft}, Dark={StaticResource MetricSleepSoftDark}}"/>
+    <SolidColorBrush x:Key="MetricActivitySoftBrush" Color="{AppThemeBinding Light={StaticResource MetricActivitySoft}, Dark={StaticResource MetricActivitySoftDark}}"/>
+    <SolidColorBrush x:Key="MetricRecoverySoftBrush" Color="{AppThemeBinding Light={StaticResource MetricRecoverySoft}, Dark={StaticResource MetricRecoverySoftDark}}"/>
+    <SolidColorBrush x:Key="MetricWellnessSoftBrush" Color="{AppThemeBinding Light={StaticResource MetricWellnessSoft}, Dark={StaticResource MetricWellnessSoftDark}}"/>
+    <SolidColorBrush x:Key="CautionBrush" Color="{StaticResource Caution}"/>
+    <SolidColorBrush x:Key="NegativeBrush" Color="{StaticResource Negative}"/>
+    <SolidColorBrush x:Key="PositiveBrush" Color="{StaticResource Positive}"/>
+
+    <x:Double x:Key="CardRadius">20</x:Double>
+    <x:Double x:Key="ChipRadius">14</x:Double>
+    <x:Double x:Key="PagePadding">20</x:Double>
+    <x:Double x:Key="CardSpacing">14</x:Double>
+    <CornerRadius x:Key="CardCornerRadius">20</CornerRadius>
+    <CornerRadius x:Key="ChipCornerRadius">14</CornerRadius>
+    <Thickness x:Key="CardPadding">18</Thickness>
+    <Thickness x:Key="PageThickness">20,12</Thickness>
+
+</ResourceDictionary>
