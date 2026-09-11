@@ -74,8 +74,8 @@ public sealed class LocalizationService : ILocalizationService, IFormatService
     private static string Lookup(string key)
     {
         // ResourceManager invariant fallback handles missing keys; empty string means truly missing.
-        var value = AppResources.ResourceManager.GetString(key, AppResources.Culture);
-        return value ?? $"[{key}]";
+        var value = Resources.Localization.AppResources.Get(key);
+        return value;
     }
 
     public void SetLanguage(AppLanguage language)

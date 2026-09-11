@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" />
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- ============ Common ============ -->
+  <data name="Common.Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Common.Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="Common.No" xml:space="preserve"><value>No</value></data>
+  <data name="Common.Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Common.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Common.Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Common.Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Common.Done" xml:space="preserve"><value>Done</value></data>
+  <data name="Common.Continue" xml:space="preserve"><value>Continue</value></data>
+  <data name="Common.GetStarted" xml:space="preserve"><value>Get started</value></data>
+  <data name="Common.Next" xml:space="preserve"><value>Next</value></data>
+  <data name="Common.Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Common.StreakDays" xml:space="preserve"><value>{0}-day streak</value></data>
+  <data name="Common.ThisWeekCount" xml:space="preserve"><value>{0} / {1} this week</value></data>
+  <data name="Common.DayXofY" xml:space="preserve"><value>Day {0} of {1}</value></data>
+  <data name="Common.SeeAll" xml:space="preserve"><value>See all</value></data>
+  <data name="Common.Complete" xml:space="preserve"><value>Complete</value></data>
+  <data name="Common.New" xml:space="preserve"><value>New</value></data>
+
+  <!-- ============ Formats ============ -->
+  <data name="Format.DurationFullFa" xml:space="preserve"><value>{0}h {1}m</value></data>
+  <data name="Format.DurationMinutesFa" xml:space="preserve"><value>{0}m</value></data>
+
+  <!-- ============ Tabs / navigation ============ -->
+  <data name="Tab.Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Tab.Health" xml:space="preserve"><value>Health</value></data>
+  <data name="Tab.Goals" xml:space="preserve"><value>Goals</value></data>
+  <data name="Tab.Programs" xml:space="preserve"><value>Programs</value></data>
+  <data name="Tab.Profile" xml:space="preserve"><value>Profile</value></data>
+
+  <!-- ============ Onboarding ============ -->
+  <data name="Onboarding.Welcome.Title" xml:space="preserve"><value>Welcome to LIVORA</value></data>
+  <data name="Onboarding.Welcome.Subtitle" xml:space="preserve"><value>LIVORA learns how you live and helps you make better decisions every day.</value></data>
+  <data name="Onboarding.Step.Name" xml:space="preserve"><value>What should LIVORA call you?</value></data>
+  <data name="Onboarding.Name.Placeholder" xml:space="preserve"><value>Your name</value></data>
+  <data name="Onboarding.Step.Goals" xml:space="preserve"><value>What matters most right now?</value></data>
+  <data name="Onboarding.Goal.BetterSleep" xml:space="preserve"><value>Better sleep</value></data>
+  <data name="Onboarding.Goal.MoreEnergy" xml:space="preserve"><value>More energy</value></data>
+  <data name="Onboarding.Goal.Fitness" xml:space="preserve"><value>Get fitter</value></data>
+  <data name="Onboarding.Goal.Focus" xml:space="preserve"><value>Sharper focus</value></data>
+  <data name="Onboarding.Goal.Stress" xml:space="preserve"><value>Less stress</value></data>
+  <data name="Onboarding.Goal.Learning" xml:space="preserve"><value>Learn consistently</value></data>
+  <data name="Onboarding.Step.Activity" xml:space="preserve"><value>How active are you these days?</value></data>
+  <data name="Onboarding.Step.Schedule" xml:space="preserve"><value>When do you usually sleep and wake?</value></data>
+  <data name="Onboarding.Bedtime" xml:space="preserve"><value>Usual bedtime</value></data>
+  <data name="Onboarding.WakeTime" xml:space="preserve"><value>Usual wake time</value></data>
+  <data name="Onboarding.Step.Language" xml:space="preserve"><value>Choose your language</value></data>
+  <data name="Onboarding.Language.English" xml:space="preserve"><value>English</value></data>
+  <data name="Onboarding.Language.Persian" xml:space="preserve"><value>فارسی</value></data>
+  <data name="Onboarding.Finish.Note" xml:space="preserve"><value>LIVORA starts with sample data so you can explore. Connect real sources later in Profile.</value></data>
+
+  <!-- ============ Today ============ -->
+  <data name="Today.Greeting.Morning" xml:space="preserve"><value>Good morning, {0}</value></data>
+  <data name="Today.Greeting.Afternoon" xml:space="preserve"><value>Good afternoon, {0}</value></data>
+  <data name="Today.Greeting.Evening" xml:space="preserve"><value>Good evening, {0}</value></data>
+  <data name="Today.DailyScore" xml:space="preserve"><value>Daily readiness</value></data>
+  <data name="Today.SampleDataNote" xml:space="preserve"><value>Sample data — connect real sources in Profile</value></data>
+  <data name="Today.Priorities" xml:space="preserve"><value>Today's priorities</value></data>
+  <data name="Today.Recommended" xml:space="preserve"><value>Recommended for you</value></data>
+  <data name="Today.ActiveGoals" xml:space="preserve"><value>Active goals</value></data>
+  <data name="Today.Habits" xml:space="preserve"><value>Habits</value></data>
+  <data name="Today.SleepCard" xml:space="preserve"><value>Sleep</value></data>
+  <data name="Today.ActivityCard" xml:space="preserve"><value>Activity</value></data>
+  <data name="Today.RecoveryCard" xml:space="preserve"><value>Recovery</value></data>
+  <data name="Today.FocusCard" xml:space="preserve"><value>Focus</value></data>
+
+  <!-- ============ Intelligence ============ -->
+  <data name="Intelligence.CardTitle" xml:space="preserve"><value>LIVORA Intelligence</value></data>
+  <data name="Intelligence.MockBadge" xml:space="preserve"><value>Demo intelligence</value></data>
+  <data name="Insight.Title.BalancedDay" xml:space="preserve"><value>You're in good shape today</value></data>
+  <data name="Insight.Title.SleepDebt" xml:space="preserve"><value>Your sleep was below your normal baseline</value></data>
+  <data name="Insight.Title.LowRecovery" xml:space="preserve"><value>Your recovery is slightly below your usual level</value></data>
+  <data name="Insight.Title.PositiveMomentum" xml:space="preserve"><value>You're building momentum</value></data>
+  <data name="Insight.Title.HighStress" xml:space="preserve"><value>Your stress looks elevated today</value></data>
+  <data name="Insight.Reason.SleepHours" xml:space="preserve"><value>You slept {0} last night — below your usual {1}.</value></data>
+  <data name="Insight.Reason.RecoveryScore" xml:space="preserve"><value>Your recovery score is {0} — usually it's around {1}.</value></data>
+  <data name="Insight.Reason.PositiveStreak" xml:space="preserve"><value>You've kept your habits {0} days in a row and activity is on target.</value></data>
+  <data name="Insight.Reason.HighStress" xml:space="preserve"><value>Your stress has been trending high while energy is low.</value></data>
+  <data name="Insight.Reason.Balanced" xml:space="preserve"><value>Sleep, activity and recovery are all close to your baseline.</value></data>
+  <data name="Rec.ReduceTrainingIntensity" xml:space="preserve"><value>Keep training intensity light today</value></data>
+  <data name="Rec.ShortWalk" xml:space="preserve"><value>Add a short walk after lunch</value></data>
+  <data name="Rec.ProtectFocusBlocks" xml:space="preserve"><value>Protect two focus blocks this morning</value></data>
+  <data name="Rec.EarlierBedtime" xml:space="preserve"><value>Plan an earlier bedtime tonight</value></data>
+  <data name="Rec.KeepRoutine" xml:space="preserve"><value>Keep your routine — it's working</value></data>
+  <data name="Rec.Hydrate" xml:space="preserve"><value>Drink water steadily through the day</value></data>
+  <data name="Rec.MorningLight" xml:space="preserve"><value>Get outside light within an hour of waking</value></data>
+  <data name="Rec.TakeBreak" xml:space="preserve"><value>Take a 10-minute break every 90 minutes</value></data>
+  <data name="Rec.CelebrateStreak" xml:space="preserve"><value>Protect your streak — do the small version if needed</value></data>
+  <data name="Rec.ModerateScreenTime" xml:space="preserve"><value>Wind screens down 30 minutes before bed</value></data>
+
+  <!-- ============ Health ============ -->
+  <data name="Health.Title" xml:space="preserve"><value>Health</value></data>
+  <data name="Health.Sleep" xml:space="preserve"><value>Sleep</value></data>
+  <data name="Health.Activity" xml:space="preserve"><value>Activity</value></data>
+  <data name="Health.Recovery" xml:space="preserve"><value>Recovery</value></data>
+  <data name="Health.Wellness" xml:space="preserve"><value>Wellness</value></data>
+  <data name="Health.Duration" xml:space="preserve"><value>Duration</value></data>
+  <data name="Health.Quality" xml:space="preserve"><value>Quality</value></data>
+  <data name="Health.Consistency" xml:space="preserve"><value>Consistency</value></data>
+  <data name="Health.Steps" xml:space="preserve"><value>Steps</value></data>
+  <data name="Health.ActiveMinutes" xml:space="preserve"><value>Active minutes</value></data>
+  <data name="Health.Load" xml:space="preserve"><value>Activity estimate</value></data>
+  <data name="Health.RecoveryScore" xml:space="preserve"><value>Recovery score</value></data>
+  <data name="Health.RestingHeartRate" xml:space="preserve"><value>Resting heart rate</value></data>
+  <data name="Health.HRV" xml:space="preserve"><value>HRV</value></data>
+  <data name="Health.NotAvailable" xml:space="preserve"><value>Not available yet</value></data>
+  <data name="Health.Stress" xml:space="preserve"><value>Stress</value></data>
+  <data name="Health.Mood" xml:space="preserve"><value>Mood</value></data>
+  <data name="Health.Energy" xml:space="preserve"><value>Energy</value></data>
+  <data name="Health.SourceMock" xml:space="preserve"><value>Sample data</value></data>
+
+  <!-- ============ Goals ============ -->
+  <data name="Goals.Title" xml:space="preserve"><value>Goals</value></data>
+  <data name="Goals.NewGoal" xml:space="preserve"><value>New goal</value></data>
+  <data name="Goals.EditGoal" xml:space="preserve"><value>Edit goal</value></data>
+  <data name="Goals.Name" xml:space="preserve"><value>Goal name</value></data>
+  <data name="Goals.Description" xml:space="preserve"><value>Description (optional)</value></data>
+  <data name="Goals.Category" xml:space="preserve"><value>Category</value></data>
+  <data name="Goals.Target" xml:space="preserve"><value>Target</value></data>
+  <data name="Goals.Progress" xml:space="preserve"><value>Progress</value></data>
+  <data name="Goals.Period" xml:space="preserve"><value>Period</value></data>
+  <data name="Goals.Unit" xml:space="preserve"><value>Unit</value></data>
+  <data name="Goals.PerDay" xml:space="preserve"><value>per day</value></data>
+  <data name="Goals.PerWeek" xml:space="preserve"><value>per week</value></data>
+  <data name="Goals.AddProgress" xml:space="preserve"><value>+1</value></data>
+  <data name="Goals.Empty" xml:space="preserve"><value>No goals yet. Start with something small — LIVORA will help you keep it.</value></data>
+  <data name="Goals.OnTrack" xml:space="preserve"><value>On track</value></data>
+  <data name="Goals.AtRisk" xml:space="preserve"><value>At risk</value></data>
+  <data name="Goals.Behind" xml:space="preserve"><value>Behind</value></data>
+  <data name="Goals.Completed" xml:space="preserve"><value>Completed</value></data>
+
+  <!-- ============ Enums ============ -->
+  <data name="Enum.GoalCategory.Fitness" xml:space="preserve"><value>Fitness</value></data>
+  <data name="Enum.GoalCategory.Sleep" xml:space="preserve"><value>Sleep</value></data>
+  <data name="Enum.GoalCategory.Mindfulness" xml:space="preserve"><value>Mindfulness</value></data>
+  <data name="Enum.GoalCategory.Learning" xml:space="preserve"><value>Learning</value></data>
+  <data name="Enum.GoalCategory.ScreenTime" xml:space="preserve"><value>Screen time</value></data>
+  <data name="Enum.GoalCategory.Focus" xml:space="preserve"><value>Focus</value></data>
+  <data name="Enum.GoalCategory.Nutrition" xml:space="preserve"><value>Nutrition</value></data>
+  <data name="Enum.GoalCategory.Custom" xml:space="preserve"><value>Custom</value></data>
+  <data name="Enum.GoalPeriod.Day" xml:space="preserve"><value>Day</value></data>
+  <data name="Enum.GoalPeriod.Week" xml:space="preserve"><value>Week</value></data>
+  <data name="Enum.GoalUnit.Sessions" xml:space="preserve"><value>sessions</value></data>
+  <data name="Enum.GoalUnit.Minutes" xml:space="preserve"><value>minutes</value></data>
+  <data name="Enum.GoalUnit.Hours" xml:space="preserve"><value>hours</value></data>
+  <data name="Enum.GoalUnit.Steps" xml:space="preserve"><value>steps</value></data>
+  <data name="Enum.ActivityLevel.Sedentary" xml:space="preserve"><value>Mostly sitting</value></data>
+  <data name="Enum.ActivityLevel.Light" xml:space="preserve"><value>Lightly active</value></data>
+  <data name="Enum.ActivityLevel.Moderate" xml:space="preserve"><value>Moderately active</value></data>
+  <data name="Enum.ActivityLevel.Active" xml:space="preserve"><value>Active</value></data>
+  <data name="Enum.ActivityLevel.VeryActive" xml:space="preserve"><value>Very active</value></data>
+  <data name="Enum.BootcampCategory.Sleep" xml:space="preserve"><value>Sleep</value></data>
+  <data name="Enum.BootcampCategory.Fitness" xml:space="preserve"><value>Fitness</value></data>
+  <data name="Enum.BootcampCategory.Mindfulness" xml:space="preserve"><value>Mindfulness</value></data>
+  <data name="Enum.BootcampCategory.Learning" xml:space="preserve"><value>Learning</value></data>
+  <data name="Enum.BootcampCategory.Focus" xml:space="preserve"><value>Focus</value></data>
+  <data name="Enum.BootcampCategory.Habit" xml:space="preserve"><value>Habits</value></data>
+  <data name="Enum.BootcampDifficulty.Beginner" xml:space="preserve"><value>Beginner</value></data>
+  <data name="Enum.BootcampDifficulty.Intermediate" xml:space="preserve"><value>Intermediate</value></data>
+  <data name="Enum.BootcampDifficulty.Advanced" xml:space="preserve"><value>Advanced</value></data>
+  <data name="Enum.InsightPriority.Low" xml:space="preserve"><value>Low</value></data>
+  <data name="Enum.InsightPriority.Normal" xml:space="preserve"><value>Normal</value></data>
+  <data name="Enum.InsightPriority.High" xml:space="preserve"><value>High</value></data>
+
+  <!-- ============ Habits ============ -->
+  <data name="Habits.Title" xml:space="preserve"><value>Habits</value></data>
+  <data name="Habits.MarkDone" xml:space="preserve"><value>Mark done</value></data>
+  <data name="Habits.Undo" xml:space="preserve"><value>Undo</value></data>
+
+  <!-- ============ Programs / Bootcamps ============ -->
+  <data name="Programs.Title" xml:space="preserve"><value>Programs</value></data>
+  <data name="Programs.AdaptiveNote" xml:space="preserve"><value>Adaptive programs — LIVORA adjusts the plan when your life changes.</value></data>
+  <data name="Programs.Enrolled" xml:space="preserve"><value>Your program</value></data>
+  <data name="Programs.Available" xml:space="preserve"><value>Available programs</value></data>
+  <data name="Programs.Enroll" xml:space="preserve"><value>Start program</value></data>
+  <data name="Programs.Leave" xml:space="preserve"><value>Leave program</value></data>
+  <data name="Programs.AdaptedToday" xml:space="preserve"><value>Your schedule changed today. LIVORA adjusted today's plan.</value></data>
+  <data name="Programs.OriginalPlan" xml:space="preserve"><value>Original plan</value></data>
+  <data name="Programs.AdjustedPlan" xml:space="preserve"><value>Adjusted for today</value></data>
+  <data name="Programs.PlanForToday" xml:space="preserve"><value>Today's plan</value></data>
+  <data name="Programs.Creator" xml:space="preserve"><value>by {0}</value></data>
+  <data name="Bootcamp.Title.EarlyRising" xml:space="preserve"><value>21 Day Early Rising</value></data>
+  <data name="Bootcamp.Desc.EarlyRising" xml:space="preserve"><value>Shift your wake time earlier with small daily steps.</value></data>
+  <data name="Bootcamp.Title.BetterSleep" xml:space="preserve"><value>14 Day Better Sleep</value></data>
+  <data name="Bootcamp.Desc.BetterSleep" xml:space="preserve"><value>Build an evening routine that actually sticks.</value></data>
+  <data name="Bootcamp.Title.FitnessStart" xml:space="preserve"><value>30 Day Fitness Start</value></data>
+  <data name="Bootcamp.Desc.FitnessStart" xml:space="preserve"><value>From zero to a consistent 30-minute routine.</value></data>
+  <data name="Bootcamp.Title.DigitalDetox" xml:space="preserve"><value>7 Day Digital Detox</value></data>
+  <data name="Bootcamp.Desc.DigitalDetox" xml:space="preserve"><value>Reclaim your attention in one clear week.</value></data>
+  <data name="Bootcamp.Title.Reading" xml:space="preserve"><value>30 Day Reading</value></data>
+  <data name="Bootcamp.Desc.Reading" xml:space="preserve"><value>Twenty focused minutes of reading, every day.</value></data>
+  <data name="Bootcamp.Title.Focus" xml:space="preserve"><value>21 Day Focus</value></data>
+  <data name="Bootcamp.Desc.Focus" xml:space="preserve"><value>Train deep work with short daily practice.</value></data>
+  <data name="Bootcamp.Plan.Walk" xml:space="preserve"><value>Morning walk</value></data>
+  <data name="Bootcamp.Plan.Walk.Desc" xml:space="preserve"><value>20 minutes outside at an easy pace.</value></data>
+  <data name="Bootcamp.Plan.WindDown" xml:space="preserve"><value>Evening wind-down</value></data>
+  <data name="Bootcamp.Plan.WindDown.Desc" xml:space="preserve"><value>Screens off 45 minutes before bed; light stretching.</value></data>
+  <data name="Bootcamp.Plan.Workout" xml:space="preserve"><value>Full-body workout</value></data>
+  <data name="Bootcamp.Plan.Workout.Desc" xml:space="preserve"><value>30 minutes, moderate intensity.</value></data>
+  <data name="Bootcamp.Plan.Reading" xml:space="preserve"><value>Reading block</value></data>
+  <data name="Bootcamp.Plan.Reading.Desc" xml:space="preserve"><value>20 minutes, one book only.</value></data>
+  <data name="Bootcamp.Plan.DeepWork" xml:space="preserve"><value>Deep work block</value></data>
+  <data name="Bootcamp.Plan.DeepWork.Desc" xml:space="preserve"><value>Two 50-minute sessions, no notifications.</value></data>
+  <data name="Bootcamp.Plan.LightWalk" xml:space="preserve"><value>Easy 10-minute walk</value></data>
+  <data name="Bootcamp.Plan.LightWalk.Desc" xml:space="preserve"><value>Recovery day — keep it gentle and short.</value></data>
+  <data name="Bootcamp.Plan.Stretch" xml:space="preserve"><value>Stretching &amp; early wind-down</value></data>
+  <data name="Bootcamp.Plan.Stretch.Desc" xml:space="preserve"><value>15 minutes stretching, bed 30 minutes earlier.</value></data>
+  <data name="Bootcamp.Plan.Meditation" xml:space="preserve"><value>Breathing &amp; meditation</value></data>
+  <data name="Bootcamp.Plan.Meditation.Desc" xml:space="preserve"><value>10 minutes of guided breathing.</value></data>
+
+  <!-- ============ Profile ============ -->
+  <data name="Profile.Title" xml:space="preserve"><value>Profile</value></data>
+  <data name="Profile.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Profile.PrimaryGoals" xml:space="preserve"><value>Primary focus areas</value></data>
+  <data name="Profile.ActivityLevel" xml:space="preserve"><value>Activity level</value></data>
+  <data name="Profile.Schedule" xml:space="preserve"><value>Sleep schedule</value></data>
+  <data name="Profile.Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Profile.LanguageNote" xml:space="preserve"><value>The interface updates immediately.</value></data>
+  <data name="Profile.DataSources" xml:space="preserve"><value>Connected data sources</value></data>
+  <data name="Profile.DataSource.Sample" xml:space="preserve"><value>LIVORA sample data</value></data>
+  <data name="Profile.DataSource.Sample.Status" xml:space="preserve"><value>Active · demo</value></data>
+  <data name="Profile.DataSource.RealComingSoon" xml:space="preserve"><value>Real device connections arrive in a later phase.</value></data>
+  <data name="Profile.Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Profile.NotificationsSoon" xml:space="preserve"><value>Coming in a later phase.</value></data>
+  <data name="Profile.Appearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="Profile.AppearanceSoon" xml:space="preserve"><value>Follows your system theme in Phase 1.</value></data>
+  <data name="Profile.About" xml:space="preserve"><value>About LIVORA</value></data>
+  <data name="Profile.Version" xml:space="preserve"><value>Version {0}</value></data>
+</root>
