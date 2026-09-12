@@ -75,8 +75,10 @@ public sealed class GoalsViewModel : ObservableObject
         try
         {
             var all = (await _repo.GetAllAsync()).Where(g => !g.IsArchived).ToList();
+            // One lookup delegate for the whole loop instead of one closure allocation per goal.
+            Func<string, string> translate = key => Loc[key];
             Goals.Clear();
-            foreach (var g in all) Goals.Add(GoalItemViewModel.FromGoal(g, _format, key => Loc[key]));
+            foreach (var g in all) Goals.Add(GoalItemViewModel.FromGoal(g, _format, translate));
             Raise(nameof(HasGoals));
             Raise(nameof(IsEmpty));
         }

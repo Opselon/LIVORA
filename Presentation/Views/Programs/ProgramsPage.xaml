@@ -40,7 +40,7 @@
                                         </VerticalStackLayout>
                                         <Label Grid.Column="1" Text="{Binding ProgressText}"
                                                Style="{StaticResource LMetric}"
-                                               TextColor="{StaticResource AccentBrush}"
+                                               TextColor="{StaticResource Accent}"
                                                VerticalOptions="Center" HorizontalOptions="End"
                                                SemanticProperties.Description="{Binding ProgressText}"/>
                                     </Grid>
@@ -76,7 +76,7 @@
                                             <Label Text="{Binding AdaptationReason}"
                                                    IsVisible="{Binding WasAdapted}"
                                                    Style="{StaticResource LCaption}" FontSize="12"
-                                                   TextColor="{StaticResource AccentBrush}"
+                                                   TextColor="{StaticResource Accent}"
                                                    LineBreakMode="WordWrap"/>
                                         </VerticalStackLayout>
                                     </Border>

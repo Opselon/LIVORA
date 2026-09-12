@@ -55,6 +55,10 @@ public sealed class DailyHistoryStore : IHistoryRepository
         if (existing is not null) Cache.AddRange(existing.Records);
         // clock moved backwards: dropping future records IS a content change, so the file must shrink too
         bool dirty = Cache.RemoveAll(r => r.Date.Date > today) > 0;
+        // A file that the old code would have rewritten just by loading it (out of order or over
+        // cap) still counts as different bytes; checked before backfill appends, which legitimately
+        // add out-of-order days.
+        bool fileNeedsNormalize = !IsAscending(Cache) || Cache.Count > RetainedDays;
 
         _loaded = true;
         _cacheDay = today;
@@ -79,10 +83,12 @@ public sealed class DailyHistoryStore : IHistoryRepository
             dirty = true;
         }
 
-        // The old code always ordered + rewrote the file here. Order is an in-memory concern and
-        // cheap (one sort of ~25 items); the rewrite only belongs to a real content change.
+        // In-memory ordering is a property every reader of GetAllAsync used to get (the old
+        // unconditional PersistAsync always rebuilt the list ordered) — keep it unconditional and
+        // cheap (~25 items). The DISK write is what becomes conditional: a real content change, or
+        // a file the old code would have normalized on load anyway.
         Cache.Sort((a, b) => a.Date.CompareTo(b.Date));
-        if (dirty) await PersistAsync();
+        if (dirty || fileNeedsNormalize) await PersistAsync();
     }
 
     public async Task UpsertAsync(DailyHistoryRecord record)

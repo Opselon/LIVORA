@@ -13,10 +13,10 @@
 
         <!-- Step indicator: purely decorative dots (non-interactive) -->
         <HorizontalStackLayout Grid.Row="0" Spacing="6" HorizontalOptions="Center" Margin="0,8">
-            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource AccentBrush}"/>
-            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource OverlayBrush}"/>
-            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource OverlayBrush}"/>
-            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource OverlayBrush}"/>
+            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource Accent}"/>
+            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
         </HorizontalStackLayout>
 
         <!-- Content -->
@@ -92,7 +92,7 @@
                 <!-- Honest sample-data note: never implies a real device connection -->
                 <Label Text="{Binding FinishNote}"
                        Style="{StaticResource LCaption}" FontSize="12"
-                       TextColor="{StaticResource TextTertiaryBrush}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
                        LineBreakMode="WordWrap"/>
             </VerticalStackLayout>
         </ScrollView>

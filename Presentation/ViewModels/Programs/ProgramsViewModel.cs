@@ -94,23 +94,31 @@ public sealed class ProgramsViewModel : ObservableObject
 
     public async Task LoadAsync()
     {
-        var all = await _repo.GetAllAsync();
+        // Bootcamps, the derived state and the habit/goal snapshots are independent reads, so they
+        // are started together and awaited as one group: with the Phase 2 synchronous store this is
+        // readability, with an async store it overlaps four round-trips that used to serialize.
         var profile = _session.CurrentProfile;
-        var state = await _stateService.GetStateAsync(DataRefreshMode.Resume);
-        var habits = await _habits.GetAllAsync();
-        var goals = (await _goals.GetAllAsync()).Where(g => !g.IsArchived).ToList();
+        var allTask = _repo.GetAllAsync();
+        var stateTask = _stateService.GetStateAsync(DataRefreshMode.Resume);
+        var habitsTask = _habits.GetAllAsync();
+        var goalsTask = _goals.GetAllAsync();
+        await Task.WhenAll(allTask, stateTask, habitsTask, goalsTask);
+
+        var all = allTask.Result;
+        var state = stateTask.Result;
+        var habits = habitsTask.Result;
+        var goals = goalsTask.Result.Where(g => !g.IsArchived).ToList();
 
         Enrolled.Clear();
         Available.Clear();
         foreach (var b in all)
-        {
-            var item = await ToItemAsync(b, state, profile, goals, habits);
-            (b.IsEnrolled ? Enrolled : Available).Add(item);
-        }
+            (b.IsEnrolled ? Enrolled : Available).Add(ToItem(b, state, profile, goals, habits));
         Raise(nameof(HasEnrolled));
     }
 
-    private async Task<BootcampItemViewModel> ToItemAsync(Bootcamp b, Domain.Models.State.PersonalState state,
+    // Was async with zero awaits inside: each call allocated a state machine + Task that the caller
+    // then awaited. The rule-engine work it triggers is synchronous, so it is now a plain method.
+    private BootcampItemViewModel ToItem(Bootcamp b, Domain.Models.State.PersonalState state,
         UserProfile profile, IReadOnlyList<Goal> goals, IReadOnlyList<Habit> habits)
     {
         var planned = b.Today;

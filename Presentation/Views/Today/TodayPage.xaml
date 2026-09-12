@@ -25,7 +25,7 @@
                             StrokeThickness="0" StrokeShape="RoundRectangle 9"
                             Padding="8,3" Margin="0,5,0,0" HorizontalOptions="Start">
                         <Label Text="{Binding SampleNote}" FontSize="11"
-                               TextColor="{StaticResource TextSecondaryBrush}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
                                LineBreakMode="WordWrap" MaxLines="2"/>
                     </Border>
                 </VerticalStackLayout>
@@ -41,10 +41,10 @@
                                      SemanticProperties.Description="{Binding DailyScoreDisplay}"/>
                         <VerticalStackLayout VerticalOptions="Center" Spacing="0" Padding="6,0">
                             <Label Text="{Binding DailyScoreDisplay}" Style="{StaticResource LMetric}"
-                                   HorizontalOptions="Center" TextColor="{StaticResource AccentBrush}"
+                                   HorizontalOptions="Center" TextColor="{StaticResource Accent}"
                                    LineBreakMode="TailTruncation" MaxLines="1"/>
                             <Label Text="{Binding DailyScoreTitle}" FontSize="10" HorizontalOptions="Center"
-                                   TextColor="{StaticResource TextSecondaryBrush}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
                                    HorizontalTextAlignment="Center"
                                    LineBreakMode="WordWrap" MaxLines="2"/>
                         </VerticalStackLayout>
@@ -63,7 +63,7 @@
                            VerticalOptions="Center" LineBreakMode="TailTruncation" MaxLines="1"/>
                     <Label Grid.Column="2" Text="{Binding StateConfidenceLabel}"
                            Style="{StaticResource LCaption}" FontSize="12" FontAttributes="Bold"
-                           TextColor="{StaticResource AccentBrush}" VerticalOptions="Center"
+                           TextColor="{StaticResource Accent}" VerticalOptions="Center"
                            LineBreakMode="TailTruncation" MaxLines="1"
                            SemanticProperties.Description="{Binding ConfidenceTitle}"/>
                 </Grid>
@@ -74,7 +74,7 @@
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <HorizontalStackLayout Grid.Column="0" Spacing="8">
-                            <BoxView WidthRequest="10" HeightRequest="10" Color="{StaticResource AccentBrush}"
+                            <BoxView WidthRequest="10" HeightRequest="10" Color="{StaticResource Accent}"
                                      CornerRadius="5" VerticalOptions="Center"/>
                             <Label Text="{Binding IntelligenceTitle}" Style="{StaticResource LSubheading}"
                                    VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="2"
@@ -84,7 +84,7 @@
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="8,3"
                                 VerticalOptions="Center">
                             <Label Text="{Binding IntelligenceBadge}" FontSize="11"
-                                   TextColor="{StaticResource TextSecondaryBrush}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
                                    LineBreakMode="TailTruncation" MaxLines="1"/>
                         </Border>
                     </Grid>
@@ -100,7 +100,7 @@
                                      Style="{StaticResource ProgressTrack}" VerticalOptions="Center"
                                      SemanticProperties.Description="{Binding ConfidenceTitle}"/>
                         <Label Grid.Column="1" Text="{Binding InsightConfidenceLabel}" FontSize="12"
-                               FontAttributes="Bold" TextColor="{StaticResource AccentBrush}"
+                               FontAttributes="Bold" TextColor="{StaticResource Accent}"
                                VerticalOptions="Center" LineBreakMode="TailTruncation" MaxLines="1"/>
                     </Grid>
                 </VerticalStackLayout>
@@ -120,21 +120,21 @@
                         <DataTemplate x:DataType="vm:RecommendationItemViewModel">
                             <Border Style="{StaticResource Card}" Padding="14,12">
                                 <Grid ColumnDefinitions="4,*" ColumnSpacing="12">
-                                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource AccentBrush}"
+                                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource Accent}"
                                              CornerRadius="2" VerticalOptions="Fill"/>
                                     <VerticalStackLayout Grid.Column="1" Spacing="4">
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                             <Label Grid.Column="0" Text="{Binding Text}" Style="{StaticResource LBody}"
                                                    FontAttributes="Bold" LineBreakMode="WordWrap"/>
                                             <Label Grid.Column="1" Text="{Binding DurationText}" FontSize="11"
-                                                   TextColor="{StaticResource TextTertiaryBrush}" VerticalOptions="Start"
+                                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}" VerticalOptions="Start"
                                                    HorizontalTextAlignment="End"
                                                    LineBreakMode="TailTruncation" MaxLines="1"/>
                                         </Grid>
                                         <Label Text="{Binding Explanation}" Style="{StaticResource LCaption}" FontSize="12"
                                                LineBreakMode="WordWrap" IsVisible="{Binding HasDetail}"/>
                                         <Label Text="{Binding Benefit}" FontSize="11.5"
-                                               TextColor="{StaticResource AccentBrush}"
+                                               TextColor="{StaticResource Accent}"
                                                LineBreakMode="WordWrap" IsVisible="{Binding HasDetail}"/>
                                     </VerticalStackLayout>
                                 </Grid>
@@ -163,7 +163,7 @@
                             StrokeShape="RoundRectangle 9" Padding="8,3"
                             IsVisible="{Binding PlanStandardNote, Converter={StaticResource IsNotEmpty}}">
                         <Label Text="{Binding PlanStandardNote}" FontSize="11"
-                               TextColor="{StaticResource TextSecondaryBrush}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
                                LineBreakMode="TailTruncation" MaxLines="1"/>
                     </Border>
                 </Grid>
@@ -181,7 +181,7 @@
                                                LineBreakMode="WordWrap"/>
                                     </VerticalStackLayout>
                                     <Label Grid.Column="2" Text="{Binding TimeWindow}" FontSize="11"
-                                           TextColor="{StaticResource TextTertiaryBrush}" VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}" VerticalOptions="Center"
                                            LineBreakMode="TailTruncation" MaxLines="1"/>
                                 </Grid>
                             </DataTemplate>
@@ -211,7 +211,7 @@
                                                  ProgressColor="{Binding AccentColor}" HeightRequest="4"
                                                  SemanticProperties.Description="{Binding Title}"/>
                                     <Label Text="{Binding DeltaText}" FontSize="11"
-                                           TextColor="{StaticResource TextTertiaryBrush}"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
                                            LineBreakMode="WordWrap" MaxLines="2"
                                            IsVisible="{Binding HasDelta}"/>
                                 </VerticalStackLayout>

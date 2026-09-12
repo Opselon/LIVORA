@@ -91,7 +91,6 @@ public static class MauiProgram
         builder.Services.AddTransient<ProfileViewModel>();
         builder.Services.AddTransient<OnboardingViewModel>();
         builder.Services.AddTransient<WeeklySummaryViewModel>();
-        builder.Services.AddTransient<AppShellViewModel>();
 
         var app = builder.Build();
 
@@ -109,8 +108,11 @@ public static class MauiProgram
         // so it would only add scheduler hops and a determinism risk to seed ordering
         // (DemoDataSeeder.SeedIfEmptyAsync must run in the ACTIVE language, which only exists once
         // LocalizationService has applied the stored preference).
-        // The Stopwatch below turns that reasoning into a number on every launch instead of a claim.
+        // The Stopwatch below turns that reasoning into a number on every DEBUG launch instead of
+        // a claim; Release pays nothing for it.
+#if DEBUG
         var bootSw = Stopwatch.StartNew();
+#endif
         var session = app.Services.GetRequiredService<SessionState>();
         var profileRepo = app.Services.GetRequiredService<IRepository<UserProfile>>();
         var profile = (profileRepo.GetAllAsync().GetAwaiter().GetResult()).FirstOrDefault();
@@ -123,9 +125,9 @@ public static class MauiProgram
 
         var seed = app.Services.GetRequiredService<DemoDataSeeder>();
         seed.SeedIfEmptyAsync(DateTime.Today).GetAwaiter().GetResult();
-        bootSw.Stop();
 #if DEBUG
-        Debug.WriteLine($"[LIVORA.boot] profile-load + demo-seed: {bootSw.Elapsed.TotalMilliseconds:F1} ms");
+        bootSw.Stop();
+        Debug.WriteLine($"[LIVORA.boot] profile-load + demo-seed: {bootSw.ElapsedMilliseconds} ms");
 #endif
 
         App.ApplyFlowDirection();

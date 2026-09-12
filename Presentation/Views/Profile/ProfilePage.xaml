@@ -26,7 +26,7 @@
                             Command="{Binding SaveNameCommand}" HorizontalOptions="Start" Padding="24,10"
                             SemanticProperties.Description="{Binding SaveText}"/>
 
-                    <BoxView HeightRequest="1" Color="{StaticResource OverlayBrush}"/>
+                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="{Binding FocusAreasLabel}" Style="{StaticResource LCaption}" FontAttributes="Bold"
@@ -112,7 +112,7 @@
                         </comp:ItemsStackLayout.ItemTemplate>
                     </comp:ItemsStackLayout>
                     <Label Text="{Binding SourcesNote}" Style="{StaticResource LCaption}" FontSize="12"
-                           TextColor="{StaticResource TextTertiaryBrush}" LineBreakMode="WordWrap"/>
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}" LineBreakMode="WordWrap"/>
                 </VerticalStackLayout>
             </Border>
 
@@ -141,7 +141,7 @@
                         </comp:ItemsStackLayout.ItemTemplate>
                     </comp:ItemsStackLayout>
                     <Button Text="{Binding DeleteAllText}" Style="{StaticResource SecondaryButton}"
-                            BorderColor="{StaticResource NegativeBrush}" TextColor="{StaticResource NegativeBrush}"
+                            BorderColor="{StaticResource Negative}" TextColor="{StaticResource Negative}"
                             Command="{Binding DeleteAllDataCommand}" FontSize="13" Padding="16,8" HorizontalOptions="Start"
                             SemanticProperties.Description="{Binding DeleteAllText}"/>
                 </VerticalStackLayout>
@@ -159,7 +159,7 @@
                     </VerticalStackLayout>
                     <Label Grid.Column="1" Text="{Binding SoonBadge}" Style="{StaticResource LCaption}" FontSize="11"
                            VerticalOptions="Center" HorizontalOptions="End"
-                           TextColor="{StaticResource TextTertiaryBrush}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
                            LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End"/>
                 </Grid>
             </Border>
@@ -174,7 +174,7 @@
                     </VerticalStackLayout>
                     <Label Grid.Column="1" Text="{Binding SoonBadge}" Style="{StaticResource LCaption}" FontSize="11"
                            VerticalOptions="Center" HorizontalOptions="End"
-                           TextColor="{StaticResource TextTertiaryBrush}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
                            LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End"/>
                 </Grid>
             </Border>

@@ -160,8 +160,16 @@ public sealed class TodayViewModel : ObservableObject
         {
             var profile = _session.CurrentProfile;
             var state = _state = await _stateService.GetStateAsync(mode);
-            var habits = await _habitRepo.GetAllAsync();
-            var goals = (await _goalRepo.GetAllAsync()).Where(g => !g.IsArchived).ToList();
+            // Two independent repositories, started together. With today's synchronous
+            // JsonFileStore both tasks are already complete when they are created, so this is
+            // correctness-neutral readability — the payoff lands when storage moves async and
+            // the two fetches overlap instead of serializing (see review notes; no .Wait() risk:
+            // Task.WhenAll is awaited, results are read only after it completes).
+            var habitsTask = _habitRepo.GetAllAsync();
+            var goalsTask = _goalRepo.GetAllAsync();
+            await Task.WhenAll(habitsTask, goalsTask);
+            var habits = habitsTask.Result;
+            var goals = goalsTask.Result.Where(g => !g.IsArchived).ToList();
 
             var plan = await _planService.BuildPlanAsync(state, profile, goals, habits, _clock.Now);
             var recs = _recommendations.BuildRecommendations(state, profile, goals, habits, plan, _clock.Now);

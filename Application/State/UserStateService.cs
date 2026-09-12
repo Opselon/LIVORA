@@ -42,6 +42,14 @@ public sealed class UserStateService : IUserStateService
     private readonly object _computeGate = new();
     private DataRefreshMode _inFlightMode;
     private TaskCompletionSource<PersonalState>? _inFlight;
+    // Identity of the stack currently inside a compute. A caller that arrives from INSIDE that
+    // compute (e.g. a synchronous StateUpdated subscriber that blocks on the result) must never be
+    // handed the in-flight task it is itself blocking on — that self-deadlocks, and with today's
+    // fully synchronous pipeline the whole compute lives on one stack. Such a caller gets a fresh
+    // inline compute instead, i.e. exactly the original sequential behavior. Losing one coalescing
+    // opportunity is cheap; a hang is not.
+    private int _computeDepth;
+    private int _computeThreadId;
 
     public UserStateService(
         IDataProvider provider,
@@ -72,55 +80,88 @@ public sealed class UserStateService : IUserStateService
             && _last.GeneratedAt.Date == _clock.Today)
             return Task.FromResult(_last);
 
-        Task<PersonalState> shared;
+        // Decide under the gate, act outside it: ComputeAsync raises StateUpdated, and running it
+        // while holding a lock is a deadlock recipe the moment a subscriber calls back in.
+        TaskCompletionSource<PersonalState>? starter = null;
+        Task<PersonalState>? joined = null;
+        bool reentrant = false;
         lock (_computeGate)
-            shared = _inFlightMode == mode && _inFlight is { } inflight
-                ? inflight.Task
-                : StartLocked(mode, ct);
-        return shared;
+        {
+            // A reentrant call from *inside* a compute on this same stack (a synchronous
+            // StateUpdated subscriber that blocks on the result — the deadlock class
+            // JsonFileStore's comment says this app already hit once) must not be handed the
+            // task it is itself blocking on. It gets an inline compute: exactly the old
+            // sequential behavior. Losing one coalescing opportunity is cheap; a hang is not.
+            if (_computeDepth > 0 && _computeThreadId == Environment.CurrentManagedThreadId)
+            {
+                _computeDepth++; // armed here, released in the helper's finally
+                reentrant = true;
+            }
+            else if (_inFlight is { } inflight && _inFlightMode == mode) joined = inflight.Task;
+            else
+            {
+                starter = new TaskCompletionSource<PersonalState>(TaskCreationOptions.RunContinuationsAsynchronously);
+                _inFlight = starter;
+                _inFlightMode = mode;
+            }
+        }
+
+        // The pipeline itself only ever runs outside the gate: it raises StateUpdated, and an
+        // event must never fire while a lock is held. The in-flight slot is registered before the
+        // pipeline starts, so a second caller can never slip in between the check and the start
+        // and kick off a duplicate walk.
+        if (reentrant) return ComputeGuardedInlineAsync(mode, ct);
+        if (joined is not null) return joined;
+        _ = CompleteComputeAsync(starter!, mode, ct);
+        return starter!.Task;
     }
 
     /// <summary>
-    /// Registers the in-flight compute BEFORE its first await, so callers that arrive while the
-    /// pipeline is running join it instead of starting a second identical walk. The completion-time
-    /// _last/_lastMode stamping stays exactly where the original code had it (end of ComputeAsync),
-    /// so error paths behave as before.
+    /// Old-path compute for a reentrant caller: runs now, on this stack, with the reentrancy guard
+    /// already armed by the caller — each such call recomputes inline exactly like the original
+    /// sequential code did, never joins, never self-blocks.
     /// </summary>
-    private Task<PersonalState> StartLocked(DataRefreshMode mode, CancellationToken ct)
+    private async Task<PersonalState> ComputeGuardedInlineAsync(DataRefreshMode mode, CancellationToken ct)
     {
-        var tcs = new TaskCompletionSource<PersonalState>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _inFlight = tcs;
-        _inFlightMode = mode;
-        _ = CompleteComputeAsync(tcs, mode, ct);
-        return tcs.Task;
+        try
+        {
+            return await ComputeAsync(mode, ct);
+        }
+        finally
+        {
+            lock (_computeGate) _computeDepth--;
+        }
     }
 
     private async Task CompleteComputeAsync(TaskCompletionSource<PersonalState> tcs, DataRefreshMode mode, CancellationToken ct)
     {
-        PersonalState? result = null;
+        // Arm the reentrancy guard for this stack while the compute runs (see _computeDepth field).
+        lock (_computeGate)
+        {
+            _computeDepth++;
+            _computeThreadId = Environment.CurrentManagedThreadId;
+        }
         try
         {
-            result = await ComputeAsync(mode, ct);
-            tcs.TrySetResult(result);
+            tcs.TrySetResult(await ComputeAsync(mode, ct));
         }
         catch (Exception ex)
         {
+            // Faithful to the previous async-method behavior: the caller's await rethrows, and a
+            // fault nobody observes stays unobserved exactly as it was before this indirection.
             tcs.TrySetException(ex);
         }
         finally
         {
             lock (_computeGate)
+            {
+                _computeDepth--;
                 if (ReferenceEquals(_inFlight, tcs))
                 {
                     _inFlight = null;
                     _inFlightMode = default;
                 }
-            // A failed compute must not leave an exception task that swallows later retries:
-            // nothing else observes tcs.Task when ComputeAsync throws into a fire-and-forget VM
-            // reload that itself has no catch, so mark it observed to avoid UnobservedTaskException
-            // escalations on the finalizer.
-            if (result is null)
-                _ = tcs.Task.ContinueWith(t => _ = t.Exception, TaskScheduler.Default);
+            }
         }
     }
 
@@ -174,10 +215,15 @@ public sealed class UserStateService : IUserStateService
             IsDerived = true,
         };
 
-        // Habit + goal snapshots for intelligence/UI
-        var habits = await _habits.GetAllAsync();
+        // Habit + goal snapshots for intelligence/UI. Independent repositories, started together:
+        // today both complete synchronously (so this is readability, not latency), but the shape is
+        // right for the Phase 3 async store, and it keeps the snapshot reads in one place.
+        var habitsTask = _habits.GetAllAsync();
+        var goalsTask = _goals.GetAllAsync();
+        await Task.WhenAll(habitsTask, goalsTask);
+        var habits = habitsTask.Result;
         var habitSnaps = habits.Select(h => SnapshotHabit(h, today)).ToList();
-        var goals = (await _goals.GetAllAsync()).Where(g => !g.IsArchived).ToList();
+        var goals = goalsTask.Result.Where(g => !g.IsArchived).ToList();
         var goalSnaps = goals.Select(g => new GoalStateSnapshot
         {
             GoalId = g.Id, Name = g.Name, Fraction = g.Fraction, Status = g.Status,
@@ -248,8 +294,9 @@ public sealed class UserStateService : IUserStateService
     private HabitStateSnapshot SnapshotHabit(Habit h, DateTime today)
     {
         var cutoff30 = today.AddDays(-30);
-        var last30 = h.Completions.Where(d => d.Date > cutoff30).ToList();
-        double successRate = last30.Count / 30.0;
+        // Count directly: the materialized list was only ever read for its Count, and this runs
+        // per habit on every state compute.
+        double successRate = h.Completions.Count(d => d.Date > cutoff30) / 30.0;
 
         // Best window: time-of-day histogram from the completion log (needs >=5 points to claim a pattern).
         TimeSpan? window = null;

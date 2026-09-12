@@ -31,6 +31,7 @@ public sealed class WeeklySummaryViewModel : ObservableObject
         _loc = loc;
         SubscribeLanguage();
         RefreshCommand = new Command(async () => await LoadAsync());
+        CloseCommand = new Command(() => CloseRequested?.Invoke());
     }
 
     public ICommand RefreshCommand { get; }
@@ -60,7 +61,11 @@ public sealed class WeeklySummaryViewModel : ObservableObject
     public string NextFocusText { get; private set; } = string.Empty;
 
     public event Action? CloseRequested;
-    public ICommand CloseCommand => new Command(() => CloseRequested?.Invoke());
+    /// <summary>
+    /// Single instance. It used to construct a fresh Command on every get, and a bound element (plus
+    /// every CanExecute/Execute probe) paid an allocation each time it read the property.
+    /// </summary>
+    public ICommand CloseCommand { get; }
 
     public async Task LoadAsync()
     {

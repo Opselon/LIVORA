@@ -47,24 +47,37 @@
     <Color x:Key="MetricRecoverySoftDark">#243832</Color>
     <Color x:Key="MetricWellnessSoftDark">#2E2738</Color>
 
-    <!-- Themed brushes -->
+    <!--
+        RULE: a *Brush key is a SolidColorBrush and may ONLY be used on brush-typed
+        properties (Border.Background, Border.Stroke, BoxView... nothing in MAUI Controls
+        takes a brush except Border/Shape). Color-typed properties (Label.TextColor,
+        Button.TextColor/BorderColor, Entry.TextColor/PlaceholderColor, BoxView.Color,
+        Shell.TabBar*Color, ProgressBar.ProgressColor) must use a Color — either a plain
+        {StaticResource <Key>} for theme-stable colors, or an inline
+        {AppThemeBinding Light=..., Dark=...} for themed ones.
+        Assigning a SolidColorBrush to a Color property makes BindableObject log
+        "Cannot convert SolidColorBrush to type 'Color'" and leaves the property null,
+        which is what crashed the app at render time.
+    -->
+
+    <!-- Themed brushes (brush-typed targets only). Color-typed properties use inline
+         {AppThemeBinding Light=..., Dark=...} against the plain Color keys above. -->
     <SolidColorBrush x:Key="BgPrimaryBrush" Color="{AppThemeBinding Light={StaticResource BgPrimary}, Dark={StaticResource BgPrimaryDark}}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"/>
     <SolidColorBrush x:Key="SurfaceAltBrush" Color="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
     <SolidColorBrush x:Key="OverlayBrush" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
-    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
     <SolidColorBrush x:Key="AccentSoftBrush" Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"/>
-    <SolidColorBrush x:Key="MetricSleepBrush" Color="{StaticResource MetricSleep}"/>
-    <SolidColorBrush x:Key="MetricActivityBrush" Color="{StaticResource MetricActivity}"/>
-    <SolidColorBrush x:Key="MetricRecoveryBrush" Color="{StaticResource MetricRecovery}"/>
-    <SolidColorBrush x:Key="MetricWellnessBrush" Color="{StaticResource MetricWellness}"/>
     <SolidColorBrush x:Key="MetricSleepSoftBrush" Color="{AppThemeBinding Light={StaticResource MetricSleepSoft}, Dark={StaticResource MetricSleepSoftDark}}"/>
     <SolidColorBrush x:Key="MetricActivitySoftBrush" Color="{AppThemeBinding Light={StaticResource MetricActivitySoft}, Dark={StaticResource MetricActivitySoftDark}}"/>
     <SolidColorBrush x:Key="MetricRecoverySoftBrush" Color="{AppThemeBinding Light={StaticResource MetricRecoverySoft}, Dark={StaticResource MetricRecoverySoftDark}}"/>
     <SolidColorBrush x:Key="MetricWellnessSoftBrush" Color="{AppThemeBinding Light={StaticResource MetricWellnessSoft}, Dark={StaticResource MetricWellnessSoftDark}}"/>
+
+    <!-- Theme-stable brushes -->
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
+    <SolidColorBrush x:Key="MetricSleepBrush" Color="{StaticResource MetricSleep}"/>
+    <SolidColorBrush x:Key="MetricActivityBrush" Color="{StaticResource MetricActivity}"/>
+    <SolidColorBrush x:Key="MetricRecoveryBrush" Color="{StaticResource MetricRecovery}"/>
+    <SolidColorBrush x:Key="MetricWellnessBrush" Color="{StaticResource MetricWellness}"/>
     <SolidColorBrush x:Key="CautionBrush" Color="{StaticResource Caution}"/>
     <SolidColorBrush x:Key="NegativeBrush" Color="{StaticResource Negative}"/>
     <SolidColorBrush x:Key="PositiveBrush" Color="{StaticResource Positive}"/>

@@ -9,8 +9,12 @@ public sealed class ColorByKeyConverter : IValueConverter
     {
         if (value is not string key) return Theme.Accent;
         var resources = Microsoft.Maui.Controls.Application.Current?.Resources;
-        if (resources is not null && resources.TryGetValue(key, out var res) && res is Color c)
-            return c;
+        if (resources is not null && resources.TryGetValue(key, out var res))
+        {
+            // Accept both spellings of a color token: a raw Color or a SolidColorBrush wrapper.
+            if (res is Color c) return c;
+            if (res is SolidColorBrush brush && brush.Color is not null) return brush.Color;
+        }
         return Theme.Accent;
     }
 

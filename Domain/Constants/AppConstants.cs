@@ -2,6 +2,8 @@ namespace LIVORA.Domain.Constants;
 
 public static class AppConstants
 {
+    public const string AppName = "LIVORA";
+
     // Settings keys
     public const string SettingsFileName = "livora_settings.json";
 
@@ -14,4 +16,6 @@ public static class AppConstants
 
     public const int DailyStepTarget = 8000;
     public const int DailyActiveMinutesTarget = 30;
+    /// <summary>Reference target; TodayViewModel currently hardcodes the same 7.5h — noted, not consolidated here.</summary>
+    public const double SleepTargetHours = 7.5;
 }

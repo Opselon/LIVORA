@@ -10,7 +10,10 @@ namespace LIVORA.Presentation.Components;
 /// LEAK AUDIT (why this file is deliberately unchanged): the old source of a CollectionChanged
 /// subscription is detached in OnItemsSourceChanged before the new one is attached, and delegate
 /// equality (target + method) makes the -= effective, so swapping ItemsSource — including
-/// null -> collection and collection -> collection — leaves no subscription behind.
+/// null -> collection and collection -> collection — leaves no subscription behind. The only
+/// reference the subscription adds is view -> VM, and every ItemsSource here is bound to a property
+/// of the page's own ViewModel, so the two are created and dropped together: nothing outlives
+/// anything.
 ///
 /// COST AUDIT (why a full rebuild per event is acceptable here): the largest collection in the app
 /// is 6 items (Today's DailyMetrics is fixed at 4, Habits 3, ActiveGoals 3, Programs ~6/7), so a
@@ -45,7 +48,6 @@ public class ItemsStackLayout : VerticalStackLayout
     private static void OnItemsSourceChanged(BindableObject bindable, object oldValue, object newValue)
     {
         var view = (ItemsStackLayout)bindable;
-        // Unsubscribe first: a replaced collection must never keep a dead layout alive.
         if (oldValue is INotifyCollectionChanged oldIncc)
             oldIncc.CollectionChanged -= view.OnCollectionChanged;
         if (newValue is INotifyCollectionChanged newIncc)

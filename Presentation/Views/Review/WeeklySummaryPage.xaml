@@ -55,7 +55,7 @@
                             </comp:ItemsStackLayout.ItemTemplate>
                         </comp:ItemsStackLayout>
                         <Label Text="{Binding ConfidenceText}" FontSize="11"
-                               TextColor="{StaticResource TextTertiaryBrush}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
                                LineBreakMode="WordWrap" MaxLines="2"/>
                     </VerticalStackLayout>
                 </Border>
@@ -71,7 +71,7 @@
                                 <DataTemplate x:DataType="x:String">
                                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                                         <BoxView Grid.Column="0" WidthRequest="8" HeightRequest="8" CornerRadius="4"
-                                                 Color="{StaticResource PositiveBrush}" VerticalOptions="Center"/>
+                                                 Color="{StaticResource Positive}" VerticalOptions="Center"/>
                                         <Label Grid.Column="1" Text="{Binding .}" Style="{StaticResource LBody}"
                                                LineBreakMode="WordWrap"/>
                                     </Grid>
@@ -92,7 +92,7 @@
                                 <DataTemplate x:DataType="x:String">
                                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                                         <BoxView Grid.Column="0" WidthRequest="8" HeightRequest="8" CornerRadius="4"
-                                                 Color="{StaticResource CautionBrush}" VerticalOptions="Center"/>
+                                                 Color="{StaticResource Caution}" VerticalOptions="Center"/>
                                         <Label Grid.Column="1" Text="{Binding .}" Style="{StaticResource LBody}"
                                                LineBreakMode="WordWrap"/>
                                     </Grid>
