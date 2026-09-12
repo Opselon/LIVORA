@@ -95,7 +95,40 @@
     <Style x:Key="ProgressTrack" TargetType="ProgressBar">
         <Setter Property="ProgressColor" Value="{StaticResource Accent}"/>
         <Setter Property="HeightRequest" Value="6"/>
-        <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+
+    <!-- Implicit defaults so the app never shows raw MAUI template look -->
+    <Style TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+    </Style>
+    <Style TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Accent}"/>
+        <Setter Property="TextColor" Value="{StaticResource TextOnAccent}"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="MinimumHeightRequest" Value="50"/>
+    </Style>
+    <Style TargetType="Entry">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextTertiaryBrush}"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="MinimumHeightRequest" Value="48"/>
+    </Style>
+    <Style TargetType="Page" ApplyToDerivedTypes="True">
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BgPrimary}, Dark={StaticResource BgPrimaryDark}}"/>
+    </Style>
+    <Style TargetType="Shell" ApplyToDerivedTypes="True">
+        <Setter Property="Shell.NavBarIsVisible" Value="False"/>
+        <Setter Property="Shell.TabBarBackgroundColor" Value="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"/>
+        <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource Accent}"/>
+        <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource TextTertiaryBrush}"/>
+        <Setter Property="Shell.ForegroundColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
     </Style>
 
 </ResourceDictionary>

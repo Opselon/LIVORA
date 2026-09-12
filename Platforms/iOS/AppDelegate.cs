@@ -1,5 +1,4 @@
-﻿using Foundation;
-
+using Foundation;
 namespace LIVORA
 {
     [Register("AppDelegate")]

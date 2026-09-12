@@ -3,12 +3,35 @@
     x:Class="LIVORA.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:LIVORA"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
     Title="LIVORA">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar x:Name="MainTabBar">
+        <ShellContent
+            x:Name="TodayItem"
+            Icon="tab_today.svg"
+            ContentTemplate="{DataTemplate views:TodayPage}"
+            Route="Today" />
+        <ShellContent
+            x:Name="HealthItem"
+            Icon="tab_health.svg"
+            ContentTemplate="{DataTemplate views:HealthPage}"
+            Route="Health" />
+        <ShellContent
+            x:Name="GoalsItem"
+            Icon="tab_goals.svg"
+            ContentTemplate="{DataTemplate views:GoalsPage}"
+            Route="Goals" />
+        <ShellContent
+            x:Name="ProgramsItem"
+            Icon="tab_programs.svg"
+            ContentTemplate="{DataTemplate views:ProgramsPage}"
+            Route="Programs" />
+        <ShellContent
+            x:Name="ProfileItem"
+            Icon="tab_profile.svg"
+            ContentTemplate="{DataTemplate views:ProfilePage}"
+            Route="Profile" />
+    </TabBar>
 
 </Shell>

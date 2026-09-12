@@ -78,4 +78,5 @@
     <Thickness x:Key="CardPadding">18</Thickness>
     <Thickness x:Key="PageThickness">20,12</Thickness>
 
+    <x:Boolean x:Key="IsNotStringEmptyKey">True</x:Boolean>
 </ResourceDictionary>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.ProgramsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:ProgramsViewModel"
+    x:Name="ProgramsPageRef">
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <VerticalStackLayout Spacing="16">
+
+            <Label Text="{Binding Title}"
+                   Style="{StaticResource LDisplay}"
+                   LineBreakMode="WordWrap" MaxLines="2"
+                   SemanticProperties.HeadingLevel="Level1"/>
+            <Label Text="{Binding AdaptiveNote}"
+                   Style="{StaticResource LBodySecondary}"
+                   LineBreakMode="WordWrap"/>
+
+            <!-- Enrolled programs (adaptive, with today's plan) -->
+            <VerticalStackLayout Spacing="10" IsVisible="{Binding HasEnrolled}">
+                <Label Text="{Binding EnrolledTitle}" Style="{StaticResource LHeading}"
+                       LineBreakMode="WordWrap" MaxLines="2"
+                       SemanticProperties.HeadingLevel="Level2"/>
+                <comp:ItemsStackLayout ItemsSource="{Binding Enrolled}" Spacing="12">
+                    <comp:ItemsStackLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BootcampItemViewModel">
+                            <Border Style="{StaticResource Card}">
+                                <VerticalStackLayout Spacing="10">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding TitleText}" Style="{StaticResource LSubheading}"
+                                                   LineBreakMode="WordWrap" MaxLines="2"
+                                                   SemanticProperties.HeadingLevel="Level2"/>
+                                            <Label Text="{Binding CategoryText}" Style="{StaticResource LCaption}"
+                                                   LineBreakMode="WordWrap" MaxLines="2"/>
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1" Text="{Binding ProgressText}"
+                                               Style="{StaticResource LMetric}"
+                                               TextColor="{StaticResource AccentBrush}"
+                                               VerticalOptions="Center" HorizontalOptions="End"
+                                               SemanticProperties.Description="{Binding ProgressText}"/>
+                                    </Grid>
+
+                                    <ProgressBar Progress="{Binding Bootcamp.CompletionFraction}"
+                                                 Style="{StaticResource ProgressTrack}"
+                                                 SemanticProperties.Description="{Binding ProgressText}"/>
+
+                                    <Label Text="{Binding DayText}" Style="{StaticResource LCaption}" FontAttributes="Bold"
+                                           LineBreakMode="WordWrap" MaxLines="2"/>
+
+                                    <!-- Today's plan row -->
+                                    <Border Style="{StaticResource SoftCard}" Padding="12,10">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Label Grid.Column="0" Text="{Binding BindingContext.PlanForTodayText, Source={x:Reference ProgramsPageRef}}"
+                                                       Style="{StaticResource LCaption}" FontAttributes="Bold"
+                                                       VerticalOptions="Center"
+                                                       LineBreakMode="WordWrap" MaxLines="2"/>
+                                                <Border Grid.Column="1" IsVisible="{Binding WasAdapted}"
+                                                        VerticalOptions="Center" HorizontalOptions="End"
+                                                        Background="{StaticResource AccentBrush}"
+                                                        StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                                        Padding="7,2">
+                                                    <Label Text="{Binding BindingContext.AdjustedPlanText, Source={x:Reference ProgramsPageRef}}"
+                                                           FontSize="10.5" TextColor="{StaticResource TextOnAccent}"
+                                                           LineBreakMode="WordWrap" MaxLines="2"
+                                                           HorizontalTextAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                            <Label Text="{Binding TodayPlanText}" Style="{StaticResource LBody}"
+                                                   LineBreakMode="WordWrap"/>
+                                            <Label Text="{Binding AdaptationReason}"
+                                                   IsVisible="{Binding WasAdapted}"
+                                                   Style="{StaticResource LCaption}" FontSize="12"
+                                                   TextColor="{StaticResource AccentBrush}"
+                                                   LineBreakMode="WordWrap"/>
+                                        </VerticalStackLayout>
+                                    </Border>
+
+                                    <Button Text="{Binding BindingContext.CompleteDayText, Source={x:Reference ProgramsPageRef}}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="16,8" FontSize="13" HorizontalOptions="Start"
+                                            SemanticProperties.Description="{Binding BindingContext.CompleteDayText, Source={x:Reference ProgramsPageRef}}"
+                                            Command="{Binding BindingContext.CompleteDayCommand, Source={x:Reference ProgramsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </comp:ItemsStackLayout.ItemTemplate>
+                </comp:ItemsStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Catalog -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{Binding AvailableTitle}" Style="{StaticResource LHeading}"
+                       LineBreakMode="WordWrap" MaxLines="2"
+                       SemanticProperties.HeadingLevel="Level2"/>
+                <comp:ItemsStackLayout ItemsSource="{Binding Available}" Spacing="10">
+                    <comp:ItemsStackLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BootcampItemViewModel">
+                            <Border Style="{StaticResource Card}">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto">
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="3">
+                                        <Label Text="{Binding TitleText}" Style="{StaticResource LSubheading}"
+                                               LineBreakMode="WordWrap" MaxLines="2"
+                                               SemanticProperties.HeadingLevel="Level3"/>
+                                        <Label Text="{Binding DescriptionText}" Style="{StaticResource LCaption}"
+                                               LineBreakMode="WordWrap" MaxLines="3"/>
+                                        <FlexLayout Wrap="Wrap" AlignItems="Center">
+                                            <Label Text="{Binding DayText}" Style="{StaticResource LCaption}" FontSize="11.5"
+                                                   LineBreakMode="WordWrap" Margin="0,0,8,0"/>
+                                            <Label Text="·" Style="{StaticResource LCaption}" FontSize="11.5"
+                                                   VerticalTextAlignment="Center" Margin="0,0,8,0"/>
+                                            <Label Text="{Binding DifficultyText}" Style="{StaticResource LCaption}" FontSize="11.5"
+                                                   LineBreakMode="WordWrap"/>
+                                        </FlexLayout>
+                                    </VerticalStackLayout>
+                                    <Button Grid.Row="0" Grid.Column="1" Grid.RowSpan="3"
+                                            Text="{Binding BindingContext.EnrollText, Source={x:Reference ProgramsPageRef}}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="16,8" FontSize="13"
+                                            VerticalOptions="Center"
+                                            SemanticProperties.Description="{Binding BindingContext.EnrollText, Source={x:Reference ProgramsPageRef}}"
+                                            Command="{Binding BindingContext.EnrollCommand, Source={x:Reference ProgramsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </comp:ItemsStackLayout.ItemTemplate>
+                </comp:ItemsStackLayout>
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="12" Color="Transparent"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

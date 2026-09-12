@@ -8,8 +8,9 @@
 
   <!-- ============ Common ============ -->
   <data name="Common.Today" xml:space="preserve"><value>امروز</value></data>
+  <data name="Common.You" xml:space="preserve"><value>تو</value></data>
   <data name="Common.Yes" xml:space="preserve"><value>بله</value></data>
-  <data name="Common.No" xml:space="preserve"><value>خیر</value></data>
+  <data name="Common.No" xml:space="preserve"><value>نه</value></data>
   <data name="Common.Save" xml:space="preserve"><value>ذخیره</value></data>
   <data name="Common.Cancel" xml:space="preserve"><value>انصراف</value></data>
   <data name="Common.Delete" xml:space="preserve"><value>حذف</value></data>
@@ -22,7 +23,7 @@
   <data name="Common.StreakDays" xml:space="preserve"><value>{0} روز پیوسته</value></data>
   <data name="Common.ThisWeekCount" xml:space="preserve"><value>{0} از {1} روز این هفته</value></data>
   <data name="Common.DayXofY" xml:space="preserve"><value>روز {0} از {1}</value></data>
-  <data name="Common.SeeAll" xml:space="preserve"><value>دیدن همه</value></data>
+  <data name="Common.SeeAll" xml:space="preserve"><value>همه را ببین</value></data>
   <data name="Common.Complete" xml:space="preserve"><value>تکمیل</value></data>
   <data name="Common.New" xml:space="preserve"><value>جدید</value></data>
 
@@ -38,11 +39,11 @@
   <data name="Tab.Profile" xml:space="preserve"><value>پروفایل</value></data>
 
   <!-- ============ Onboarding ============ -->
-  <data name="Onboarding.Welcome.Title" xml:space="preserve"><value>به LIVORA خوش آمدید</value></data>
+  <data name="Onboarding.Welcome.Title" xml:space="preserve"><value>به LIVORA خوش آمدی</value></data>
   <data name="Onboarding.Welcome.Subtitle" xml:space="preserve"><value>LIVORA سبک زندگی تو را می‌شناسد و هر روز به تصمیم‌های بهتر کمک می‌کند.</value></data>
-  <data name="Onboarding.Step.Name" xml:space="preserve"><value>LIVORA چه اسمی صدایت بزند؟</value></data>
-  <data name="Onboarding.Name.Placeholder" xml:space="preserve"><value>اسم تو</value></data>
-  <data name="Onboarding.Step.Goals" xml:space="preserve"><value>این روزها چه چیزی برایت مهم‌تر است؟</value></data>
+  <data name="Onboarding.Step.Name" xml:space="preserve"><value>LIVORA چطور صدایت کند؟</value></data>
+  <data name="Onboarding.Name.Placeholder" xml:space="preserve"><value>اسمت</value></data>
+  <data name="Onboarding.Step.Goals" xml:space="preserve"><value>الان چه چیزی برایت از همه مهم‌تر است؟</value></data>
   <data name="Onboarding.Goal.BetterSleep" xml:space="preserve"><value>خواب بهتر</value></data>
   <data name="Onboarding.Goal.MoreEnergy" xml:space="preserve"><value>انرژی بیشتر</value></data>
   <data name="Onboarding.Goal.Fitness" xml:space="preserve"><value>تناسب اندام</value></data>
@@ -53,10 +54,10 @@
   <data name="Onboarding.Step.Schedule" xml:space="preserve"><value>معمولاً چه ساعتی می‌خوابی و بیدار می‌شوی؟</value></data>
   <data name="Onboarding.Bedtime" xml:space="preserve"><value>ساعت خواب معمول</value></data>
   <data name="Onboarding.WakeTime" xml:space="preserve"><value>ساعت بیداری معمول</value></data>
-  <data name="Onboarding.Step.Language" xml:space="preserve"><value>زبان خود را انتخاب کن</value></data>
+  <data name="Onboarding.Step.Language" xml:space="preserve"><value>زبانت را انتخاب کن</value></data>
   <data name="Onboarding.Language.English" xml:space="preserve"><value>English</value></data>
   <data name="Onboarding.Language.Persian" xml:space="preserve"><value>فارسی</value></data>
-  <data name="Onboarding.Finish.Note" xml:space="preserve"><value>LIVORA با داده نمونه شروع می‌کند تا بتوانی همه‌چیز را ببینی. اتصال منابع واقعی بعداً از پروفایل انجام می‌شود.</value></data>
+  <data name="Onboarding.Finish.Note" xml:space="preserve"><value>LIVORA با داده نمونه شروع می‌کند تا همه‌چیز را ببینی. بعداً می‌توانی از پروفایل منابع واقعی را وصل کنی.</value></data>
 
   <!-- ============ Today ============ -->
   <data name="Today.Greeting.Morning" xml:space="preserve"><value>صبح بخیر، {0}</value></data>
@@ -65,7 +66,7 @@
   <data name="Today.DailyScore" xml:space="preserve"><value>آمادگی امروز</value></data>
   <data name="Today.SampleDataNote" xml:space="preserve"><value>داده نمونه — اتصال منابع واقعی از پروفایل</value></data>
   <data name="Today.Priorities" xml:space="preserve"><value>اولویت‌های امروز</value></data>
-  <data name="Today.Recommended" xml:space="preserve"><value>پیشنهاد برای تو</value></data>
+  <data name="Today.Recommended" xml:space="preserve"><value>پیشنهاد برایت</value></data>
   <data name="Today.ActiveGoals" xml:space="preserve"><value>اهداف فعال</value></data>
   <data name="Today.Habits" xml:space="preserve"><value>عادت‌ها</value></data>
   <data name="Today.SleepCard" xml:space="preserve"><value>خواب</value></data>
@@ -81,28 +82,28 @@
   <data name="Insight.Title.LowRecovery" xml:space="preserve"><value>سطح ریکاوری تو کمی پایین‌تر از حالت معمول است</value></data>
   <data name="Insight.Title.PositiveMomentum" xml:space="preserve"><value>داری شتاب خوبی می‌سازی</value></data>
   <data name="Insight.Title.HighStress" xml:space="preserve"><value>استرس امروزت بالاتر از حد معمول به نظر می‌رسد</value></data>
-  <data name="Insight.Reason.SleepHours" xml:space="preserve"><value>دیشب {0} خوابیدی — کمتر از معمولِ {1}.</value></data>
+  <data name="Insight.Reason.SleepHours" xml:space="preserve"><value>دیشب {0} خوابیدی — کمتر از {1} که معمول توست.</value></data>
   <data name="Insight.Reason.RecoveryScore" xml:space="preserve"><value>امتیاز ریکاوری تو {0} است — معمولاً حدود {1} است.</value></data>
   <data name="Insight.Reason.PositiveStreak" xml:space="preserve"><value>{0} روز پیوسته عادت‌ها را نگه داشته‌ای و فعالیت هم در مسیر هدف است.</value></data>
   <data name="Insight.Reason.HighStress" xml:space="preserve"><value>استرس تو روند صعودی داشته و انرژی پایین است.</value></data>
   <data name="Insight.Reason.Balanced" xml:space="preserve"><value>خواب، فعالیت و ریکاوری همه نزدیک به وضعیت همیشگی‌ات هستند.</value></data>
   <data name="Rec.ReduceTrainingIntensity" xml:space="preserve"><value>امروز شدت تمرین را سبک نگه دار</value></data>
   <data name="Rec.ShortWalk" xml:space="preserve"><value>یک پیاده‌روی کوتاه بعد از ناهار اضافه کن</value></data>
-  <data name="Rec.ProtectFocusBlocks" xml:space="preserve"><value>دو بازه تمرکز صبح را حفظ کن</value></data>
+  <data name="Rec.ProtectFocusBlocks" xml:space="preserve"><value>امروز صبح دو بازه تمرکز را حفظ کن</value></data>
   <data name="Rec.EarlierBedtime" xml:space="preserve"><value>امشب برای خواب زودتر برنامه‌ریزی کن</value></data>
   <data name="Rec.KeepRoutine" xml:space="preserve"><value>روتینت را ادامه بده — جواب داده</value></data>
   <data name="Rec.Hydrate" xml:space="preserve"><value>در طول روز مرتب آب بنوش</value></data>
-  <data name="Rec.MorningLight" xml:space="preserve"><value>تا یک ساعت بعد از بیداری نور طبیعی ببین</value></data>
+  <data name="Rec.MorningLight" xml:space="preserve"><value>تا یک ساعت بعد از بیداری، نور طبیعی بگیر</value></data>
   <data name="Rec.TakeBreak" xml:space="preserve"><value>هر ۹۰ دقیقه یک استراحت ۱۰ دقیقه‌ای بگیر</value></data>
   <data name="Rec.CelebrateStreak" xml:space="preserve"><value>زنجیره‌ات را نگه دار — اگر لازم شد نسخه کوچکش را انجام بده</value></data>
-  <data name="Rec.ModerateScreenTime" xml:space="preserve"><value>۳۰ دقیقه قبل خواب نمایشگرها را کنار بگذار</value></data>
+  <data name="Rec.ModerateScreenTime" xml:space="preserve"><value>۳۰ دقیقه قبل از خواب، کار با نمایشگر را کم کن</value></data>
 
   <!-- ============ Health ============ -->
   <data name="Health.Title" xml:space="preserve"><value>سلامت</value></data>
   <data name="Health.Sleep" xml:space="preserve"><value>خواب</value></data>
   <data name="Health.Activity" xml:space="preserve"><value>فعالیت</value></data>
   <data name="Health.Recovery" xml:space="preserve"><value>ریکاوری</value></data>
-  <data name="Health.Wellness" xml:space="preserve"><value>احساس</value></data>
+  <data name="Health.Wellness" xml:space="preserve"><value>تندرستی</value></data>
   <data name="Health.Duration" xml:space="preserve"><value>مدت</value></data>
   <data name="Health.Quality" xml:space="preserve"><value>کیفیت</value></data>
   <data name="Health.Consistency" xml:space="preserve"><value>نظم</value></data>
@@ -113,6 +114,7 @@
   <data name="Health.RestingHeartRate" xml:space="preserve"><value>ضربان قلب استراحت</value></data>
   <data name="Health.HRV" xml:space="preserve"><value>HRV</value></data>
   <data name="Health.NotAvailable" xml:space="preserve"><value>هنوز در دسترس نیست</value></data>
+  <data name="Health.PlaceholderNote" xml:space="preserve"><value>ضربان قلب و HRV تا اتصال دستگاه واقعی خالی می‌مانند — LIVORA عدد جعلی نشان نمی‌دهد.</value></data>
   <data name="Health.Stress" xml:space="preserve"><value>استرس</value></data>
   <data name="Health.Mood" xml:space="preserve"><value>خلق</value></data>
   <data name="Health.Energy" xml:space="preserve"><value>انرژی</value></data>
@@ -153,8 +155,8 @@
   <data name="Enum.GoalUnit.Minutes" xml:space="preserve"><value>دقیقه</value></data>
   <data name="Enum.GoalUnit.Hours" xml:space="preserve"><value>ساعت</value></data>
   <data name="Enum.GoalUnit.Steps" xml:space="preserve"><value>قدم</value></data>
-  <data name="Enum.ActivityLevel.Sedentary" xml:space="preserve"><value>بیشتر نشسته</value></data>
-  <data name="Enum.ActivityLevel.Light" xml:space="preserve"><value>کم‌تحرک</value></data>
+  <data name="Enum.ActivityLevel.Sedentary" xml:space="preserve"><value>بیشتر وقت نشسته</value></data>
+  <data name="Enum.ActivityLevel.Light" xml:space="preserve"><value>کم فعال</value></data>
   <data name="Enum.ActivityLevel.Moderate" xml:space="preserve"><value>نیمه‌فعال</value></data>
   <data name="Enum.ActivityLevel.Active" xml:space="preserve"><value>فعال</value></data>
   <data name="Enum.ActivityLevel.VeryActive" xml:space="preserve"><value>بسیار فعال</value></data>
@@ -167,19 +169,19 @@
   <data name="Enum.BootcampDifficulty.Beginner" xml:space="preserve"><value>مقدماتی</value></data>
   <data name="Enum.BootcampDifficulty.Intermediate" xml:space="preserve"><value>متوسط</value></data>
   <data name="Enum.BootcampDifficulty.Advanced" xml:space="preserve"><value>پیشرفته</value></data>
-  <data name="Enum.InsightPriority.Low" xml:space="preserve"><value>کم</value></data>
+  <data name="Enum.InsightPriority.Low" xml:space="preserve"><value>کم‌اهمیت</value></data>
   <data name="Enum.InsightPriority.Normal" xml:space="preserve"><value>معمول</value></data>
   <data name="Enum.InsightPriority.High" xml:space="preserve"><value>مهم</value></data>
 
   <!-- ============ Habits ============ -->
   <data name="Habits.Title" xml:space="preserve"><value>عادت‌ها</value></data>
   <data name="Habits.MarkDone" xml:space="preserve"><value>انجام دادم</value></data>
-  <data name="Habits.Undo" xml:space="preserve"><value>بازگردانی</value></data>
+  <data name="Habits.Undo" xml:space="preserve"><value>واگرد</value></data>
 
   <!-- ============ Programs ============ -->
   <data name="Programs.Title" xml:space="preserve"><value>برنامه‌ها</value></data>
   <data name="Programs.AdaptiveNote" xml:space="preserve"><value>برنامه‌های تطبیقی — LIVORA وقتی زندگی‌ات تغییر می‌کند برنامه را تنظیم می‌کند.</value></data>
-  <data name="Programs.Enrolled" xml:space="preserve"><value>برنامه تو</value></data>
+  <data name="Programs.Enrolled" xml:space="preserve"><value>برنامه‌ات</value></data>
   <data name="Programs.Available" xml:space="preserve"><value>برنامه‌های موجود</value></data>
   <data name="Programs.Enroll" xml:space="preserve"><value>شروع برنامه</value></data>
   <data name="Programs.Leave" xml:space="preserve"><value>ترک برنامه</value></data>
@@ -187,19 +189,19 @@
   <data name="Programs.OriginalPlan" xml:space="preserve"><value>برنامه اصلی</value></data>
   <data name="Programs.AdjustedPlan" xml:space="preserve"><value>تنظیم‌شده برای امروز</value></data>
   <data name="Programs.PlanForToday" xml:space="preserve"><value>برنامه امروز</value></data>
-  <data name="Programs.Creator" xml:space="preserve"><value>توسط {0}</value></data>
+  <data name="Programs.Creator" xml:space="preserve"><value>از {0}</value></data>
   <data name="Bootcamp.Title.EarlyRising" xml:space="preserve"><value>۲۱ روز سحرخیزی</value></data>
   <data name="Bootcamp.Desc.EarlyRising" xml:space="preserve"><value>با قدم‌های کوچک روزانه، ساعت بیداری را جلو ببر.</value></data>
   <data name="Bootcamp.Title.BetterSleep" xml:space="preserve"><value>۱۴ روز خواب بهتر</value></data>
   <data name="Bootcamp.Desc.BetterSleep" xml:space="preserve"><value>یک روال شبانه بساز که واقعاً بماند.</value></data>
   <data name="Bootcamp.Title.FitnessStart" xml:space="preserve"><value>۳۰ روز شروع تناسب اندام</value></data>
-  <data name="Bootcamp.Desc.FitnessStart" xml:space="preserve"><value>از صفر تا یک روال ۳۰ دقیقه‌ایِ پیوسته.</value></data>
+  <data name="Bootcamp.Desc.FitnessStart" xml:space="preserve"><value>از صفر تا یک روال پیوسته ۳۰ دقیقه‌ای.</value></data>
   <data name="Bootcamp.Title.DigitalDetox" xml:space="preserve"><value>۷ روز دیتاکس دیجیتال</value></data>
-  <data name="Bootcamp.Desc.DigitalDetox" xml:space="preserve"><value>در یک هفته شفاف، تمرکزت را پس بگیر.</value></data>
+  <data name="Bootcamp.Desc.DigitalDetox" xml:space="preserve"><value>در یک هفته منظم، توجهت را پس بگیر.</value></data>
   <data name="Bootcamp.Title.Reading" xml:space="preserve"><value>۳۰ روز مطالعه</value></data>
   <data name="Bootcamp.Desc.Reading" xml:space="preserve"><value>هر روز بیست دقیقه مطالعه متمرکز.</value></data>
   <data name="Bootcamp.Title.Focus" xml:space="preserve"><value>۲۱ روز تمرکز</value></data>
-  <data name="Bootcamp.Desc.Focus" xml:space="preserve"><value>کار عمیق را با تمرین کوتاه روزانه تمرین کن.</value></data>
+  <data name="Bootcamp.Desc.Focus" xml:space="preserve"><value>کار عمیق را با تمرین روزانه و کوتاه تقویت کن.</value></data>
   <data name="Bootcamp.Plan.Walk" xml:space="preserve"><value>پیاده‌روی صبحگاهی</value></data>
   <data name="Bootcamp.Plan.Walk.Desc" xml:space="preserve"><value>۲۰ دقیقه بیرون با قدم آرام.</value></data>
   <data name="Bootcamp.Plan.WindDown" xml:space="preserve"><value>آرام‌سازی شبانه</value></data>
@@ -212,10 +214,18 @@
   <data name="Bootcamp.Plan.DeepWork.Desc" xml:space="preserve"><value>دو نوبت ۵۰ دقیقه‌ای بدون اعلان.</value></data>
   <data name="Bootcamp.Plan.LightWalk" xml:space="preserve"><value>پیاده‌روی آسان ۱۰ دقیقه‌ای</value></data>
   <data name="Bootcamp.Plan.LightWalk.Desc" xml:space="preserve"><value>روز ریکاوری — ملایم و کوتاه.</value></data>
-  <data name="Bootcamp.Plan.Stretch" xml:space="preserve"><value>کشش و آرام‌سازی زودتر</value></data>
+  <data name="Bootcamp.Plan.Stretch" xml:space="preserve"><value>کشش و آرام‌سازی زودهنگام</value></data>
   <data name="Bootcamp.Plan.Stretch.Desc" xml:space="preserve"><value>۱۵ دقیقه کشش، خواب ۳۰ دقیقه زودتر.</value></data>
   <data name="Bootcamp.Plan.Meditation" xml:space="preserve"><value>تنفس و مدیتیشن</value></data>
   <data name="Bootcamp.Plan.Meditation.Desc" xml:space="preserve"><value>۱۰ دقیقه تنفس هدایت‌شده.</value></data>
+
+  <!-- ============ Seed ============ -->
+  <data name="Seed.Goal.Exercise" xml:space="preserve"><value>۴ جلسه ورزش در هفته</value></data>
+  <data name="Seed.Goal.Sleep" xml:space="preserve"><value>خواب قبل از ۲۳:۳۰</value></data>
+  <data name="Seed.Goal.Reading" xml:space="preserve"><value>روزانه ۲۰ دقیقه مطالعه</value></data>
+  <data name="Seed.Habit.MorningWalk" xml:space="preserve"><value>پیاده‌روی صبحگاهی</value></data>
+  <data name="Seed.Habit.Reading" xml:space="preserve"><value>مطالعه شبانه</value></data>
+  <data name="Seed.Habit.Stretching" xml:space="preserve"><value>حرکات کششی</value></data>
 
   <!-- ============ Profile ============ -->
   <data name="Profile.Title" xml:space="preserve"><value>پروفایل</value></data>
@@ -230,9 +240,139 @@
   <data name="Profile.DataSource.Sample.Status" xml:space="preserve"><value>فعال · نمایشی</value></data>
   <data name="Profile.DataSource.RealComingSoon" xml:space="preserve"><value>اتصال دستگاه‌های واقعی در فاز بعدی اضافه می‌شود.</value></data>
   <data name="Profile.Notifications" xml:space="preserve"><value>اعلان‌ها</value></data>
-  <data name="Profile.NotificationsSoon" xml:space="preserve"><value>در فاز بعدی.</value></data>
+  <data name="Profile.NotificationsSoon" xml:space="preserve"><value>در فاز بعدی می‌آید.</value></data>
   <data name="Profile.Appearance" xml:space="preserve"><value>ظاهر</value></data>
-  <data name="Profile.AppearanceSoon" xml:space="preserve"><value>در فاز ۱ از تم سیستم پیروی می‌کند.</value></data>
+  <data name="Profile.AppearanceSoon" xml:space="preserve"><value>در فاز ۱ با تم سیستم تنظیم است.</value></data>
   <data name="Profile.About" xml:space="preserve"><value>درباره LIVORA</value></data>
   <data name="Profile.Version" xml:space="preserve"><value>نسخه {0}</value></data>
+  <data name="Profile.SoonBadge" xml:space="preserve"><value>به‌زودی</value></data>
+
+  <!-- ============ Wave 2: تراشه‌های امروز ============ -->
+  <data name="Today.Confidence" xml:space="preserve"><value>میزان اطمینان</value></data>
+  <data name="Today.Completeness" xml:space="preserve"><value>پوشش داده</value></data>
+  <data name="Today.Plan" xml:space="preserve"><value>برنامه امروز</value></data>
+  <data name="Today.PlanAdapted" xml:space="preserve"><value>متناسب با وضعیت امروزت تنظیم شد</value></data>
+  <data name="Today.Delta.Above" xml:space="preserve"><value>{0} بالاتر از حالت معمول</value></data>
+  <data name="Today.Delta.Below" xml:space="preserve"><value>{0} پایین‌تر از حالت معمول</value></data>
+  <data name="Today.Delta.OnBaseline" xml:space="preserve"><value>روی خط پایه تو</value></data>
+  <data name="Today.ViewWeek" xml:space="preserve"><value>مرور این هفته</value></data>
+
+  <data name="Rule.Reason.SleepBelowBaseline" xml:space="preserve"><value>خواب تو {0} کمتر از خط پایه شخصی‌ات بود.</value></data>
+  <data name="Rule.Reason.RecoveryBelowBaseline" xml:space="preserve"><value>ریکاوری تو پایین‌تر از سطح معمولت است.</value></data>
+  <data name="Rule.Reason.StressAboveUsual" xml:space="preserve"><value>استرست بالاتر از حالت عادی است.</value></data>
+  <data name="Rule.Reason.StepsBelowBaseline" xml:space="preserve"><value>قدم‌هایت خیلی پایین‌تر از حالت معمولت است.</value></data>
+  <data name="Rule.Reason.AllNearBaseline" xml:space="preserve"><value>خواب، فعالیت و ریکاوری همه نزدیک به حالت عادی‌ات هستند.</value></data>
+  <data name="Rule.Reason.GoalBehind" xml:space="preserve"><value>این هدف از برنامه دوره عقب است.</value></data>
+  <data name="Rule.Reason.HabitStreakAtRisk" xml:space="preserve"><value>زنجیره {1} روزه‌ات در «{0}» امشب قطع می‌شود.</value></data>
+  <data name="Rule.Reason.SleepDataStale" xml:space="preserve"><value>داده خواب {0} روز قدیمی است — تاریخچه محسوب می‌شود، نه امروز.</value></data>
+  <data name="Rule.Why.Rule.SleepDebt" xml:space="preserve"><value>خوابت کمتر از حد معمولت بود</value></data>
+  <data name="Rule.Why.Rule.SleepDebtReduceIntensity" xml:space="preserve"><value>خوابت کمتر از حد معمولت بود</value></data>
+  <data name="Rule.Why.Rule.LowRecoveryReduce" xml:space="preserve"><value>ریکاوری‌ات پایین‌تر از معمول بود</value></data>
+  <data name="Rule.Why.Rule.HighStress" xml:space="preserve"><value>استرست بالا بود</value></data>
+  <data name="Rule.Why.Rule.HighStressScreens" xml:space="preserve"><value>استرست بالا بود</value></data>
+  <data name="Rule.Why.Rule.ActivityDeficit" xml:space="preserve"><value>فعالیتت پایین‌تر از روتینت بود</value></data>
+  <data name="Rule.Why.Rule.PositiveMomentum" xml:space="preserve"><value>همه‌چیز نزدیک به خط پایه‌ات است</value></data>
+  <data name="Rule.Why.Rule.HabitAtRisk" xml:space="preserve"><value>یکی از زنجیره عادت‌هایت داشت قطع می‌شد</value></data>
+  <data name="Rule.Why.Rule.StaleSleep" xml:space="preserve"><value>داده خوابت قدیمی بود</value></data>
+
+  <data name="Plan.Item.Habit" xml:space="preserve"><value>{0}</value></data>
+  <data name="Plan.Item.FocusBlocks" xml:space="preserve"><value>{0} بازه تمرکز</value></data>
+  <data name="Plan.Item.Recovery" xml:space="preserve"><value>زمان ریکاوری</value></data>
+  <data name="Plan.Item.WindDown" xml:space="preserve"><value>آرام‌سازی شبانه</value></data>
+  <data name="Plan.NotAdapted" xml:space="preserve"><value>برنامه استاندارد</value></data>
+  <data name="Plan.Adapted.Sleep" xml:space="preserve"><value>تنظیم‌شده: خواب کمتر از خط پایه</value></data>
+  <data name="Plan.Adapted.Recovery" xml:space="preserve"><value>تنظیم‌شده: ریکاوری کمتر از خط پایه</value></data>
+  <data name="Plan.Adapted.Stress" xml:space="preserve"><value>تنظیم‌شده: استرس بالاتر از معمول</value></data>
+  <data name="Plan.Adapted.Activity" xml:space="preserve"><value>تنظیم‌شده: فعالیت کمتر از معمول</value></data>
+  <data name="Plan.Adapted.Multiple" xml:space="preserve"><value>تنظیم‌شده بر اساس چند سیگنال امروز</value></data>
+  <data name="Plan.Adapted.Generic" xml:space="preserve"><value>متناسب با وضعیت امروز تنظیم شد</value></data>
+  <data name="Plan.Adapted.Reason" xml:space="preserve"><value>برنامه امروز تغییر کرد چون {0}.</value></data>
+
+  <data name="Rec.AdvanceGoal" xml:space="preserve"><value>«{0}» را جلو ببر — ۲۰ دقیقه متمرکز</value></data>
+  <data name="Rec.CompleteHabit" xml:space="preserve"><value>نسخه کوچک یک عادت جاافتاده را انجام بده</value></data>
+  <data name="Rec.DoProgramDay" xml:space="preserve"><value>برنامه امروز دوره‌ات را کامل کن</value></data>
+  <data name="Rec.ReviewWeeklySummary" xml:space="preserve"><value>هفته‌ات را مرور کن</value></data>
+  <data name="Rec.WindDown" xml:space="preserve"><value>۳۰ دقیقه قبل خواب نمایشگرها را کم کن</value></data>
+  <data name="Rec.Nap" xml:space="preserve"><value>یک استراحت ۲۰ دقیقه‌ای برای تازه شدن</value></data>
+  <!-- Keys generated at runtime from RecommendationActionKind values ($"Rec.{action}") -->
+  <data name="Rec.None" xml:space="preserve"><value>امروز چیز اضافه‌ای لازم نیست</value></data>
+  <data name="Rec.WindDownBeforeBed" xml:space="preserve"><value>همین حالا آرام‌سازی را شروع کن — قبل خواب نمایشگرها خاموش</value></data>
+  <data name="Rec.NapBriefly" xml:space="preserve"><value>یک چرت ۲۰ دقیقه‌ای برای تازه شدن بگیر</value></data>
+
+  <data name="Benefit.SleepRecovery" xml:space="preserve"><value>بدهی خواب سریع‌تر تسویه می‌شود.</value></data>
+  <data name="Benefit.PreserveRecovery" xml:space="preserve"><value>ریکاوری حفظ می‌شود و پیوستگی نمی‌شکند.</value></data>
+  <data name="Benefit.GentleMovement" xml:space="preserve"><value>تحرک ملایم، ریکاوری و خلق را بالا می‌برد.</value></data>
+  <data name="Benefit.StressRelease" xml:space="preserve"><value>یک استراحت واقعی، بار استرس را کم می‌کند.</value></data>
+  <data name="Benefit.BetterSleepOnset" xml:space="preserve"><value>نور کمتر → خواب عمیق‌تر امشب.</value></data>
+  <data name="Benefit.StreakMomentum" xml:space="preserve"><value>زنجیره و اعتمادبه‌نفس خودت حفظ می‌شود.</value></data>
+  <data name="Benefit.Streak" xml:space="preserve"><value>زنجیره‌ات حفظ می‌شود.</value></data>
+  <data name="Benefit.Goal" xml:space="preserve"><value>مشهودتر به هدف نزدیک می‌شوی.</value></data>
+  <data name="Benefit.General" xml:space="preserve"><value>پیشرفت کوچک و پایدار.</value></data>
+  <data name="Benefit.Stability" xml:space="preserve"><value>پیوستگی انباشته می‌شود — ریتم را نگه دار.</value></data>
+
+  <data name="Enum.RecommendationCategory.Sleep" xml:space="preserve"><value>خواب</value></data>
+  <data name="Enum.RecommendationCategory.Activity" xml:space="preserve"><value>فعالیت</value></data>
+  <data name="Enum.RecommendationCategory.Recovery" xml:space="preserve"><value>ریکاوری</value></data>
+  <data name="Enum.RecommendationCategory.Focus" xml:space="preserve"><value>تمرکز</value></data>
+  <data name="Enum.RecommendationCategory.Stress" xml:space="preserve"><value>استرس</value></data>
+  <data name="Enum.RecommendationCategory.Habit" xml:space="preserve"><value>عادت</value></data>
+  <data name="Enum.RecommendationCategory.Goal" xml:space="preserve"><value>هدف</value></data>
+  <data name="Enum.RecommendationCategory.Program" xml:space="preserve"><value>برنامه</value></data>
+  <data name="Enum.RecommendationCategory.General" xml:space="preserve"><value>عمومی</value></data>
+
+  <data name="Health.BaselineNote" xml:space="preserve"><value>مقایسه‌ها با خط پایه ۲۸ روزه خودِ توست، نه میانگین‌های عمومی.</value></data>
+  <data name="Health.TrendNote" xml:space="preserve"><value>روند نسبت به خط پایه تو</value></data>
+  <data name="Health.Trend.Learning" xml:space="preserve"><value>در حال یادگیری خط پایه</value></data>
+  <data name="Health.Trend.Above" xml:space="preserve"><value>بالاتر از معمول</value></data>
+  <data name="Health.Trend.Below" xml:space="preserve"><value>پایین‌تر از معمول</value></data>
+  <data name="Health.Trend.Normal" xml:space="preserve"><value>مطابق معمول</value></data>
+  <data name="Health.StaleBadge" xml:space="preserve"><value>قدیمی</value></data>
+
+  <data name="Tab.Weekly" xml:space="preserve"><value>مرور</value></data>
+  <data name="WeeklySummary.Title" xml:space="preserve"><value>هفته گذشته</value></data>
+  <data name="WeeklySummary.Subtitle" xml:space="preserve"><value>{0} تا {1}</value></data>
+  <data name="WeeklySummary.Improvements" xml:space="preserve"><value>رو به بهتر شدن</value></data>
+  <data name="WeeklySummary.Declines" xml:space="preserve"><value>نیازمند توجه</value></data>
+  <data name="WeeklySummary.Habits" xml:space="preserve"><value>پیوستگی عادت‌ها</value></data>
+  <data name="WeeklySummary.Goals" xml:space="preserve"><value>پیشرفت اهداف</value></data>
+  <data name="WeeklySummary.NextFocus" xml:space="preserve"><value>تمرکز هفته بعد</value></data>
+  <data name="WeeklySummary.Confidence" xml:space="preserve"><value>بر پایه {0} روز تاریخچه</value></data>
+  <data name="WeeklySummary.Empty" xml:space="preserve"><value>هنوز تاریخچه کافی برای یک مرور صادقانه نیست — LIVORA چیزی نمی‌سازد.</value></data>
+  <data name="Weekly.Up.Sleep" xml:space="preserve"><value>خواب رو به بهتر شدن است</value></data>
+  <data name="Weekly.Down.Sleep" xml:space="preserve"><value>خواب رو به افت است</value></data>
+  <data name="Weekly.Up.Activity" xml:space="preserve"><value>فعالیتت رو به افزایش است</value></data>
+  <data name="Weekly.Down.Activity" xml:space="preserve"><value>فعالیتت رو به کاهش است</value></data>
+  <data name="Weekly.Up.Recovery" xml:space="preserve"><value>ریکاوری بهتر می‌شود</value></data>
+  <data name="Weekly.Down.Recovery" xml:space="preserve"><value>ریکاوری افت کرده</value></data>
+  <data name="Weekly.Up.Stress" xml:space="preserve"><value>استرست رو به کاهش است</value></data>
+  <data name="Weekly.Down.Stress" xml:space="preserve"><value>استرست رو به افزایش است</value></data>
+  <data name="Weekly.Focus.Stress" xml:space="preserve"><value>آرامش را حفظ کن: استراحت‌ها را قبل از اوج استرس بگذار.</value></data>
+  <data name="Weekly.Focus.Sleep" xml:space="preserve"><value>به خواب اولویت بده: امشب زودتر بخواب.</value></data>
+  <data name="Weekly.Focus.Momentum" xml:space="preserve"><value>زنجیره {0} روزه را نگه دار — پیوستگی از شدت مهم‌تر است.</value></data>
+  <data name="Weekly.Focus.OneHabit" xml:space="preserve"><value>فقط یک عادت را انتخاب کن و به یک ساعت ثابت گره بزن.</value></data>
+  <data name="Weekly.Summary.Back" xml:space="preserve"><value>بازگشت به امروز</value></data>
+  <!-- Fallback FocusKey default on WeeklySummary / DailyHistoryRecord (0 args) -->
+  <data name="WeeklySummary.Focus.Steady" xml:space="preserve"><value>ریتم را نگه دار — باثبات بودن از کامل بودن بهتر است.</value></data>
+
+  <data name="Profile.ConnectionCenter" xml:space="preserve"><value>مرکز اتصال</value></data>
+  <data name="Profile.SourcesNote" xml:space="preserve"><value>اتصال واقعی با دسترسی‌ها در فاز بعد می‌آید. وضعیت‌های زیر صادقانه‌اند.</value></data>
+  <data name="Profile.Source.Health" xml:space="preserve"><value>داده سلامت (دستگاه)</value></data>
+  <data name="Profile.Source.Activity" xml:space="preserve"><value>ردیگر فعالیت</value></data>
+  <data name="Profile.Source.Calendar" xml:space="preserve"><value>تقویم</value></data>
+  <data name="Profile.Source.Tasks" xml:space="preserve"><value>وظایف</value></data>
+  <data name="Profile.Source.ScreenTime" xml:space="preserve"><value>زمان نمایشگر</value></data>
+  <data name="Profile.Status.MockActive" xml:space="preserve"><value>فعال · داده نمونه</value></data>
+  <data name="Profile.Status.NotConnected" xml:space="preserve"><value>متصل نیست</value></data>
+
+  <data name="Privacy.Title" xml:space="preserve"><value>حریم خصوصی و داده</value></data>
+  <data name="Privacy.Note" xml:space="preserve"><value>همه‌چیز روی همین دستگاه می‌ماند. بدون حساب، بدون ارسال.</value></data>
+  <data name="Privacy.Item.Profile" xml:space="preserve"><value>پروفایل و تنظیمات</value></data>
+  <data name="Privacy.Item.GoalsHabits" xml:space="preserve"><value>اهداف و ثبت عادت‌ها</value></data>
+  <data name="Privacy.Item.HealthHistory" xml:space="preserve"><value>تاریخچه روزانه سلامت</value></data>
+  <data name="Privacy.Item.Programs" xml:space="preserve"><value>عضویت و پیشرفت برنامه‌ها</value></data>
+  <data name="Privacy.Location.Device" xml:space="preserve"><value>فقط این دستگاه</value></data>
+  <data name="Privacy.Origin.Mock" xml:space="preserve"><value>نمونه</value></data>
+  <data name="Privacy.Origin.Manual" xml:space="preserve"><value>ورودی تو</value></data>
+  <data name="Privacy.DeleteAll" xml:space="preserve"><value>حذف همه داده‌های محلی</value></data>
+  <data name="Privacy.Deleted" xml:space="preserve"><value>همه داده‌های محلی حذف شد.</value></data>
 </root>

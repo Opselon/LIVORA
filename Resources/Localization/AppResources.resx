@@ -8,6 +8,7 @@
 
   <!-- ============ Common ============ -->
   <data name="Common.Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Common.You" xml:space="preserve"><value>you</value></data>
   <data name="Common.Yes" xml:space="preserve"><value>Yes</value></data>
   <data name="Common.No" xml:space="preserve"><value>No</value></data>
   <data name="Common.Save" xml:space="preserve"><value>Save</value></data>
@@ -113,6 +114,7 @@
   <data name="Health.RestingHeartRate" xml:space="preserve"><value>Resting heart rate</value></data>
   <data name="Health.HRV" xml:space="preserve"><value>HRV</value></data>
   <data name="Health.NotAvailable" xml:space="preserve"><value>Not available yet</value></data>
+  <data name="Health.PlaceholderNote" xml:space="preserve"><value>Heart rate and HRV stay empty until a real device is connected — LIVORA never shows fake values.</value></data>
   <data name="Health.Stress" xml:space="preserve"><value>Stress</value></data>
   <data name="Health.Mood" xml:space="preserve"><value>Mood</value></data>
   <data name="Health.Energy" xml:space="preserve"><value>Energy</value></data>
@@ -217,6 +219,14 @@
   <data name="Bootcamp.Plan.Meditation" xml:space="preserve"><value>Breathing &amp; meditation</value></data>
   <data name="Bootcamp.Plan.Meditation.Desc" xml:space="preserve"><value>10 minutes of guided breathing.</value></data>
 
+  <!-- ============ Seed (first-launch demo content) ============ -->
+  <data name="Seed.Goal.Exercise" xml:space="preserve"><value>Exercise 4x this week</value></data>
+  <data name="Seed.Goal.Sleep" xml:space="preserve"><value>Sleep before 23:30</value></data>
+  <data name="Seed.Goal.Reading" xml:space="preserve"><value>Read 20 minutes daily</value></data>
+  <data name="Seed.Habit.MorningWalk" xml:space="preserve"><value>Morning walk</value></data>
+  <data name="Seed.Habit.Reading" xml:space="preserve"><value>Evening reading</value></data>
+  <data name="Seed.Habit.Stretching" xml:space="preserve"><value>Stretching</value></data>
+
   <!-- ============ Profile ============ -->
   <data name="Profile.Title" xml:space="preserve"><value>Profile</value></data>
   <data name="Profile.Name" xml:space="preserve"><value>Name</value></data>
@@ -235,4 +245,139 @@
   <data name="Profile.AppearanceSoon" xml:space="preserve"><value>Follows your system theme in Phase 1.</value></data>
   <data name="Profile.About" xml:space="preserve"><value>About LIVORA</value></data>
   <data name="Profile.Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Profile.SoonBadge" xml:space="preserve"><value>Soon</value></data>
+
+  <!-- ============ Wave 2: Today state chips ============ -->
+  <data name="Today.Confidence" xml:space="preserve"><value>Confidence</value></data>
+  <data name="Today.Completeness" xml:space="preserve"><value>Data coverage</value></data>
+  <data name="Today.Plan" xml:space="preserve"><value>Today's plan</value></data>
+  <data name="Today.PlanAdapted" xml:space="preserve"><value>Adjusted for your state today</value></data>
+  <data name="Today.Delta.Above" xml:space="preserve"><value>+{0} vs your normal</value></data>
+  <data name="Today.Delta.Below" xml:space="preserve"><value>{0} below your normal</value></data>
+  <data name="Today.Delta.OnBaseline" xml:space="preserve"><value>on your baseline</value></data>
+  <data name="Today.ViewWeek" xml:space="preserve"><value>Review this week</value></data>
+
+  <!-- ============ Wave 2: rules / explanations / benefits ============ -->
+  <data name="Rule.Reason.SleepBelowBaseline" xml:space="preserve"><value>Your sleep was {0} below your personal baseline.</value></data>
+  <data name="Rule.Reason.RecoveryBelowBaseline" xml:space="preserve"><value>Your recovery is below your usual level.</value></data>
+  <data name="Rule.Reason.StressAboveUsual" xml:space="preserve"><value>Your stress is higher than usual.</value></data>
+  <data name="Rule.Reason.StepsBelowBaseline" xml:space="preserve"><value>Your steps are well below your normal.</value></data>
+  <data name="Rule.Reason.AllNearBaseline" xml:space="preserve"><value>Sleep, activity and recovery are all near your normal.</value></data>
+  <data name="Rule.Reason.GoalBehind" xml:space="preserve"><value>This goal is behind pace for the period.</value></data>
+  <data name="Rule.Reason.HabitStreakAtRisk" xml:space="preserve"><value>Your {1}-day streak on “{0}” ends tonight.</value></data>
+  <data name="Rule.Reason.SleepDataStale" xml:space="preserve"><value>Sleep data is {0} days old — treated as history, not today.</value></data>
+  <data name="Rule.Why.Rule.SleepDebt" xml:space="preserve"><value>your sleep was below your usual</value></data>
+  <data name="Rule.Why.Rule.SleepDebtReduceIntensity" xml:space="preserve"><value>your sleep was below your usual</value></data>
+  <data name="Rule.Why.Rule.LowRecoveryReduce" xml:space="preserve"><value>your recovery was below your usual</value></data>
+  <data name="Rule.Why.Rule.HighStress" xml:space="preserve"><value>your stress was elevated</value></data>
+  <data name="Rule.Why.Rule.HighStressScreens" xml:space="preserve"><value>your stress was elevated</value></data>
+  <data name="Rule.Why.Rule.ActivityDeficit" xml:space="preserve"><value>your activity was below your normal</value></data>
+  <data name="Rule.Why.Rule.PositiveMomentum" xml:space="preserve"><value>everything is near your baseline</value></data>
+  <data name="Rule.Why.Rule.HabitAtRisk" xml:space="preserve"><value>one of your habit streaks was about to end</value></data>
+  <data name="Rule.Why.Rule.StaleSleep" xml:space="preserve"><value>your sleep data was out of date</value></data>
+
+  <data name="Plan.Item.Habit" xml:space="preserve"><value>{0}</value></data>
+  <data name="Plan.Item.FocusBlocks" xml:space="preserve"><value>Focus blocks ×{0}</value></data>
+  <data name="Plan.Item.Recovery" xml:space="preserve"><value>Recovery time</value></data>
+  <data name="Plan.Item.WindDown" xml:space="preserve"><value>Evening wind-down</value></data>
+  <data name="Plan.NotAdapted" xml:space="preserve"><value>Standard schedule</value></data>
+  <data name="Plan.Adapted.Sleep" xml:space="preserve"><value>Adjusted: sleep below your baseline</value></data>
+  <data name="Plan.Adapted.Recovery" xml:space="preserve"><value>Adjusted: recovery below your baseline</value></data>
+  <data name="Plan.Adapted.Stress" xml:space="preserve"><value>Adjusted: stress above your usual</value></data>
+  <data name="Plan.Adapted.Activity" xml:space="preserve"><value>Adjusted: activity below your normal</value></data>
+  <data name="Plan.Adapted.Multiple" xml:space="preserve"><value>Adjusted for several signals today</value></data>
+  <data name="Plan.Adapted.Generic" xml:space="preserve"><value>Adjusted for today's state</value></data>
+  <data name="Plan.Adapted.Reason" xml:space="preserve"><value>Today's plan changed because {0}.</value></data>
+
+  <data name="Rec.AdvanceGoal" xml:space="preserve"><value>Move a goal you care about forward — 20 focused minutes</value></data>
+  <data name="Rec.CompleteHabit" xml:space="preserve"><value>Do the small version of a skipped habit</value></data>
+  <data name="Rec.DoProgramDay" xml:space="preserve"><value>Complete today's program day</value></data>
+  <data name="Rec.ReviewWeeklySummary" xml:space="preserve"><value>Look back at your week</value></data>
+  <data name="Rec.WindDown" xml:space="preserve"><value>Wind down screens 30 minutes before bed</value></data>
+  <data name="Rec.Nap" xml:space="preserve"><value>Take a 20-minute reset break</value></data>
+  <!-- Keys generated at runtime from RecommendationActionKind values ($"Rec.{action}") -->
+  <data name="Rec.None" xml:space="preserve"><value>Nothing extra needed today</value></data>
+  <data name="Rec.WindDownBeforeBed" xml:space="preserve"><value>Start winding down now — screens off before bed</value></data>
+  <data name="Rec.NapBriefly" xml:space="preserve"><value>Take a brief 20-minute nap to reset</value></data>
+
+  <data name="Benefit.SleepRecovery" xml:space="preserve"><value>You'll repay sleep debt faster.</value></data>
+  <data name="Benefit.PreserveRecovery" xml:space="preserve"><value>Protects recovery while staying consistent.</value></data>
+  <data name="Benefit.GentleMovement" xml:space="preserve"><value>Light movement lifts recovery and mood.</value></data>
+  <data name="Benefit.StressRelease" xml:space="preserve"><value>A real break lowers stress load.</value></data>
+  <data name="Benefit.BetterSleepOnset" xml:space="preserve"><value>Less screen light → deeper sleep tonight.</value></data>
+  <data name="Benefit.StreakMomentum" xml:space="preserve"><value>Keeps your streak and self-trust intact.</value></data>
+  <data name="Benefit.Streak" xml:space="preserve"><value>Keeps your streak alive.</value></data>
+  <data name="Benefit.Goal" xml:space="preserve"><value>Gets you visibly closer to the goal.</value></data>
+  <data name="Benefit.General" xml:space="preserve"><value>Small, sustainable progress.</value></data>
+  <data name="Benefit.Stability" xml:space="preserve"><value>Consistency compounds — keep the rhythm.</value></data>
+
+  <data name="Enum.RecommendationCategory.Sleep" xml:space="preserve"><value>Sleep</value></data>
+  <data name="Enum.RecommendationCategory.Activity" xml:space="preserve"><value>Activity</value></data>
+  <data name="Enum.RecommendationCategory.Recovery" xml:space="preserve"><value>Recovery</value></data>
+  <data name="Enum.RecommendationCategory.Focus" xml:space="preserve"><value>Focus</value></data>
+  <data name="Enum.RecommendationCategory.Stress" xml:space="preserve"><value>Stress</value></data>
+  <data name="Enum.RecommendationCategory.Habit" xml:space="preserve"><value>Habit</value></data>
+  <data name="Enum.RecommendationCategory.Goal" xml:space="preserve"><value>Goal</value></data>
+  <data name="Enum.RecommendationCategory.Program" xml:space="preserve"><value>Program</value></data>
+  <data name="Enum.RecommendationCategory.General" xml:space="preserve"><value>General</value></data>
+
+  <!-- ============ Wave 2: Health trends ============ -->
+  <data name="Health.BaselineNote" xml:space="preserve"><value>Deltas compare to YOUR 28-day baseline, not generic averages.</value></data>
+  <data name="Health.TrendNote" xml:space="preserve"><value>Trend vs your baseline</value></data>
+  <data name="Health.Trend.Learning" xml:space="preserve"><value>learning your baseline</value></data>
+  <data name="Health.Trend.Above" xml:space="preserve"><value>above your normal</value></data>
+  <data name="Health.Trend.Below" xml:space="preserve"><value>below your normal</value></data>
+  <data name="Health.Trend.Normal" xml:space="preserve"><value>at your normal</value></data>
+  <data name="Health.StaleBadge" xml:space="preserve"><value>stale</value></data>
+
+  <!-- ============ Wave 2: Weekly summary ============ -->
+  <data name="Tab.Weekly" xml:space="preserve"><value>Review</value></data>
+  <data name="WeeklySummary.Title" xml:space="preserve"><value>Last week</value></data>
+  <data name="WeeklySummary.Subtitle" xml:space="preserve"><value>{0} – {1}</value></data>
+  <data name="WeeklySummary.Improvements" xml:space="preserve"><value>Improving</value></data>
+  <data name="WeeklySummary.Declines" xml:space="preserve"><value>Watch</value></data>
+  <data name="WeeklySummary.Habits" xml:space="preserve"><value>Habit consistency</value></data>
+  <data name="WeeklySummary.Goals" xml:space="preserve"><value>Goal progress</value></data>
+  <data name="WeeklySummary.NextFocus" xml:space="preserve"><value>Focus for next week</value></data>
+  <data name="WeeklySummary.Confidence" xml:space="preserve"><value>Based on {0} days of history</value></data>
+  <data name="WeeklySummary.Empty" xml:space="preserve"><value>Not enough history yet for an honest weekly review — LIVORA won't invent one.</value></data>
+  <data name="Weekly.Up.Sleep" xml:space="preserve"><value>Sleep is trending up</value></data>
+  <data name="Weekly.Down.Sleep" xml:space="preserve"><value>Sleep is sliding down</value></data>
+  <data name="Weekly.Up.Activity" xml:space="preserve"><value>Activity is growing</value></data>
+  <data name="Weekly.Down.Activity" xml:space="preserve"><value>Activity is dropping</value></data>
+  <data name="Weekly.Up.Recovery" xml:space="preserve"><value>Recovery is improving</value></data>
+  <data name="Weekly.Down.Recovery" xml:space="preserve"><value>Recovery is declining</value></data>
+  <data name="Weekly.Up.Stress" xml:space="preserve"><value>Stress is easing</value></data>
+  <data name="Weekly.Down.Stress" xml:space="preserve"><value>Stress is climbing</value></data>
+  <data name="Weekly.Focus.Stress" xml:space="preserve"><value>Protect calm: schedule breaks before stress builds.</value></data>
+  <data name="Weekly.Focus.Sleep" xml:space="preserve"><value>Make sleep the priority again: one earlier bedtime, tonight.</value></data>
+  <data name="Weekly.Focus.Momentum" xml:space="preserve"><value>Guard the {0}-day streak — consistency beats intensity.</value></data>
+  <data name="Weekly.Focus.OneHabit" xml:space="preserve"><value>Pick ONE habit and anchor it to a fixed time.</value></data>
+  <data name="Weekly.Summary.Back" xml:space="preserve"><value>Back to Today</value></data>
+  <!-- Fallback FocusKey default on WeeklySummary / DailyHistoryRecord (0 args) -->
+  <data name="WeeklySummary.Focus.Steady" xml:space="preserve"><value>Keep the rhythm — steady beats perfect.</value></data>
+
+  <!-- ============ Wave 2: Connection center ============ -->
+  <data name="Profile.ConnectionCenter" xml:space="preserve"><value>Connection center</value></data>
+  <data name="Profile.SourcesNote" xml:space="preserve"><value>Real connections arrive with permissions in Wave 3. Statuses below are honest.</value></data>
+  <data name="Profile.Source.Health" xml:space="preserve"><value>Health data (device)</value></data>
+  <data name="Profile.Source.Activity" xml:space="preserve"><value>Activity tracker</value></data>
+  <data name="Profile.Source.Calendar" xml:space="preserve"><value>Calendar</value></data>
+  <data name="Profile.Source.Tasks" xml:space="preserve"><value>Tasks</value></data>
+  <data name="Profile.Source.ScreenTime" xml:space="preserve"><value>Screen time</value></data>
+  <data name="Profile.Status.MockActive" xml:space="preserve"><value>Active · sample data</value></data>
+  <data name="Profile.Status.NotConnected" xml:space="preserve"><value>Not connected</value></data>
+
+  <!-- ============ Wave 2: Privacy ============ -->
+  <data name="Privacy.Title" xml:space="preserve"><value>Privacy &amp; data</value></data>
+  <data name="Privacy.Note" xml:space="preserve"><value>Everything stays on this device. No account, no upload.</value></data>
+  <data name="Privacy.Item.Profile" xml:space="preserve"><value>Profile &amp; preferences</value></data>
+  <data name="Privacy.Item.GoalsHabits" xml:space="preserve"><value>Goals &amp; habit check-ins</value></data>
+  <data name="Privacy.Item.HealthHistory" xml:space="preserve"><value>Daily health history</value></data>
+  <data name="Privacy.Item.Programs" xml:space="preserve"><value>Program enrollment &amp; progress</value></data>
+  <data name="Privacy.Location.Device" xml:space="preserve"><value>This device only</value></data>
+  <data name="Privacy.Origin.Mock" xml:space="preserve"><value>sample</value></data>
+  <data name="Privacy.Origin.Manual" xml:space="preserve"><value>you entered</value></data>
+  <data name="Privacy.DeleteAll" xml:space="preserve"><value>Delete all local data</value></data>
+  <data name="Privacy.Deleted" xml:space="preserve"><value>All local data deleted.</value></data>
 </root>

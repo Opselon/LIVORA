@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.GoalsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:GoalsViewModel"
+    x:Name="GoalsPageRef">
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <VerticalStackLayout Spacing="16">
+
+            <!-- Header: title + new-goal CTA. Start/End alignment mirrors correctly in RTL. -->
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       Style="{StaticResource LDisplay}"
+                       LineBreakMode="WordWrap" MaxLines="2"
+                       SemanticProperties.HeadingLevel="Level1"/>
+                <Button Grid.Column="1"
+                        Text="{Binding NewGoalText}"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding NewGoalCommand}"
+                        VerticalOptions="Center"
+                        SemanticProperties.Description="{Binding NewGoalText}"/>
+            </Grid>
+
+            <!-- Empty state -->
+            <Border Style="{StaticResource SoftCard}" IsVisible="{Binding IsEmpty}">
+                <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
+                       LineBreakMode="WordWrap"/>
+            </Border>
+
+            <!-- Goals list -->
+            <comp:ItemsStackLayout ItemsSource="{Binding Goals}" Spacing="10">
+                <comp:ItemsStackLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:GoalItemViewModel">
+                        <Border Style="{StaticResource Card}">
+                            <VerticalStackLayout Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="{Binding Goal.Name}"
+                                               Style="{StaticResource LSubheading}"
+                                               LineBreakMode="WordWrap" MaxLines="2"
+                                               SemanticProperties.HeadingLevel="Level2"/>
+                                        <Label Text="{Binding CategoryText}" Style="{StaticResource LCaption}"
+                                               LineBreakMode="WordWrap" MaxLines="2"/>
+                                    </VerticalStackLayout>
+                                    <Border Grid.Column="1" VerticalOptions="Center"
+                                            HorizontalOptions="End"
+                                            Background="{StaticResource SurfaceAltBrush}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                            Padding="9,4">
+                                        <Label Text="{Binding StatusText}" FontSize="11.5" FontAttributes="Bold"
+                                               TextColor="{Binding StatusColor}"
+                                               LineBreakMode="WordWrap" MaxLines="2"
+                                               HorizontalTextAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <ProgressBar Grid.Column="0" Progress="{Binding Fraction}"
+                                                 Style="{StaticResource ProgressTrack}"
+                                                 VerticalOptions="Center"
+                                                 SemanticProperties.Description="{Binding StatusText}"/>
+                                    <Label Grid.Column="1" Text="{Binding ProgressText}"
+                                           Style="{StaticResource LCaption}" VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation" MaxLines="1"/>
+                                </Grid>
+
+                                <!-- Action row: two equal columns so long Persian/English labels
+                                     wrap instead of clipping at 360dp; Start-anchored, mirrors in RTL. -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                    <Button Grid.Column="0"
+                                            Text="{Binding BindingContext.AddProgressText, Source={x:Reference GoalsPageRef}}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="16,8" FontSize="13"
+                                            LineBreakMode="WordWrap"
+                                            SemanticProperties.Description="{Binding BindingContext.AddProgressText, Source={x:Reference GoalsPageRef}}"
+                                            Command="{Binding BindingContext.EditGoalCommand, Source={x:Reference GoalsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                    <Button Grid.Column="1"
+                                            Text="{Binding BindingContext.DeleteText, Source={x:Reference GoalsPageRef}}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            BorderColor="{StaticResource NegativeBrush}"
+                                            TextColor="{StaticResource NegativeBrush}"
+                                            Padding="16,8" FontSize="13"
+                                            LineBreakMode="WordWrap"
+                                            SemanticProperties.Description="{Binding BindingContext.DeleteText, Source={x:Reference GoalsPageRef}}"
+                                            Command="{Binding BindingContext.DeleteGoalCommand, Source={x:Reference GoalsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </comp:ItemsStackLayout.ItemTemplate>
+            </comp:ItemsStackLayout>
+
+            <BoxView HeightRequest="12" Color="Transparent"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

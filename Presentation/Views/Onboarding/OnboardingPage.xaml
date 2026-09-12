@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.OnboardingPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:OnboardingViewModel">
+
+    <!-- Single-scroll onboarding: steps read top-to-bottom in both LTR and RTL
+         (pure vertical flow + Start/End alignment, so mirroring never reorders content). -->
+    <Grid RowDefinitions="Auto,*,Auto" Padding="{StaticResource PageThickness}">
+
+        <!-- Step indicator: purely decorative dots (non-interactive) -->
+        <HorizontalStackLayout Grid.Row="0" Spacing="6" HorizontalOptions="Center" Margin="0,8">
+            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource AccentBrush}"/>
+            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource OverlayBrush}"/>
+            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource OverlayBrush}"/>
+            <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource OverlayBrush}"/>
+        </HorizontalStackLayout>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="16" VerticalOptions="Center" Padding="0,12">
+                <Label Text="{Binding WelcomeTitle}"
+                       Style="{StaticResource LDisplay}"
+                       LineBreakMode="WordWrap" MaxLines="2"
+                       SemanticProperties.HeadingLevel="Level1"/>
+                <Label Text="{Binding WelcomeSubtitle}"
+                       Style="{StaticResource LBodySecondary}"
+                       LineBreakMode="WordWrap"/>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding NamePrompt}" Style="{StaticResource LSubheading}"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Entry Text="{Binding Name}"
+                           Placeholder="{Binding NamePlaceholder}"
+                           SemanticProperties.Description="{Binding NamePrompt}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding ActivityPrompt}" Style="{StaticResource LSubheading}"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Picker ItemsSource="{Binding ActivityOptions}"
+                            SelectedIndex="{Binding ActivityIndex}"
+                            MinimumHeightRequest="44"
+                            SemanticProperties.Description="{Binding ActivityPrompt}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding SchedulePrompt}" Style="{StaticResource LSubheading}"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{Binding BedtimeLabel}" Style="{StaticResource LCaption}" FontSize="12"
+                                   LineBreakMode="WordWrap" MaxLines="2"/>
+                            <TimePicker Time="{Binding Bedtime}" MinimumHeightRequest="44"
+                                        SemanticProperties.Description="{Binding BedtimeLabel}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="{Binding WakeLabel}" Style="{StaticResource LCaption}" FontSize="12"
+                                   LineBreakMode="WordWrap" MaxLines="2"/>
+                            <TimePicker Time="{Binding WakeTime}" MinimumHeightRequest="44"
+                                        SemanticProperties.Description="{Binding WakeLabel}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding LanguagePrompt}" Style="{StaticResource LSubheading}"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Grid.Column="0" Text="{Binding EnglishText}"
+                                Command="{Binding SetEnglishCommand}"
+                                HeightRequest="48" CornerRadius="14" FontAttributes="Bold"
+                                BackgroundColor="{Binding EnglishButtonBackground}"
+                                TextColor="{Binding EnglishButtonText}"
+                                SemanticProperties.Description="{Binding EnglishText}"/>
+                        <Button Grid.Column="1" Text="{Binding PersianText}"
+                                Command="{Binding SetPersianCommand}"
+                                HeightRequest="48" CornerRadius="14" FontAttributes="Bold"
+                                BackgroundColor="{Binding PersianButtonBackground}"
+                                TextColor="{Binding PersianButtonText}"
+                                SemanticProperties.Description="{Binding PersianText}"/>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- Honest sample-data note: never implies a real device connection -->
+                <Label Text="{Binding FinishNote}"
+                       Style="{StaticResource LCaption}" FontSize="12"
+                       TextColor="{StaticResource TextTertiaryBrush}"
+                       LineBreakMode="WordWrap"/>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Finish: full-width, min 50dp (PrimaryButton), sticky at bottom -->
+        <Button Grid.Row="2"
+                Text="{Binding GetStartedText}"
+                Style="{StaticResource PrimaryButton}"
+                Command="{Binding FinishCommand}"
+                Margin="0,16,0,8"
+                HorizontalOptions="Fill"
+                MinimumHeightRequest="50"
+                SemanticProperties.Description="{Binding GetStartedText}"/>
+    </Grid>
+</views:BaseContentPage>

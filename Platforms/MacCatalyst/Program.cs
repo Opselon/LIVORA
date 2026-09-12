@@ -1,6 +1,5 @@
-﻿using ObjCRuntime;
+using ObjCRuntime;
 using UIKit;
-
 namespace LIVORA
 {
     public class Program
