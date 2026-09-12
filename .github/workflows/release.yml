@@ -37,11 +37,13 @@ jobs:
       version_code: ${{ steps.ver.outputs.version_code }}
     steps:
       - id: ver
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
           else
-            VERSION="${{ github.event.inputs.version }}"
+            VERSION="$INPUT_VERSION"
             [ -z "$VERSION" ] && VERSION="99.0.0-rc.${GITHUB_RUN_NUMBER}"
           fi
           # Android versionCode must be an int: major*10000 + minor*100 + patch (prerelease -> run number)
@@ -242,6 +244,15 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Resolve tag name
+        id: tag
+        env:
+          REF: ${{ github.ref }}
+          RUN_TAG: ${{ github.ref_name }}
+          VER: ${{ needs.meta.outputs.version }}
+        run: |
+          if [[ "$REF" == refs/tags/v* ]]; then echo "tag=$RUN_TAG" >> "$GITHUB_OUTPUT"; else echo "tag=v$VER" >> "$GITHUB_OUTPUT"; fi
+
       - uses: actions/download-artifact@v4
         with:
           path: assets
@@ -256,9 +267,9 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || ('v' + needs.meta.outputs.version) }}
+          tag_name: ${{ steps.tag.outputs.tag }}
           name: LIVORA ${{ needs.meta.outputs.version }}
-          prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+          prerelease: ${{ github.ref_type != 'tag' }}
           generate_release_notes: true
           body: |
             ## LIVORA ${{ needs.meta.outputs.version }}
