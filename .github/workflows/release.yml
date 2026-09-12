@@ -1,11 +1,10 @@
 name: Release
 
 # Builds every deliverable a GitHub-hosted runner can produce:
-#   - Android: universal APK + AAB (installable; signed with repo keystore secret
-#     or an ephemeral dev keystore when not configured)
-#   - Windows: unpackaged self-contained win-x64 app (zip)
-#   - iOS: simulator .app (zip) + device .app (zip, UNSIGNED — no distribution
-#     cert in CI; honest label, not installable outside a dev signing pass)
+#   - Android: universal APK + AAB (signed with repo keystore secret, or an
+#     ephemeral dev keystore when not configured — labeled in the release body)
+#   - Windows: unpackaged self-contained win-x64 (zip)
+#   - iOS: simulator .app (zip) + best-effort device .app (zip, unsigned)
 #   - macOS Catalyst: .app bundle (zip, ad-hoc signed for local runs)
 # Then publishes them all to a GitHub Release.
 
@@ -34,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.ver.outputs.version }}
+      version_num: ${{ steps.ver.outputs.version_num }}
       version_code: ${{ steps.ver.outputs.version_code }}
     steps:
       - id: ver
@@ -46,46 +46,51 @@ jobs:
             VERSION="$INPUT_VERSION"
             [ -z "$VERSION" ] && VERSION="99.0.0-rc.${GITHUB_RUN_NUMBER}"
           fi
-          # Android versionCode must be an int: major*10000 + minor*100 + patch (prerelease -> run number)
-          CORE="${VERSION%%+*}"; CORE="${CORE%%-*}"
-          IFS='.' read -r MA MI PA <<< "$CORE"
+          # Numeric core for MSBuild version properties (no -rc/+hash suffixes)
+          NUM="${VERSION%%+*}"; NUM="${NUM%%-*}"
+          IFS='.' read -r MA MI PA <<< "$NUM"
           MA=${MA:-0}; MI=${MI:-0}; PA=${PA:-0}
           if [[ "$VERSION" == *-* ]]; then CODE="$((10000000 + GITHUB_RUN_NUMBER))"; else CODE="$(( MA*10000 + MI*100 + PA ))"; fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_num=$NUM" >> "$GITHUB_OUTPUT"
           echo "version_code=$CODE" >> "$GITHUB_OUTPUT"
-          echo "Releasing $VERSION (versionCode $CODE)"
+          echo "Releasing $VERSION (numeric $NUM, code $CODE)"
 
   android:
     name: Android (APK + AAB)
     needs: meta
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Install MAUI workloads
+        shell: bash
         run: dotnet workload install maui-android android
 
       - name: Prepare signing keystore
         shell: bash
+        env:
+          KS_B64: ${{ secrets.LIVORA_KEYSTORE_B64 }}
+          KS_SECRET_PASS: ${{ secrets.LIVORA_KEYSTORE_PASSWORD }}
         run: |
           mkdir -p "$RUNNER_TEMP/ks"
-          if [ -n "${{ secrets.LIVORA_KEYSTORE_B64 }}" ]; then
+          if [ -n "$KS_B64" ]; then
             echo "Using repo release keystore"
-            echo "${{ secrets.LIVORA_KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/ks/livora.jks"
-            echo "KS_PASS=${{ secrets.LIVORA_KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/ks/livora.jks"
+            echo "KS_PASS=$KS_SECRET_PASS" >> "$GITHUB_ENV"
           else
-            echo "No keystore secret configured -> generating EPHEMERAL dev keystore (artifacts are installable but NOT distribution-key signed)"
+            echo "No keystore secret configured -> generating EPHEMERAL dev keystore (installable, NOT distribution-key signed)"
             keytool -genkeypair -v -keystore "$RUNNER_TEMP/ks/livora.jks" \
               -storepass livora-dev -keypass livora-dev -alias livora \
               -keyalg RSA -keysize 2048 -validity 10000 \
@@ -95,31 +100,37 @@ jobs:
           echo "KS_PATH=$RUNNER_TEMP/ks/livora.jks" >> "$GITHUB_ENV"
 
       - name: Build APK (universal)
-        run: >
-          dotnet publish LIVORA.csproj -f net10.0-android -c Release
-          -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version }}
-          -p:ApplicationVersion=${{ needs.meta.outputs.version_code }}
-          -p:AndroidPackageFormat=apk
-          -p:AndroidKeyStore=true
-          -p:AndroidSigningKeyStore="$env:KS_PATH"
-          -p:AndroidSigningStorePass=$env:KS_PASS
-          -p:AndroidSigningKeyAlias=livora
-          -p:AndroidSigningKeyPass=$env:KS_PASS
-          -p:RuntimeIdentifiers=android-arm64;android-x64;android-x86
-          -o publish-android
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          dotnet publish LIVORA.csproj -f net10.0-android -c Release `
+            -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} `
+            -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} `
+            -p:AndroidPackageFormat=apk `
+            -p:AndroidKeyStore=true `
+            "-p:AndroidSigningKeyStore=$env:KS_PATH" `
+            "-p:AndroidSigningStorePass=$env:KS_PASS" `
+            -p:AndroidSigningKeyAlias=livora `
+            "-p:AndroidSigningKeyPass=$env:KS_PASS" `
+            "-p:RuntimeIdentifiers=android-arm64;android-x64;android-x86" `
+            -o publish-android
+          exit $LASTEXITCODE
 
       - name: Build AAB (Play Store upload bundle)
-        run: >
-          dotnet publish LIVORA.csproj -f net10.0-android -c Release
-          -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version }}
-          -p:ApplicationVersion=${{ needs.meta.outputs.version_code }}
-          -p:AndroidPackageFormat=aab
-          -p:AndroidKeyStore=true
-          -p:AndroidSigningKeyStore="$env:KS_PATH"
-          -p:AndroidSigningStorePass=$env:KS_PASS
-          -p:AndroidSigningKeyAlias=livora
-          -p:AndroidSigningKeyPass=$env:KS_PASS
-          -o publish-android-aab
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          dotnet publish LIVORA.csproj -f net10.0-android -c Release `
+            -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} `
+            -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} `
+            -p:AndroidPackageFormat=aab `
+            -p:AndroidKeyStore=true `
+            "-p:AndroidSigningKeyStore=$env:KS_PATH" `
+            "-p:AndroidSigningStorePass=$env:KS_PASS" `
+            -p:AndroidSigningKeyAlias=livora `
+            "-p:AndroidSigningKeyPass=$env:KS_PASS" `
+            -o publish-android-aab
+          exit $LASTEXITCODE
 
       - name: Collect artifacts
         shell: bash
@@ -127,8 +138,11 @@ jobs:
           mkdir -p out
           APK=$(find publish-android -name "*.apk" | head -1)
           AAB=$(find publish-android-aab -name "*.aab" | head -1)
+          [ -z "$APK" ] && { find . -name "*.apk" | head; exit 1; }
+          [ -z "$AAB" ] && { find . -name "*.aab" | head; exit 1; }
           cp "$APK" "out/LIVORA-${{ needs.meta.outputs.version }}.apk"
           cp "$AAB" "out/LIVORA-${{ needs.meta.outputs.version }}.aab"
+          ls -la out/
 
       - uses: actions/upload-artifact@v4
         with:
@@ -140,26 +154,29 @@ jobs:
     needs: meta
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
       - name: Install MAUI workloads
+        shell: bash
         run: dotnet workload install maui-windows
-      - name: Publish
-        run: >
-          dotnet publish LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release
-          -p:WindowsPackageType=None
-          -p:RuntimeIdentifier=win-x64
-          -p:SelfContained=true
-          -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version }}
-          -p:ApplicationVersion=${{ needs.meta.outputs.version_code }}
-          -o publish-windows
+      - name: Publish (framework-dependent win-x64)
+        shell: bash
+        run: |
+          set -o pipefail
+          dotnet publish LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release \
+            -p:WindowsPackageType=None \
+            -p:RuntimeIdentifier=win-x64 \
+            -p:SelfContained=false \
+            -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
+            -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
+            -o publish-windows 2>&1 | tail -n 60
       - name: Zip
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force out | Out-Null
-          Compress-Archive -Path publish-windows/* -DestinationPath "out/LIVORA-${{ needs.meta.outputs.version }}-win-x64.zip"
+          Compress-Archive -Path "publish-windows/*" -DestinationPath "out/LIVORA-${{ needs.meta.outputs.version }}-win-x64.zip" -Force
           Get-ChildItem out
       - uses: actions/upload-artifact@v4
         with:
@@ -169,39 +186,47 @@ jobs:
   ios:
     name: iOS (simulator + device .app)
     needs: meta
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
       - name: Install MAUI workloads
-        run: dotnet workload install maui-ios maui
-      - name: Show installed workloads
-        run: dotnet workload list
+        run: dotnet workload install maui
       - name: Build (simulator)
-        run: >
-          dotnet build LIVORA.csproj -f net10.0-ios -c Release
-          -p:RuntimeIdentifier=iossimulator-arm64
-          -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version }}
-          -p:ApplicationVersion=${{ needs.meta.outputs.version_code }}
-      - name: Build (device, unsigned)
-        run: >
-          dotnet build LIVORA.csproj -f net10.0-ios -c Release
-          -p:RuntimeIdentifier=ios-arm64
-          -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version }}
-          -p:ApplicationVersion=${{ needs.meta.outputs.version_code }}
+        run: |
+          set -o pipefail
+          dotnet build LIVORA.csproj -f net10.0-ios -c Release \
+            -p:RuntimeIdentifier=iossimulator-arm64 \
+            -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
+            -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
+            2>&1 | tail -n 60
+      - name: Build (device, ad-hoc signed)  # best-effort: no distribution cert on hosted runners
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          dotnet build LIVORA.csproj -f net10.0-ios -c Release \
+            -p:RuntimeIdentifier=ios-arm64 \
+            -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
+            -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
+            -p:AutomaticSigning=false \
+            -p:CodesignKey="-" \
+            -p:CodesignProvision="" \
+            -p:BuildIpa=false \
+            2>&1 | tee device-build.log | tail -n 60
       - name: Package payloads
         shell: bash
         run: |
           mkdir -p out
-          SIM=$(find bin obj -path "*iossimulator-arm64*" -name "*.app" -type d 2>/dev/null | head -1)
-          DEV=$(find bin obj -path "*/ios-arm64/*" -name "*.app" -type d 2>/dev/null | head -1)
-          [ -n "$SIM" ] && (cd "$(dirname "$SIM")" && zip -qr "$GITHUB_WORKSPACE/out/LIVORA-${{ needs.meta.outputs.version }}-ios-simulator.app.zip" "$(basename "$SIM")")
-          [ -n "$DEV" ] && (cd "$(dirname "$DEV")" && zip -qr "$GITHUB_WORKSPACE/out/LIVORA-${{ needs.meta.outputs.version }}-ios-device-unsigned.app.zip" "$(basename "$DEV")")
-          # Fail loudly if neither .app materialized
+          SIM=$(find bin obj -path "*iossimulator*" -name "*.app" -type d 2>/dev/null | grep -v "\.dSYM" | head -1)
+          DEV=$(find bin obj -path "*ios-arm64*" -name "*.app" -type d 2>/dev/null | grep -v "iossimulator\|\.dSYM" | head -1)
+          echo "SIM=$SIM DEV=$DEV"
+          [ -z "$SIM" ] && { echo "no iOS simulator .app payload found (device build may have produced one)"; }
+          [ -z "$SIM" ] && [ -z "$DEV" ] && { find . -maxdepth 6 -name "*.app" -type d | head -20; exit 1; }
+          if [ -n "$SIM" ]; then (cd "$(dirname "$SIM")" && zip -qr "$GITHUB_WORKSPACE/out/LIVORA-${{ needs.meta.outputs.version }}-ios-simulator.app.zip" "$(basename "$SIM")"); fi
+          if [ -n "$DEV" ]; then (cd "$(dirname "$DEV")" && zip -qr "$GITHUB_WORKSPACE/out/LIVORA-${{ needs.meta.outputs.version }}-ios-device-unsigned.app.zip" "$(basename "$DEV")"); fi
           ls -la out/
-          [ "$(ls out/ | wc -l)" -ge 1 ] || { echo "no iOS .app payload found"; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
           name: ios
@@ -210,29 +235,34 @@ jobs:
   macos:
     name: Mac Catalyst (.app)
     needs: meta
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
       - name: Install MAUI workloads
-        run: dotnet workload install maui-maccatalyst maui
+        run: dotnet workload install maui
+      - name: Show workloads
+        run: dotnet workload list
       - name: Publish
-        run: >
-          dotnet publish LIVORA.csproj -f net10.0-maccatalyst -c Release
-          -p:RuntimeIdentifier=maccatalyst-arm64
-          -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version }}
-          -p:ApplicationVersion=${{ needs.meta.outputs.version_code }}
-          -o publish-mac
+        run: |
+          set -o pipefail
+          dotnet publish LIVORA.csproj -f net10.0-maccatalyst -c Release \
+            -p:RuntimeIdentifier=maccatalyst-arm64 \
+            -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
+            -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
+            -o publish-mac 2>&1 | tail -n 60
       - name: Ad-hoc sign + zip
         shell: bash
         run: |
-          APP=$(find publish-mac -name "*.app" -type d | head -1)
-          [ -z "$APP" ] && { echo "no .app found"; exit 1; }
+          APP=$(find bin publish-mac -name "*.app" -type d 2>/dev/null | grep -m1 "maccatalyst" || true)
+          [ -z "$APP" ] && APP=$(find bin publish-mac -name "*.app" -type d 2>/dev/null | head -1)
+          [ -z "$APP" ] && { echo "no .app found; tree was:"; find . -maxdepth 4 -name "*.app" -o -maxdepth 4 -name "LIVORA*" | head -30; exit 1; }
+          echo "payload: $APP"
           codesign --force --deep --sign - "$APP" || echo "ad-hoc codesign skipped"
           mkdir -p out
-          zip -qry "out/LIVORA-${{ needs.meta.outputs.version }}-mac-catalyst.app.zip" "$APP"
+          (cd "$(dirname "$APP")" && zip -qry "$GITHUB_WORKSPACE/out/LIVORA-${{ needs.meta.outputs.version }}-mac-catalyst.app.zip" "$(basename "$APP")")
           ls -la out/
       - uses: actions/upload-artifact@v4
         with:
@@ -258,7 +288,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: assets
-          merge-multiple: false
+          merge-multiple: true
 
       - name: Flatten
         run: |
@@ -278,9 +308,9 @@ jobs:
 
             | Platform | File | Status |
             |---|---|---|
-            | Android | `*.apk` | signed (dev or repo keystore) · installable |
+            | Android | `*.apk` | signed (repo or ephemeral dev keystore) · installable |
             | Android | `*.aab` | Play Store upload bundle |
-            | Windows | `*-win-x64.zip` | unpackaged self-contained app |
+            | Windows | `*-win-x64.zip` | unpackaged app (needs .NET 10 Desktop Runtime installed) |
             | iOS simulator | `*-ios-simulator.app.zip` | runs on Apple-Silicon simulator |
             | iOS device | `*-ios-device-unsigned.app.zip` | UNSIGNED — needs a distribution cert + profile to install |
             | macOS | `*-mac-catalyst.app.zip` | ad-hoc signed, local runs only |
