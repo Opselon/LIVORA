@@ -26,37 +26,23 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup .NET (global.json-pinned SDK)
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-
       - name: Install MAUI workloads
         run: dotnet workload install maui-windows
-
-      - name: Restore
-        run: dotnet restore LIVORA.csproj -f net10.0-windows10.0.19041.0
-
-      - name: Build app (Windows)
-        run: dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release --no-restore
+      - name: Build app (Windows, Release)
+        run: dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release
 
   android-build:
     name: Build (net10.0-android)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup .NET (global.json-pinned SDK)
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-
       - name: Install MAUI workloads
-        run: dotnet workload install maui android
-
-      - name: Restore
-        run: dotnet restore LIVORA.csproj -f net10.0-android
-
-      - name: Build app (Android)
-        run: dotnet build LIVORA.csproj -f net10.0-android -c Release --no-restore
+        run: dotnet workload install maui-android android
+      - name: Build app (Android, Release)
+        run: dotnet build LIVORA.csproj -f net10.0-android -c Release
