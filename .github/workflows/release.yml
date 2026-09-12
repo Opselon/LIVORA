@@ -112,7 +112,7 @@ jobs:
             "-p:AndroidSigningStorePass=$env:KS_PASS" `
             -p:AndroidSigningKeyAlias=livora `
             "-p:AndroidSigningKeyPass=$env:KS_PASS" `
-            "-p:RuntimeIdentifiers=android-arm64;android-x64;android-x86" `
+            '-p:RuntimeIdentifiers=android-arm64;android-x64;android-x86' `
             -o publish-android
           exit $LASTEXITCODE
 
@@ -186,7 +186,7 @@ jobs:
   ios:
     name: iOS (simulator + device .app)
     needs: meta
-    runs-on: macos-26
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v5
@@ -235,7 +235,7 @@ jobs:
   macos:
     name: Mac Catalyst (.app)
     needs: meta
-    runs-on: macos-26
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v5
