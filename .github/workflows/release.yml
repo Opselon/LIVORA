@@ -112,7 +112,7 @@ jobs:
             "-p:AndroidSigningStorePass=$env:KS_PASS" `
             -p:AndroidSigningKeyAlias=livora `
             "-p:AndroidSigningKeyPass=$env:KS_PASS" `
-            '-p:RuntimeIdentifiers=android-arm64;android-x64;android-x86' `
+            -p:AndroidUniversalRid=true `
             -o publish-android
           exit $LASTEXITCODE
 
@@ -241,29 +241,97 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
+      # Only the platform-specific id: bare `maui` is the legacy meta-workload
+      # (pulls android/ios/tvos packs too and can mix SDK versions). Fail loudly —
+      # a silent workload-install failure later shows up as a cryptic build error.
       - name: Install MAUI workloads
-        run: dotnet workload install maui
-      - name: Show workloads
-        run: dotnet workload list
-      - name: Publish
-        run: |
-          set -o pipefail
-          dotnet publish LIVORA.csproj -f net10.0-maccatalyst -c Release \
-            -p:RuntimeIdentifier=maccatalyst-arm64 \
-            -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
-            -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
-            -o publish-mac 2>&1 | tail -n 60
-      - name: Ad-hoc sign + zip
         shell: bash
         run: |
-          APP=$(find bin publish-mac -name "*.app" -type d 2>/dev/null | grep -m1 "maccatalyst" || true)
-          [ -z "$APP" ] && APP=$(find bin publish-mac -name "*.app" -type d 2>/dev/null | head -1)
-          [ -z "$APP" ] && { echo "no .app found; tree was:"; find . -maxdepth 4 -name "*.app" -o -maxdepth 4 -name "LIVORA*" | head -30; exit 1; }
-          echo "payload: $APP"
-          codesign --force --deep --sign - "$APP" || echo "ad-hoc codesign skipped"
-          mkdir -p out
-          (cd "$(dirname "$APP")" && zip -qry "$GITHUB_WORKSPACE/out/LIVORA-${{ needs.meta.outputs.version }}-mac-catalyst.app.zip" "$(basename "$APP")")
-          ls -la out/
+          set -o pipefail
+          if ! dotnet workload install maui-maccatalyst 2>&1 | tee workload-install.log | tail -n 40; then
+            echo "::error::'dotnet workload install maui-maccatalyst' failed — Mac Catalyst SDK/AOT packs are not installed"
+            exit 1
+          fi
+      - name: Show workloads
+        shell: bash
+        run: |
+          dotnet workload list 2>&1 | tee workload-list.log || true
+          grep -qi "maccatalyst" workload-list.log || echo "::warning::'dotnet workload list' does not mention maccatalyst — check the install step above"
+      - name: Publish
+        shell: bash
+        run: |
+          # No -o: for Apple platforms the .app bundle is built in place under
+          # bin/Release/<tfm>/<rid>/LIVORA.app; a -o publish dir only receives the
+          # copied payloads plus the installer .pkg, which is what hid the bundle
+          # from the old `find publish-mac -name "*.app"`. CreatePackage=false skips
+          # the ~100s installer .pkg we don't ship. Full output kept in publish-mac.log.
+          # '|| rc=$?' guards the failing exit code so it survives 'set -e' (Actions bash)
+          # and still gives us the real MSBuild code instead of a silent abort.
+          rc=0
+          dotnet publish LIVORA.csproj -f net10.0-maccatalyst -c Release \
+            -p:RuntimeIdentifier=maccatalyst-arm64 \
+            -p:CreatePackage=false \
+            -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
+            -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
+            > publish-mac.log 2>&1 || rc=$?
+          tail -n 60 publish-mac.log
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::'dotnet publish -f net10.0-maccatalyst' failed (exit $rc) — full log: publish-mac.log"
+            exit "$rc"
+          fi
+      - name: Show publish tree
+        shell: bash
+        run: |
+          # Informational only — never fail the job on a missing candidate dir.
+          { find bin publish-mac -maxdepth 4 -name "*.app" -o -maxdepth 4 -name "*.dll"; } 2>/dev/null | head -40 || true
+          echo "--- *.app anywhere ---"
+          find . -maxdepth 8 -type d -name "*.app" 2>/dev/null | grep -v "\.dSYM" | head -20 || true
+      - name: Ad-hoc sign + zip
+        shell: bash
+        env:
+          VER: ${{ needs.meta.outputs.version }}
+        run: |
+          set -uo pipefail
+          # Space-separated (deliberately unquoted below) so this stays bash 3.2-safe:
+          # the runner's /bin/bash is 3.2, where empty arrays trip 'set -u'.
+          roots=""
+          for r in bin publish-mac; do [ -d "$r" ] && roots="$roots $r"; done
+          roots=$(echo $roots)
+          [ -z "$roots" ] && { echo "::error::no build output tree (bin/ or publish-mac/) after publish"; exit 1; }
+          # Prefer a bundle under a maccatalyst path, else any .app we found.
+          APP=$(find $roots -type d -name "*.app" 2>/dev/null | grep -v "\.dSYM" | grep -i "maccatalyst" | head -n 1 || true)
+          if [ -z "$APP" ]; then APP=$(find $roots -type d -name "*.app" 2>/dev/null | grep -v "\.dSYM" | head -n 1 || true); fi
+          if [ -z "$APP" ]; then
+            echo "::error::no .app bundle found under $roots"
+            find . -maxdepth 6 -type d -name "*.app" 2>/dev/null | head -20 || true
+            tail -n 40 publish-mac.log 2>/dev/null || true
+            exit 1
+          fi
+          APPDIR=$(cd "$(dirname "$APP")" && pwd -P)
+          APPNAME=$(basename "$APP")
+          echo "payload: $APP (dir: $APPDIR, bundle: $APPNAME)"
+          [ -f "$APP/Contents/Info.plist" ] || echo "::warning::$APPNAME has no Contents/Info.plist — unexpected bundle layout"
+          [ -d "$APP/Contents/MacOS" ] || echo "::warning::$APPNAME has no Contents/MacOS — unexpected bundle layout"
+          if codesign --force --deep --sign - "$APP" 2>codesign.log; then
+            codesign --verify --deep --verbose=2 "$APP" 2>&1 | tail -n 5 || true
+            echo "ad-hoc signed"
+          else
+            echo "::warning::ad-hoc codesign failed — artifact ships unsigned:"
+            tail -n 10 codesign.log || true
+          fi
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          ZIP="$GITHUB_WORKSPACE/out/LIVORA-$VER-mac-catalyst.app.zip"
+          rm -f "$ZIP"
+          # zip from the bundle's parent so the archive root IS LIVORA.app/...
+          # -y keeps the bundle's symlinks as symlinks (breaks the layout otherwise)
+          ( cd "$APPDIR" && zip -qry "$ZIP" "$APPNAME" )
+          [ -s "$ZIP" ] || { echo "::error::zip was not created or is empty: $ZIP"; exit 1; }
+          # sanity: the archive's root must be the bundle itself (LIVORA.app/...)
+          unzip -Z1 "$ZIP" > ziplist.txt 2>/dev/null || { echo "::error::cannot list $ZIP"; exit 1; }
+          head -5 ziplist.txt
+          grep -Eq "^$APPNAME/?$" ziplist.txt || {
+            echo "::error::zip root does not contain $APPNAME (listing above)"; exit 1; }
+          ls -la "$GITHUB_WORKSPACE/out/"
       - uses: actions/upload-artifact@v4
         with:
           name: macos
