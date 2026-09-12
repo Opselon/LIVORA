@@ -176,7 +176,9 @@ jobs:
         with:
           global-json-file: global.json
       - name: Install MAUI workloads
-        run: sudo dotnet workload install maui-ios
+        run: dotnet workload install maui-ios maui
+      - name: Show installed workloads
+        run: dotnet workload list
       - name: Build (simulator)
         run: >
           dotnet build LIVORA.csproj -f net10.0-ios -c Release
@@ -215,7 +217,7 @@ jobs:
         with:
           global-json-file: global.json
       - name: Install MAUI workloads
-        run: sudo dotnet workload install maui-maccatalyst
+        run: dotnet workload install maui-maccatalyst maui
       - name: Publish
         run: >
           dotnet publish LIVORA.csproj -f net10.0-maccatalyst -c Release
