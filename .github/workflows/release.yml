@@ -275,6 +275,7 @@ jobs:
           # (an unguarded failure would abort the step before the error annotation).
           rc=0
           dotnet publish LIVORA.csproj -f net10.0-maccatalyst -c Release \
+            -p:TargetFrameworks=net10.0-maccatalyst \
             -p:RuntimeIdentifier=maccatalyst-arm64 \
             -p:CreatePackage=false \
             -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
