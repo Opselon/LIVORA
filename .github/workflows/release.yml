@@ -161,22 +161,26 @@ jobs:
       - name: Install MAUI workloads
         shell: bash
         run: dotnet workload install maui-windows
-      - name: Publish (framework-dependent win-x64)
+      - name: Build unpackaged app (win-x64)
         shell: bash
         run: |
+          # TargetFrameworks override: without it the implicit multi-TFM restore
+          # evaluates the android inner build too, which demands Mono runtime packs
+          # for whatever RID is global on the CLI (the NU1102 this replaced).
           set -o pipefail
-          dotnet publish LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release \
-            -p:WindowsPackageType=None \
-            -p:RuntimeIdentifier=win-x64 \
-            -p:SelfContained=false \
+          dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release \
+            -p:TargetFrameworks=net10.0-windows10.0.19041.0 \
             -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
             -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
-            -o publish-windows 2>&1 | tail -n 60
+            2>&1 | tail -n 60
       - name: Zip
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force out | Out-Null
-          Compress-Archive -Path "publish-windows/*" -DestinationPath "out/LIVORA-${{ needs.meta.outputs.version }}-win-x64.zip" -Force
+          $dir = Get-ChildItem "bin/Release" -Directory | Where-Object Name -like "net10.0-windows*" | Select-Object -First 1
+          $payload = Join-Path $dir.FullName "win-x64"
+          if (-not (Test-Path "$payload/LIVORA.exe")) { Write-Error "no LIVORA.exe under $payload"; exit 1 }
+          Compress-Archive -Path "$payload/*" -DestinationPath "out/LIVORA-${{ needs.meta.outputs.version }}-win-x64.zip" -Force
           Get-ChildItem out
       - uses: actions/upload-artifact@v4
         with:
@@ -198,6 +202,7 @@ jobs:
         run: |
           set -o pipefail
           dotnet build LIVORA.csproj -f net10.0-ios -c Release \
+            -p:TargetFrameworks=net10.0-ios \
             -p:RuntimeIdentifier=iossimulator-arm64 \
             -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
             -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
@@ -207,6 +212,7 @@ jobs:
         run: |
           set -o pipefail
           dotnet build LIVORA.csproj -f net10.0-ios -c Release \
+            -p:TargetFrameworks=net10.0-ios \
             -p:RuntimeIdentifier=ios-arm64 \
             -p:ApplicationDisplayVersion=${{ needs.meta.outputs.version_num }} \
             -p:ApplicationVersion=${{ needs.meta.outputs.version_code }} \
@@ -264,9 +270,9 @@ jobs:
           # bin/Release/<tfm>/<rid>/LIVORA.app; a -o publish dir only receives the
           # copied payloads plus the installer .pkg, which is what hid the bundle
           # from the old `find publish-mac -name "*.app"`. CreatePackage=false skips
-          # the ~100s installer .pkg we don't ship. Full output kept in publish-mac.log.
-          # '|| rc=$?' guards the failing exit code so it survives 'set -e' (Actions bash)
-          # and still gives us the real MSBuild code instead of a silent abort.
+          # the ~85s installer .pkg we don't ship.
+          # '|| rc=$?' keeps the real MSBuild exit code under Actions' 'bash -e'
+          # (an unguarded failure would abort the step before the error annotation).
           rc=0
           dotnet publish LIVORA.csproj -f net10.0-maccatalyst -c Release \
             -p:RuntimeIdentifier=maccatalyst-arm64 \
@@ -276,14 +282,15 @@ jobs:
             > publish-mac.log 2>&1 || rc=$?
           tail -n 60 publish-mac.log
           if [ "$rc" -ne 0 ]; then
-            echo "::error::'dotnet publish -f net10.0-maccatalyst' failed (exit $rc) — full log: publish-mac.log"
+            echo "::error::'dotnet publish -f net10.0-maccatalyst' failed (exit $rc) — full log in publish-mac.log above"
             exit "$rc"
           fi
       - name: Show publish tree
         shell: bash
         run: |
           # Informational only — never fail the job on a missing candidate dir.
-          { find bin publish-mac -maxdepth 4 -name "*.app" -o -maxdepth 4 -name "*.dll"; } 2>/dev/null | head -40 || true
+          # (Parenthesized -o so BSD/macOS find doesn't choke on the second -maxdepth.)
+          find bin publish-mac -maxdepth 4 \( -name "*.app" -o -name "*.dll" \) 2>/dev/null | head -40 || true
           echo "--- *.app anywhere ---"
           find . -maxdepth 8 -type d -name "*.app" 2>/dev/null | grep -v "\.dSYM" | head -20 || true
       - name: Ad-hoc sign + zip
