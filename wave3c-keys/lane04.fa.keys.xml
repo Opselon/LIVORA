@@ -1,0 +1,38 @@
+<root>
+  <!-- Wave 3c lane 04 — Persian keys. Association wording only (همبستگی/در کنار هم),
+       association wording only, never a diagnosis. -->
+
+  <!-- LateSleepRecurring -->
+  <data name="pattern.observed.late-sleep" xml:space="preserve"><value>شب‌های دیرهنگام تکرار می‌شوند</value></data>
+  <data name="pattern.evidence.late-nights" xml:space="preserve"><value>{0} شب از {1} شب اخیر، بیش از {2} دیرتر از ساعت خواب همیشگی شما</value></data>
+
+  <!-- WeekdayActivityDip -->
+  <data name="pattern.observed.weekday-dip" xml:space="preserve"><value>یکی از روزهای هفته کم‌تحرک‌تر است</value></data>
+  <data name="pattern.evidence.weekday-dip" xml:space="preserve"><value>روز {0}: حدود {1}٪ پایین‌تر از روزهای دیگر شما (در {2} روز مشاهده شد)</value></data>
+
+  <!-- FocusAfterPoorSleep -->
+  <data name="pattern.observed.poor-sleep-focus" xml:space="preserve"><value>کم‌خوابی و تمرکز پایین، کنار هم دیده می‌شوند</value></data>
+  <data name="pattern.evidence.poor-sleep-focus" xml:space="preserve"><value>پس از {0}٪ از {1} شبِ کم‌خواب، تمرکز روز بعد پایین‌تر از میانگین خودتان بود ({2} مورد از {1})</value></data>
+
+  <!-- HabitFailureWindow -->
+  <data name="pattern.observed.habit-window" xml:space="preserve"><value>انجام‌ندادنِ عادت در یک روزِ هفته جمع می‌شود</value></data>
+  <data name="pattern.evidence.habit-window" xml:space="preserve"><value>{1} بار از {2} بارِ برنامه‌ریزی‌شده در روز {0} انجام نشد ({3}٪ از آن روزها)</value></data>
+
+  <!-- WorkoutConsistency -->
+  <data name="pattern.observed.workout-trend" xml:space="preserve"><value>روزهای فعال شما در حال تغییر است</value></data>
+  <data name="pattern.evidence.workout-trend" xml:space="preserve"><value>در طول {0} هفته: {1} روز با بیش از ۳۰ دقیقه فعالیت</value></data>
+
+  <!-- GoalStagnation -->
+  <data name="pattern.observed.goal-stagnant" xml:space="preserve"><value>یک هدف ثابت مانده است</value></data>
+  <data name="pattern.evidence.goal-stagnant" xml:space="preserve"><value>هیچ تغییری در پیشرفت طی {0} روز، با {1} روز تا ددلاین</value></data>
+
+  <!-- RecoveryActivityCoupling -->
+  <data name="pattern.observed.recovery-activity" xml:space="preserve"><value>بازیابی و فعالیت روزِ قبل با هم حرکت می‌کنند</value></data>
+  <data name="pattern.evidence.recovery-activity" xml:space="preserve"><value>همبستگی r = {0} در {1} جفت‌روز (فقط هم‌رخدادی)</value></data>
+
+  <!-- Baseline / confidence vocabulary -->
+  <data name="State.Confidence.Basis" xml:space="preserve"><value>بر پایهٔ {0} فیلد کامل · اطمینانِ خط‌مبنای {1} · قدیمی {2} روز</value></data>
+  <data name="State.Baseline.Gated.Short" xml:space="preserve"><value>تاریخچهٔ تمیزِ کافی هنوز نیست ({0} روز دیده شد — به {1} روز نیاز است)</value></data>
+  <data name="State.Baseline.WindowUsed" xml:space="preserve"><value>بازهٔ {0} روزه · {1} نمونهٔ تمیز</value></data>
+  <data name="Pattern.Insufficient.Note" xml:space="preserve"><value>هنوز در حال یادگیری — {0} از ۷ الگو دادهٔ کافی دارد</value></data>
+</root>

@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.AiSettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:AiSettingsViewModel"
+    views:BaseContentPage.MaxContentWidth="980"
+    views:BaseContentPage.IsLoading="{Binding IsBusy}">
+
+    <!-- Wave 3c lane 07 — AI settings. Everything on this page either reads a real service
+         through ServiceHelper (honest "not available" when unregistered) or says so. The
+         gateway card renders exactly what GetPublicStatusAsync reported; "Verified" appears
+         only with a real LastVerifiedUtc; the cloud card is read-only status, no fake form.
+         Tokens only; brushes only on Border props; Start/End everywhere for RTL mirroring.
+         NOTE: comments must be XML comments — C-style brace comments break MAUIX2002 (fa9450f). -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <comp:NotConverter x:Key="Not"/>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+            <Style x:Key="HintLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="4"/>
+            </Style>
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+                <Setter Property="Padding" Value="9,4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <VerticalStackLayout x:Name="Root" Spacing="{StaticResource CardSpacing}">
+
+            <!-- Header + back -->
+            <Border Style="{StaticResource Card}" x:Name="HeaderCard">
+                <Grid ColumnDefinitions="4,*,Auto" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                    <Label Grid.Column="1" Text="{Binding Title}" Style="{StaticResource LDisplay}"
+                           LineBreakMode="WordWrap" MaxLines="2" VerticalOptions="Center"
+                           SemanticProperties.HeadingLevel="Level1"/>
+                    <Button Grid.Column="2" Text="{Binding BackText}" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding BackCommand}" Padding="14,8" FontSize="13"
+                            MinimumHeightRequest="44" VerticalOptions="Center"
+                            SemanticProperties.Description="{Binding BackText}"/>
+                </Grid>
+            </Border>
+
+            <!-- ============ Gateway status ============ -->
+            <Border Style="{StaticResource Card}" x:Name="StatusCard">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                        <Label Grid.Column="1" Text="{Binding StatusHeader}"
+                               Style="{StaticResource SectionHeader}" FontSize="17"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                    </Grid>
+                    <Label Text="{Binding AdvancedNote}" Style="{StaticResource HintLabel}"/>
+
+                    <!-- Honest not-available row when lane 02's service is not registered -->
+                    <Label Text="{Binding NotAvailable}" Style="{StaticResource HintLabel}"
+                           IsVisible="{Binding NoGatewayNoteVisible}" MaxLines="2"/>
+
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasGatewayService}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Border Grid.Column="0" Style="{StaticResource ChipNeutral}"
+                                    IsVisible="{Binding ConfiguredChipVisible}">
+                                <Label Text="{Binding ConfiguredText}" Style="{StaticResource ChipLabel}"
+                                       FontAttributes="Bold"/>
+                            </Border>
+                            <Label Grid.Column="1" Text="{Binding VerificationText}"
+                                   Style="{StaticResource HintLabel}" VerticalOptions="Center"
+                                   MaxLines="3"/>
+                        </Grid>
+
+                        <!-- model + key source: machine tag verbatim, source mapped to a key -->
+                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                            <Border Grid.Column="0" Style="{StaticResource ChipNeutral}">
+                                <Label Text="{Binding ModelText}" Style="{StaticResource ChipLabel}"
+                                       FontAttributes="Bold"/>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource ChipCaution}"
+                                    IsVisible="{Binding IsInsecureTransport}">
+                                <Label Text="{localize:Tr AiSettings.Status.InsecureChip}"
+                                       Style="{StaticResource ChipLabel}" FontAttributes="Bold"/>
+                            </Border>
+                            <Label Grid.Column="3" Text="{Binding KeySourceText}"
+                                   Style="{StaticResource HintLabel}" VerticalOptions="Center"
+                                   HorizontalTextAlignment="End" MaxLines="2"/>
+                        </Grid>
+
+                        <!-- Enable switch: real SetEnabledAsync behind it -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" MinimumHeightRequest="44">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                <Label Text="{Binding EnableLabel}" Style="{StaticResource LSubheading}"
+                                       FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                                       SemanticProperties.HeadingLevel="Level3"/>
+                                <Label Text="{Binding EnableNote}" Style="{StaticResource HintLabel}"/>
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" Style="{StaticResource SwitchStyle}"
+                                    IsToggled="{Binding Enabled}" HorizontalOptions="End"
+                                    IsVisible="{Binding HasStatus}"
+                                    SemanticProperties.Description="{Binding EnableLabel}"/>
+                        </Grid>
+
+                        <!-- Test connection: button only when a tester is registered -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="{Binding TestUnavailableNote}"
+                                   Style="{StaticResource HintLabel}" VerticalOptions="Center"
+                                   IsVisible="{Binding TestUnavailableVisible}" MaxLines="3"/>
+                            <Button Grid.Column="1" Text="{Binding TestConnectionLabel}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding TestConnectionCommand}" FontSize="13"
+                                    Padding="16,8" MinimumHeightRequest="44" HorizontalOptions="End"
+                                    IsVisible="{Binding TestButtonVisible}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    SemanticProperties.Description="{Binding TestConnectionLabel}"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============ Insecure transport warning (amber, only when true) ============ -->
+            <Border Style="{StaticResource Card}" Background="{StaticResource CautionSoftBrush}"
+                    StrokeThickness="0" x:Name="InsecureCard"
+                    IsVisible="{Binding IsInsecureTransport}">
+                <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource Caution}"
+                             CornerRadius="2" VerticalOptions="Fill"/>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{localize:Tr AiSettings.Insecure.Title}"
+                               Style="{StaticResource LSubheading}" FontSize="15"
+                               TextColor="{AppThemeBinding Light={StaticResource CautionText}, Dark={StaticResource Caution}}"
+                               LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <Label Text="{localize:Tr AiSettings.Insecure.Body}"
+                               Style="{StaticResource LBody}" FontSize="13.5"
+                               LineBreakMode="WordWrap"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- ============ User key override ============ -->
+            <Border Style="{StaticResource Card}" x:Name="KeyCard"
+                    IsVisible="{Binding KeyActionsVisible}">
+                <VerticalStackLayout Spacing="10">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding KeyHeader}" Style="{StaticResource LSubheading}"
+                               FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Label Text="{Binding KeyNote}" Style="{StaticResource HintLabel}"/>
+                    </VerticalStackLayout>
+                    <Entry Text="{Binding KeyDraft}" Style="{StaticResource InputField}"
+                           IsPassword="True" Placeholder="{Binding KeyPlaceholder}"
+                           MinimumHeightRequest="44"
+                           SemanticProperties.Description="{Binding KeyHeader}"/>
+                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" HorizontalOptions="Start">
+                        <Button Grid.Column="0" Text="{Binding KeySaveLabel}"
+                                Style="{StaticResource PrimaryButton}" Command="{Binding SaveKeyCommand}"
+                                FontSize="13" Padding="16,8" MinimumHeightRequest="44"
+                                IsEnabled="{Binding IsNotBusy}"
+                                SemanticProperties.Description="{Binding KeySaveLabel}"/>
+                        <Button Grid.Column="1" Text="{Binding KeyClearLabel}"
+                                Style="{StaticResource GhostButton}" Command="{Binding ClearKeyCommand}"
+                                FontSize="13" Padding="16,8" MinimumHeightRequest="44"
+                                IsEnabled="{Binding IsNotBusy}"
+                                SemanticProperties.Description="{Binding KeyClearLabel}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============ Consent rows (three-state) ============ -->
+            <Border Style="{StaticResource Card}" x:Name="ConsentCard">
+                <VerticalStackLayout Spacing="10">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding ConsentHeader}" Style="{StaticResource LSubheading}"
+                               FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Label Text="{Binding ConsentNote}" Style="{StaticResource HintLabel}"/>
+                        <Label Text="{Binding ConsentUnavailableNote}" Style="{StaticResource HintLabel}"
+                               IsVisible="{Binding HasConsentService, Converter={StaticResource Not}}"/>
+                    </VerticalStackLayout>
+
+                    <!-- Consent: a fixed four-row set (not a list). Full-path compiled bindings on
+                         named row accessors — no index paths, no DataTemplate. Three-state: the
+                         amber "never asked" sub-label sits under the switch until the user records
+                         an explicit Granted/Denied decision (Untouched behaves as denied). -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" MinimumHeightRequest="44">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding AiProcessingRow.Title}" Style="{StaticResource LBody}"
+                                   FontAttributes="Bold" FontSize="14" LineBreakMode="WordWrap"
+                                   MaxLines="2"/>
+                            <Label Text="{Binding AiProcessingRow.Note}" Style="{StaticResource HintLabel}"/>
+                            <Label Text="{Binding AiProcessingRow.UntouchedLabel}" Style="{StaticResource HintLabel}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Caution}, Dark={StaticResource CautionDark}}"
+                                   IsVisible="{Binding AiProcessingRow.ShowUntouchedLabel}" MaxLines="2"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" Style="{StaticResource SwitchStyle}"
+                                IsToggled="{Binding AiProcessingRow.IsToggled}" HorizontalOptions="End"
+                                IsVisible="{Binding HasConsentService}"
+                                SemanticProperties.Description="{Binding AiProcessingRow.Title}"/>
+                    </Grid>
+                    <BoxView HeightRequest="1" Color="{StaticResource Hairline}"/>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" MinimumHeightRequest="44">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding HealthDataRow.Title}" Style="{StaticResource LBody}"
+                                   FontAttributes="Bold" FontSize="14" LineBreakMode="WordWrap"
+                                   MaxLines="2"/>
+                            <Label Text="{Binding HealthDataRow.Note}" Style="{StaticResource HintLabel}"/>
+                            <Label Text="{Binding HealthDataRow.UntouchedLabel}" Style="{StaticResource HintLabel}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Caution}, Dark={StaticResource CautionDark}}"
+                                   IsVisible="{Binding HealthDataRow.ShowUntouchedLabel}" MaxLines="2"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" Style="{StaticResource SwitchStyle}"
+                                IsToggled="{Binding HealthDataRow.IsToggled}" HorizontalOptions="End"
+                                IsVisible="{Binding HasConsentService}"
+                                SemanticProperties.Description="{Binding HealthDataRow.Title}"/>
+                    </Grid>
+                    <BoxView HeightRequest="1" Color="{StaticResource Hairline}"/>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" MinimumHeightRequest="44">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding ActivityDataRow.Title}" Style="{StaticResource LBody}"
+                                   FontAttributes="Bold" FontSize="14" LineBreakMode="WordWrap"
+                                   MaxLines="2"/>
+                            <Label Text="{Binding ActivityDataRow.Note}" Style="{StaticResource HintLabel}"/>
+                            <Label Text="{Binding ActivityDataRow.UntouchedLabel}" Style="{StaticResource HintLabel}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Caution}, Dark={StaticResource CautionDark}}"
+                                   IsVisible="{Binding ActivityDataRow.ShowUntouchedLabel}" MaxLines="2"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" Style="{StaticResource SwitchStyle}"
+                                IsToggled="{Binding ActivityDataRow.IsToggled}" HorizontalOptions="End"
+                                IsVisible="{Binding HasConsentService}"
+                                SemanticProperties.Description="{Binding ActivityDataRow.Title}"/>
+                    </Grid>
+                    <BoxView HeightRequest="1" Color="{StaticResource Hairline}"/>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" MinimumHeightRequest="44">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding NotificationsRow.Title}" Style="{StaticResource LBody}"
+                                   FontAttributes="Bold" FontSize="14" LineBreakMode="WordWrap"
+                                   MaxLines="2"/>
+                            <Label Text="{Binding NotificationsRow.Note}" Style="{StaticResource HintLabel}"/>
+                            <Label Text="{Binding NotificationsRow.UntouchedLabel}" Style="{StaticResource HintLabel}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Caution}, Dark={StaticResource CautionDark}}"
+                                   IsVisible="{Binding NotificationsRow.ShowUntouchedLabel}" MaxLines="2"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" Style="{StaticResource SwitchStyle}"
+                                IsToggled="{Binding NotificationsRow.IsToggled}" HorizontalOptions="End"
+                                IsVisible="{Binding HasConsentService}"
+                                SemanticProperties.Description="{Binding NotificationsRow.Title}"/>
+                    </Grid>
+                                    </VerticalStackLayout>
+            </Border>
+
+            <!-- ============ Cloud account (read-only honest status) ============ -->
+            <Border Style="{StaticResource Card}" x:Name="CloudCard">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Label Grid.Column="0" Text="{Binding CloudHeader}"
+                               Style="{StaticResource LSubheading}" FontSize="15"
+                               VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Border Grid.Column="1" Style="{StaticResource ChipNeutral}">
+                            <Label Text="{Binding CloudStateText}" Style="{StaticResource ChipLabel}"
+                                   FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+                    <Label Text="{localize:Tr AiSettings.Cloud.Note}" Style="{StaticResource HintLabel}"
+                           MaxLines="4"/>
+                    <Label Text="{Binding CloudReasonText}" Style="{StaticResource HintLabel}"
+                           IsVisible="{Binding CloudReasonText, Converter={StaticResource IsNotEmpty}}"
+                           MaxLines="4"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <BoxView HeightRequest="12" Color="Transparent"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

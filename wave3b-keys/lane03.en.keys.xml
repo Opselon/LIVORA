@@ -1,0 +1,15 @@
+<!--
+  Wave 3b lane 03 (Activity & Workout) — English keys.
+
+  DELIBERATELY EMPTY. This lane is a pure foundation seam (source, aggregator, merger,
+  intensity model). It emits no user-facing prose and no new localization keys: every string
+  a future consumer will show already has a home —
+    - Activity label:            Health.ActiveMinutes
+    - Step label:                Health.Steps
+    - Estimated-energy wording:  Health.Load ("Activity estimate")
+    - Mock disclosure:           Profile.DataSource.Sample / Health.SourceMock / Privacy.Origin.Mock
+  The "+workout" provenance segment is a machine tag inside Provenance.SourceRecordId, never
+  display text (LANES-WAVE3B §0.6 exception). If lane 13 needs a workout-specific label when it
+  wires the UI, the Activity.Workout.* namespace is reserved here for it.
+-->
+<keys lane="03" language="en" count="0" />

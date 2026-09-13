@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wave 3c lane 07 key manifest — NOT a .resx (the SDK would double-embed it). The merge
+     driver appends these <data> entries into Resources/Localization/AppResources.resx after the
+     existing content; EN/FA keep identical key order. Reused existing keys (NOT re-emitted
+     here): Common.Back, Common.Save, Common.Delete, Common.Done, Common.Cancel, Common.Continue,
+     Common.NotAvailable. -->
+<root>
+  <data name="AiSettings.Title" xml:space="preserve"><value>AI assistant</value></data>
+  <data name="AiSettings.Status.Header" xml:space="preserve"><value>Gateway status</value></data>
+  <data name="AiSettings.AdvancedNote" xml:space="preserve"><value>This screen talks to the real gateway settings. Changes take effect immediately and only after the service confirms them.</value></data>
+  <data name="AiSettings.Status.Configured" xml:space="preserve"><value>Configured</value></data>
+  <data name="AiSettings.Status.NotConfigured" xml:space="preserve"><value>Not configured</value></data>
+  <data name="AiSettings.Status.VerifiedAt" xml:space="preserve"><value>Verified reachable at {0}, {1}</value></data>
+  <data name="AiSettings.Status.NotVerified" xml:space="preserve"><value>Not verified — this install has never seen a successful check</value></data>
+  <data name="AiSettings.KeySource.BuiltIn" xml:space="preserve"><value>Built-in (obfuscated)</value></data>
+  <data name="AiSettings.KeySource.User" xml:space="preserve"><value>Your own key</value></data>
+  <data name="AiSettings.KeySource.None" xml:space="preserve"><value>No key</value></data>
+  <data name="AiSettings.Enable" xml:space="preserve"><value>Use AI answers</value></data>
+  <data name="AiSettings.EnableNote" xml:space="preserve"><value>When off, every insight stays rule-based. AI also needs your processing consent below.</value></data>
+  <data name="AiSettings.TestConnection" xml:space="preserve"><value>Test connection</value></data>
+  <data name="AiSettings.TestUnavailableNote" xml:space="preserve"><value>No connection tester is registered in this build — the live probe has not been merged yet.</value></data>
+  <data name="AiSettings.Test.Ok" xml:space="preserve"><value>The gateway answered this check. Verification is now recorded.</value></data>
+  <data name="AiSettings.Test.Fail" xml:space="preserve"><value>The gateway did not answer this check. Nothing was verified.</value></data>
+  <data name="AiSettings.Key.Header" xml:space="preserve"><value>Your own API key</value></data>
+  <data name="AiSettings.Key.Note" xml:space="preserve"><value>Optional. A key you enter here replaces the built-in one and is stored encrypted on this device only. Save an empty box? Use “Back to built-in” instead.</value></data>
+  <data name="AiSettings.Key.Placeholder" xml:space="preserve"><value>Paste your key</value></data>
+  <data name="AiSettings.Key.Clear" xml:space="preserve"><value>Back to built-in</value></data>
+  <data name="AiSettings.Key.Saved" xml:space="preserve"><value>Your key was saved for this device.</value></data>
+  <data name="AiSettings.Key.Cleared" xml:space="preserve"><value>Back to the built-in key.</value></data>
+  <data name="AiSettings.Key.Empty" xml:space="preserve"><value>Type a key first — or use “Back to built-in” to clear your override.</value></data>
+  <data name="AiSettings.Status.InsecureChip" xml:space="preserve"><value>Insecure</value></data>
+  <data name="AiSettings.Insecure.Title" xml:space="preserve"><value>This connection is not encrypted</value></data>
+  <data name="AiSettings.Insecure.Body" xml:space="preserve"><value>The gateway is reachable over plain HTTP: anything sent could be read on the network. Keep AI off unless you accept that risk, and never send data you would not want exposed.</value></data>
+  <data name="AiSettings.Consent.Header" xml:space="preserve"><value>Consent</value></data>
+  <data name="AiSettings.Consent.Note" xml:space="preserve"><value>Every category starts as never-asked, which behaves like denied. Flipping a switch records your explicit answer; a “never asked” label disappears once you do.</value></data>
+  <data name="AiSettings.Consent.NeverAsked" xml:space="preserve"><value>Never asked — treated as denied</value></data>
+  <data name="AiSettings.Consent.AiProcessing" xml:space="preserve"><value>AI processing</value></data>
+  <data name="AiSettings.Consent.AiProcessingNote" xml:space="preserve"><value>Send a minimal summary of your state to the AI gateway for interpretation. The raw key never travels from this device beyond the gateway call itself.</value></data>
+  <data name="AiSettings.Consent.HealthData" xml:space="preserve"><value>Health data</value></data>
+  <data name="AiSettings.Consent.HealthDataNote" xml:space="preserve"><value>Let features read your sleep and recovery history. Stays on this device; AI only ever receives the minimal derived summary above, and only with that consent too.</value></data>
+  <data name="AiSettings.Consent.ActivityData" xml:space="preserve"><value>Activity data</value></data>
+  <data name="AiSettings.Consent.ActivityDataNote" xml:space="preserve"><value>Let features read steps and workouts. Stays on this device.</value></data>
+  <data name="AiSettings.Consent.Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="AiSettings.Consent.NotificationsNote" xml:space="preserve"><value>Allow LIVORA to remind you locally. The system permission prompt is separate and is only asked for on the Reminders screen.</value></data>
+  <data name="AiSettings.Cloud.Header" xml:space="preserve"><value>Cloud account</value></data>
+  <data name="AiSettings.Cloud.Configured" xml:space="preserve"><value>Backend configured</value></data>
+  <data name="AiSettings.Cloud.NotConfigured" xml:space="preserve"><value>Not configured</value></data>
+  <data name="AiSettings.Cloud.Note" xml:space="preserve"><value>This card reports the account backend's real state. There is no sign-in form because there is nothing to sign in to yet — your data lives on this device.</value></data>
+  <data name="AiSettings.Failed" xml:space="preserve"><value>That did not go through. Nothing was changed.</value></data>
+  <data name="DataStudio.Title" xml:space="preserve"><value>Data Studio</value></data>
+  <data name="DataStudio.AdvancedBanner" xml:space="preserve"><value>Advanced: this screen edits the raw JSON your app actually stores. Wrong shapes can break trends and plans. If you were not told to be here, go back.</value></data>
+  <data name="DataStudio.Warning.Title" xml:space="preserve"><value>You are editing stored data directly</value></data>
+  <data name="DataStudio.Warning.Body" xml:space="preserve"><value>Changes here are not validated by the normal UI — the store's own rules are the last line of defense. Export a backup first if the data matters to you.</value></data>
+  <data name="DataStudio.Entity.Header" xml:space="preserve"><value>Single entity</value></data>
+  <data name="DataStudio.Kind" xml:space="preserve"><value>Entity kind</value></data>
+  <data name="DataStudio.EntityId" xml:space="preserve"><value>Entity ID</value></data>
+  <data name="DataStudio.EntityId.Placeholder" xml:space="preserve"><value>the entity's id</value></data>
+  <data name="DataStudio.Load" xml:space="preserve"><value>Load</value></data>
+  <data name="DataStudio.Apply" xml:space="preserve"><value>Apply JSON</value></data>
+  <data name="DataStudio.NoKinds" xml:space="preserve"><value>The data catalog returned no kinds yet.</value></data>
+  <data name="DataStudio.NothingLoaded" xml:space="preserve"><value>Nothing loaded yet. Pick a kind, type an id, then press Load.</value></data>
+  <data name="DataStudio.Errors.Header" xml:space="preserve"><value>The store rejected this JSON:</value></data>
+  <data name="DataStudio.ImportOk" xml:space="preserve"><value>Accepted and stored</value></data>
+  <data name="DataStudio.Failed" xml:space="preserve"><value>The operation failed. Nothing was changed.</value></data>
+  <data name="DataStudio.ConfirmDelete.Title" xml:space="preserve"><value>Delete this entity?</value></data>
+  <data name="DataStudio.ConfirmDelete.Body" xml:space="preserve"><value>{0} “{1}” will be removed from local storage. This cannot be undone.</value></data>
+  <data name="DataStudio.ExportAll.Header" xml:space="preserve"><value>Export everything</value></data>
+  <data name="DataStudio.ExportAll.Note" xml:space="preserve"><value>Writes the whole local store as one JSON file into this app's data folder and shows the real path. No cloud, no network.</value></data>
+  <data name="DataStudio.ExportAll.Action" xml:space="preserve"><value>Export all to file</value></data>
+  <data name="DataStudio.ImportAll.Header" xml:space="preserve"><value>Import from file</value></data>
+  <data name="DataStudio.ImportAll.Note" xml:space="preserve"><value>Reads a full-export JSON file from a path on this device and replaces or merges your store according to the switch below.</value></data>
+  <data name="DataStudio.ImportAll.Action" xml:space="preserve"><value>Import from path</value></data>
+  <data name="DataStudio.Merge" xml:space="preserve"><value>Merge into existing data (off = replace everything)</value></data>
+  <data name="DataStudio.Path" xml:space="preserve"><value>Backup file path</value></data>
+  <data name="DataStudio.Path.Placeholder" xml:space="preserve"><value>C:\folder\livora_export.json</value></data>
+  <data name="DataStudio.PathMissing" xml:space="preserve"><value>That file could not be read. Check the path — this build takes a full path typed here, not a folder picker.</value></data>
+  <data name="Lock.Title" xml:space="preserve"><value>App lock</value></data>
+  <data name="Lock.PinNote" xml:space="preserve"><value>A 4-digit code protects this app on the device. It is stored only as a hash here and never sent anywhere.</value></data>
+  <data name="Lock.Set.Label" xml:space="preserve"><value>Choose a 4-digit code</value></data>
+  <data name="Lock.Retype.Label" xml:space="preserve"><value>Re-enter the same code</value></data>
+  <data name="Lock.Verify.Label" xml:space="preserve"><value>Enter your code</value></data>
+  <data name="Lock.Set" xml:space="preserve"><value>Set code</value></data>
+  <data name="Lock.Confirm" xml:space="preserve"><value>Confirm code</value></data>
+  <data name="Lock.Unlock" xml:space="preserve"><value>Unlock</value></data>
+  <data name="Lock.Wrong" xml:space="preserve"><value>That code didn't work.</value></data>
+  <data name="Lock.Mismatch" xml:space="preserve"><value>The two entries didn't match. Choose your code again.</value></data>
+  <data name="Lock.SetDone" xml:space="preserve"><value>Code set. The app will ask for it next launch.</value></data>
+  <data name="Lock.SetFailed" xml:space="preserve"><value>The code could not be saved on this device.</value></data>
+  <data name="Lock.Removed" xml:space="preserve"><value>The code was removed from this device.</value></data>
+  <data name="Lock.Remove" xml:space="preserve"><value>Remove code</value></data>
+  <data name="Lock.LockNow" xml:space="preserve"><value>Lock now</value></data>
+  <data name="Settings.AiEntry" xml:space="preserve"><value>AI assistant &amp; consent</value></data>
+  <data name="Settings.AiEntryNote" xml:space="preserve"><value>Gateway status, your key, data consent</value></data>
+  <data name="Settings.DataStudioEntry" xml:space="preserve"><value>Data Studio</value></data>
+  <data name="Settings.DataStudioEntryNote" xml:space="preserve"><value>Advanced: raw entity editing, backup and restore</value></data>
+  <data name="Settings.LockEntry" xml:space="preserve"><value>App lock</value></data>
+  <data name="Settings.LockEntryNote" xml:space="preserve"><value>4-digit passcode, lock now, remove</value></data>
+</root>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wave 3c lane 01 key manifest — NOT a .resx (the SDK would double-embed it). The merge driver
+     appends these <data> entries into Resources/Localization/AppResources.resx after the existing
+     content; EN/FA keep identical key order. Reused existing keys (NOT re-emitted here):
+     Norm.Reject.Ratio already ships in lane03's manifest with the same wording, so lane 01 does
+     not re-declare it; Norm.Reject.NotFinite is repeated here VERBATIM from lane03 on purpose (two
+     lanes shipping the same key with the same value merges cleanly; different values do not). Keys are returned by the data catalog /
+     consent / auth services; the code emits KEYS ONLY, never prose. -->
+<root>
+  <data name="Norm.Reject.MalformedJson" xml:space="preserve"><value>The file is not valid JSON</value></data>
+  <data name="Norm.Reject.NotObject" xml:space="preserve"><value>This entry is not an object</value></data>
+  <data name="Norm.Reject.TooLarge" xml:space="preserve"><value>This entry is larger than 1 MB and was not read</value></data>
+  <data name="Norm.Reject.Empty" xml:space="preserve"><value>Nothing was entered</value></data>
+  <data name="Norm.Reject.UnknownKind" xml:space="preserve"><value>Unknown data type</value></data>
+  <data name="Norm.Reject.NotFound" xml:space="preserve"><value>No stored entry matches that id</value></data>
+  <data name="Norm.Reject.StoreCorrupt" xml:space="preserve"><value>The stored file cannot be read and was left untouched</value></data>
+  <data name="Norm.Reject.UnknownField" xml:space="preserve"><value>This field is not part of the schema and was rejected</value></data>
+  <data name="Norm.Reject.MissingField" xml:space="preserve"><value>A required field is missing</value></data>
+  <data name="Norm.Reject.MissingId" xml:space="preserve"><value>The entry has no id</value></data>
+  <data name="Norm.Reject.DuplicateId" xml:space="preserve"><value>Two entries share the same id</value></data>
+  <data name="Norm.Reject.Type" xml:space="preserve"><value>This field is not the expected type</value></data>
+  <data name="Norm.Reject.NotFinite" xml:space="preserve"><value>The recorded value is not a valid number</value></data>
+  <data name="Norm.Reject.Range" xml:space="preserve"><value>This value is outside the possible range</value></data>
+  <data name="Norm.Reject.StringTooLong" xml:space="preserve"><value>This text is longer than the field allows</value></data>
+  <data name="Norm.Reject.UnknownEnum" xml:space="preserve"><value>This option is not one the app knows</value></data>
+  <data name="Norm.Reject.DateInverted" xml:space="preserve"><value>The dates are in the wrong order, or outside the supported range</value></data>
+  <data name="Norm.Reject.SchemaTooNew" xml:space="preserve"><value>This backup was written by a newer version of LIVORA</value></data>
+  <data name="Norm.Reject.ImpossibleProvenance" xml:space="preserve"><value>A manually entered day cannot claim another source</value></data>
+  <data name="Norm.Reject.UntouchableState" xml:space="preserve"><value>“Never asked” cannot be saved as a decision</value></data>
+  <data name="Auth.Cloud.NotAvailable" xml:space="preserve"><value>No account server exists yet, so sign-in is not available. Everything stays on this device.</value></data>
+  <data name="Sync.Reason.NoBackend" xml:space="preserve"><value>No sync backend is configured — changes stay on this device</value></data>
+  <data name="Passcode.Locked" xml:space="preserve"><value>Too many attempts. Try again in a minute.</value></data>
+  <data name="Passcode.Set" xml:space="preserve"><value>Passcode set. It protects this app on this device only.</value></data>
+  <data name="Passcode.Removed" xml:space="preserve"><value>Passcode removed. Nothing was uploaded.</value></data>
+</root>

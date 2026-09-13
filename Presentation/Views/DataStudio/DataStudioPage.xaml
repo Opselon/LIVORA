@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.DataStudioPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:DataStudioViewModel"
+    views:BaseContentPage.MaxContentWidth="980"
+    views:BaseContentPage.IsLoading="{Binding IsBusy}">
+
+    <!-- Wave 3c lane 07 — Data Studio (the honest "advanced" raw-entity screen). Every card
+         renders only what ILocalDataCatalogService really answered; error rows are the catalog's
+         keys localized through the existing Tr pattern (key preserved beside the text in the VM).
+         Brushes only on Border props; Start/End alignment everywhere for RTL; prose wraps.
+         NOTE: comments must be XML comments — C-style brace comments break MAUIX2002 (fa9450f). -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <comp:NotConverter x:Key="Not"/>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+            <Style x:Key="HintLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="4"/>
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+
+            <!-- Header + back -->
+            <Border Style="{StaticResource Card}" x:Name="HeaderCard">
+                <Grid ColumnDefinitions="4,*,Auto" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                    <Label Grid.Column="1" Text="{Binding Title}" Style="{StaticResource LDisplay}"
+                           LineBreakMode="WordWrap" MaxLines="2" VerticalOptions="Center"
+                           SemanticProperties.HeadingLevel="Level1"/>
+                    <Button Grid.Column="2" Text="{Binding BackText}" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding BackCommand}" Padding="14,8" FontSize="13"
+                            MinimumHeightRequest="44" VerticalOptions="Center"
+                            SemanticProperties.Description="{Binding BackText}"/>
+                </Grid>
+            </Border>
+
+            <!-- Honest "advanced" banner: this screen edits stored truth, not a game -->
+            <Border Style="{StaticResource Card}" Background="{StaticResource CautionSoftBrush}"
+                    StrokeThickness="0" x:Name="BannerCard">
+                <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource Caution}"
+                             CornerRadius="2" VerticalOptions="Fill"/>
+                    <Label Grid.Column="1" Text="{Binding AdvancedBanner}" Style="{StaticResource LBody}"
+                           FontSize="13.5" LineBreakMode="WordWrap" VerticalOptions="Center"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
+            </Border>
+
+            <!-- No catalog registered => one honest row, nothing else -->
+            <Border Style="{StaticResource Card}" x:Name="UnavailableCard"
+                    IsVisible="{Binding HasCatalog, Converter={StaticResource Not}}">
+                <Label Text="{Binding NotAvailable}" Style="{StaticResource HintLabel}"
+                       MaxLines="3"/>
+            </Border>
+
+            <!-- ============ Single-entity inspect / edit ============ -->
+            <Border Style="{StaticResource Card}" x:Name="EntityCard"
+                    IsVisible="{Binding HasCatalog}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{Binding EntityHeader}" Style="{StaticResource SectionHeader}"
+                           FontSize="17" SemanticProperties.HeadingLevel="Level2"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{Binding KindLabel}" Style="{StaticResource LCaption}"
+                                   FontAttributes="Bold" FontSize="12" LineBreakMode="WordWrap"
+                                   MaxLines="2"/>
+                            <!-- machine kind tokens ("goals", "history", ...) render verbatim:
+                                 technical names stay Latin per the i18n rule -->
+                            <Picker ItemsSource="{Binding Kinds}" SelectedItem="{Binding SelectedKind}"
+                                    Style="{StaticResource PickerStyle}" MinimumHeightRequest="44"
+                                    SemanticProperties.Description="{Binding KindLabel}"/>
+                            <Label Text="{Binding NoKindsNote}" Style="{StaticResource HintLabel}"
+                                   IsVisible="{Binding HasKinds, Converter={StaticResource Not}}"
+                                   MaxLines="3"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{Binding EntityIdLabel}" Style="{StaticResource LCaption}"
+                                   FontAttributes="Bold" FontSize="12" LineBreakMode="WordWrap"
+                                   MaxLines="2"/>
+                            <Entry Text="{Binding EntityId}" Style="{StaticResource InputField}"
+                                   Placeholder="{Binding EntityIdPlaceholder}"
+                                   MinimumHeightRequest="44"
+                                   SemanticProperties.Description="{Binding EntityIdLabel}"/>
+                            <Button Text="{Binding LoadLabel}" Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding LoadEntityCommand}" FontSize="13" Padding="16,8"
+                                    MinimumHeightRequest="44" HorizontalOptions="Start"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    SemanticProperties.Description="{Binding LoadLabel}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- raw JSON editor; a shared EmptyStateView replaces it before any load -->
+                    <Editor Text="{Binding EditorText}" Style="{StaticResource EditorStyle}"
+                            HeightRequest="220" AutoSize="Disabled"
+                            IsVisible="{Binding HasEditorContent}"
+                            SemanticProperties.Description="{Binding EntityHeader}"/>
+                    <comp:EmptyStateView
+                        Title="{Binding EntityHeader}"
+                        Message="{Binding NothingLoaded}"
+                        IsVisible="{Binding HasEditorContent, Converter={StaticResource Not}}"/>
+
+                    <!-- write-back actions: Apply validates through the catalog, Delete confirms -->
+                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
+                        <Button Grid.Column="0" Text="{Binding ApplyLabel}"
+                                Style="{StaticResource PrimaryButton}" Command="{Binding ApplyCommand}"
+                                FontSize="13" Padding="16,8" MinimumHeightRequest="44"
+                                IsVisible="{Binding HasEditorContent}" IsEnabled="{Binding IsNotBusy}"
+                                SemanticProperties.Description="{Binding ApplyLabel}"/>
+                        <Button Grid.Column="1" Text="{Binding DeleteLabel}"
+                                Style="{StaticResource GhostButton}" Command="{Binding DeleteCommand}"
+                                FontSize="13" Padding="16,8" MinimumHeightRequest="44"
+                                TextColor="{StaticResource Negative}" IsEnabled="{Binding IsNotBusy}"
+                                SemanticProperties.Description="{Binding DeleteLabel}"/>
+                        <Border Grid.Column="2" Style="{StaticResource ChipCaution}"
+                                HorizontalOptions="End" IsVisible="{Binding LastWriteOk}">
+                            <Label Text="{Binding ImportOkMessage}" Style="{StaticResource ChipLabel}"
+                                   FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+
+                    <!-- rejection list: the catalog's error keys, localized, one row each.
+                         CollectionView (bounded list, virtualized) with x:DataType + ItemTemplate. -->
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding HasErrors}">
+                        <Label Text="{Binding ErrorsHeader}" Style="{StaticResource LCaption}"
+                               FontAttributes="Bold" FontSize="12" TextColor="{StaticResource Negative}"
+                               LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <CollectionView ItemsSource="{Binding ImportErrors}"
+                                        SelectionMode="None" MaximumHeightRequest="200">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:DataStudioErrorRow">
+                                    <Border Style="{StaticResource SoftCard}" Padding="12,8"
+                                            Margin="0,0,0,4">
+                                        <Grid ColumnDefinitions="4,*" ColumnSpacing="8">
+                                            <BoxView Grid.Column="0" WidthRequest="4"
+                                                     Color="{StaticResource Negative}" CornerRadius="2"
+                                                     VerticalOptions="Fill"/>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                <Label Text="{Binding Text}" Style="{StaticResource LBody}"
+                                                       FontSize="13" LineBreakMode="WordWrap" MaxLines="3"/>
+                                                <Label Text="{Binding Key}" Style="{StaticResource LCaption}"
+                                                       FontSize="11" LineBreakMode="WordWrap" MaxLines="2"
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="0"/>
+                            </CollectionView.ItemsLayout>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============ Export All ============ -->
+            <Border Style="{StaticResource Card}" x:Name="ExportCard"
+                    IsVisible="{Binding HasCatalog}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding ExportAllHeader}" Style="{StaticResource LSubheading}"
+                           FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Label Text="{Binding ExportAllNote}" Style="{StaticResource HintLabel}"
+                           MaxLines="4"/>
+                    <Button Text="{Binding ExportAllLabel}" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ExportAllCommand}" FontSize="13" Padding="16,8"
+                            MinimumHeightRequest="44" HorizontalOptions="Start"
+                            IsEnabled="{Binding IsNotBusy}"
+                            SemanticProperties.Description="{Binding ExportAllLabel}"/>
+                    <!-- the REAL path of the file that exists now; never a hypothetical -->
+                    <Border Style="{StaticResource SoftCard}" Padding="12,8"
+                            IsVisible="{Binding HasExportedPath}">
+                        <Label Text="{Binding ExportedPath}" Style="{StaticResource LCaption}"
+                               FontSize="11.5" LineBreakMode="WordWrap" MaxLines="3"
+                               SemanticProperties.Description="{Binding ExportedPath}"/>
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============ Import All ============ -->
+            <Border Style="{StaticResource Card}" x:Name="ImportCard"
+                    IsVisible="{Binding HasCatalog}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding ImportAllHeader}" Style="{StaticResource LSubheading}"
+                           FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Label Text="{Binding ImportAllNote}" Style="{StaticResource HintLabel}"
+                           MaxLines="4"/>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" MinimumHeightRequest="44">
+                        <Label Grid.Column="0" Text="{Binding MergeLabel}" Style="{StaticResource LBody}"
+                               FontSize="14" VerticalOptions="Center" LineBreakMode="WordWrap"
+                               MaxLines="2"/>
+                        <Switch Grid.Column="1" Style="{StaticResource SwitchStyle}"
+                                IsToggled="{Binding Merge}" HorizontalOptions="End"
+                                SemanticProperties.Description="{Binding MergeLabel}"/>
+                    </Grid>
+                    <Entry Text="{Binding ImportPath}" Style="{StaticResource InputField}"
+                           Placeholder="{Binding PathPlaceholder}" MinimumHeightRequest="44"
+                           SemanticProperties.Description="{Binding PathLabel}"/>
+                    <Button Text="{Binding ImportAllLabel}" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ImportAllCommand}" FontSize="13" Padding="16,8"
+                            MinimumHeightRequest="44" HorizontalOptions="Start"
+                            IsEnabled="{Binding IsNotBusy}"
+                            SemanticProperties.Description="{Binding ImportAllLabel}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <BoxView HeightRequest="12" Color="Transparent"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

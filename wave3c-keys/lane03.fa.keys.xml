@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- WAVE3C lane03: کلیدهای رد اعتبارسنجی (دیوارهای فیزیکی) — فارسی، با نیم‌فاصله. -->
+  <data name="Norm.Reject.Sleep"><value>میزان خواب معتبر نیست</value></data>
+  <data name="Norm.Reject.Bedtime"><value>ساعت خواب معتبر نیست</value></data>
+  <data name="Norm.Reject.Wake"><value>ساعت بیدار شدن معتبر نیست</value></data>
+  <data name="Norm.Reject.Steps"><value>تعداد قدم‌ها معتبر نیست</value></data>
+  <data name="Norm.Reject.Active"><value>دقایق فعالیت معتبر نیست</value></data>
+  <data name="Norm.Reject.Bpm"><value>ضربان قلب معتبر نیست</value></data>
+  <data name="Norm.Reject.Hrv"><value>تغییرپذیری ضربان قلب معتبر نیست</value></data>
+  <data name="Norm.Reject.Quality"><value>کیفیت خواب معتبر نیست</value></data>
+  <data name="Norm.Reject.Consistency"><value>نظم خواب معتبر نیست</value></data>
+  <data name="Norm.Reject.Recovery"><value>امتیاز بازیابی معتبر نیست</value></data>
+  <data name="Norm.Reject.Ratio"><value>این مقدار باید بین ۰ تا ۱ باشد</value></data>
+  <data name="Norm.Reject.NotFinite"><value>مقدار ثبت‌شده عدد معتبری نیست</value></data>
+  <data name="Norm.Reject.Negative"><value>مقدار منفی مجاز نیست</value></data>
+  <data name="Norm.Reject.TimeReversed"><value>پایان بازه زودتر از شروع آن است</value></data>
+  <data name="Norm.Reject.Unit"><value>یکای اندازه‌گیری شناخته‌شده نیست</value></data>
+  <data name="Norm.Reject.Distance"><value>مسافت معتبر نیست</value></data>
+  <data name="Norm.Reject.Energy"><value>انرژی معتبر نیست</value></data>
+  <!-- WAVE3C lane03: هشدارهای غیرعادی بودن (مقدار می‌ماند، نشان داده می‌شود). -->
+  <data name="Norm.Warn.StepsHigh"><value>تعداد قدم‌ها غیرعادی به نظر می‌رسد</value></data>
+  <data name="Norm.Warn.SleepHigh"><value>مدت خواب غیرعادی به نظر می‌رسد</value></data>
+  <data name="Norm.Warn.RhrHigh"><value>ضربان قلب هنگام استراحت غیرعادی به نظر می‌رسد</value></data>
+  <data name="Norm.Warn.HrvHigh"><value>تغییرپذیری ضربان قلب غیرعادی به نظر می‌رسد</value></data>
+  <!-- WAVE3C lane03: ردهای بخش فعالیت. -->
+  <data name="Activity.Reject.Duration"><value>مدت فعالیت معتبر نیست</value></data>
+  <data name="Activity.Reject.Unit"><value>یکای اندازه‌گیری فعالیت شناخته‌شده نیست</value></data>
+</root>

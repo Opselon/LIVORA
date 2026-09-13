@@ -28,6 +28,9 @@ public class ResxIntegrityTests
         "Update.Platform.MacOS",         // product name (value is "macOS" — Latin by definition)
         "Update.Platform.iOS",           // product name
         "WeekProgress.Period",           // pure "{0} — {1}" passthrough: ShortDate already localizes
+        // Wave3c merge additions, same reasoning:
+        "Ai.Body.Provider",              // pure "{0}" passthrough: validator-cleaned provider sentence
+        "DataStudio.Path.Placeholder",   // a Windows file path is Latin by definition
     };
 
     [Fact]
@@ -222,6 +225,11 @@ public class ResxIntegrityTests
             // Added at merge: lane 08's week-progress rail component (its own §2-name component,
             // extended deliberately per this test's rule — the prefix appears in docs/WAVE3.md).
             "WeekProgress.",
+            // Added at wave3b/wave3c merge (integration lane, deliberate per this test's rule;
+            // each family is documented in docs/wave3c/INTEGRATION-PLAN.md):
+            "Activity.", "Ai.", "AiSettings.", "Auth.", "Data.", "DataStudio.", "Error.Catalog.",
+            "Lock.", "Migration.", "Norm.", "Passcode.", "Pattern.", "pattern.",  // pattern.* lowercase = lane-04 engine keys, kept verbatim so runtime output resolves
+            "Sync.",
         };
         var unknown = Resx.En.Keys
             .Where(k => !prefixes.Any(p => k.StartsWith(p, StringComparison.Ordinal)))

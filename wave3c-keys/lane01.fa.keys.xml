@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wave 3c lane 01 — Persian key manifest. Native register, ZWNJ throughout; technical values
+     (field names, kinds) stay Latin because the code never sends them to the UI as text.
+     Identical key order to the EN manifest. NOT a .resx — see the EN manifest comment. -->
+<root>
+  <data name="Norm.Reject.MalformedJson" xml:space="preserve"><value>فایل JSON معتبری نیست</value></data>
+  <data name="Norm.Reject.NotObject" xml:space="preserve"><value>این ورودی یک شیی نیست</value></data>
+  <data name="Norm.Reject.TooLarge" xml:space="preserve"><value>این ورودی از یک مگابایت بزرگ‌تر است و خوانده نشد</value></data>
+  <data name="Norm.Reject.Empty" xml:space="preserve"><value>چیزی وارد نشده است</value></data>
+  <data name="Norm.Reject.UnknownKind" xml:space="preserve"><value>نوع داده شناخته‌شده نیست</value></data>
+  <data name="Norm.Reject.NotFound" xml:space="preserve"><value>هیچ ورودی ذخیره‌شده‌ای با این شناسه پیدا نشد</value></data>
+  <data name="Norm.Reject.StoreCorrupt" xml:space="preserve"><value>فایل ذخیره‌شده قابل خواندن نیست و دست‌نخورده ماند</value></data>
+  <data name="Norm.Reject.UnknownField" xml:space="preserve"><value>این فیلد در طرح‌بند نیست و رد شد</value></data>
+  <data name="Norm.Reject.MissingField" xml:space="preserve"><value>یکی از فیلدهای لازم وجود ندارد</value></data>
+  <data name="Norm.Reject.MissingId" xml:space="preserve"><value>این ورودی شناسه ندارد</value></data>
+  <data name="Norm.Reject.DuplicateId" xml:space="preserve"><value>دو ورودی شناسهٔ یکسان دارند</value></data>
+  <data name="Norm.Reject.Type" xml:space="preserve"><value>نوع این فیلد درست نیست</value></data>
+  <data name="Norm.Reject.NotFinite" xml:space="preserve"><value>مقدار ثبت‌شده عدد معتبری نیست</value></data>
+  <data name="Norm.Reject.Range" xml:space="preserve"><value>این مقدار خارج از بازهٔ ممکن است</value></data>
+  <data name="Norm.Reject.StringTooLong" xml:space="preserve"><value>این متن از حد مجاز فیلد بلندتر است</value></data>
+  <data name="Norm.Reject.UnknownEnum" xml:space="preserve"><value>این گزینه را برنامه نمی‌شناسد</value></data>
+  <data name="Norm.Reject.DateInverted" xml:space="preserve"><value>تاریخ‌ها وارونه‌اند یا خارج از بازهٔ پشتیبانی‌شده‌اند</value></data>
+  <data name="Norm.Reject.SchemaTooNew" xml:space="preserve"><value>این نسخهٔ پشتیبان را نسخهٔ تازه‌ترِ لی‌ورا نوشته است</value></data>
+  <data name="Norm.Reject.ImpossibleProvenance" xml:space="preserve"><value>روزِ دست‌ورود نمی‌تواند منبع دیگری ادعا کند</value></data>
+  <data name="Norm.Reject.UntouchableState" xml:space="preserve"><value>«پرسیده‌نشده» را نمی‌توان به‌عنوان تصمیم ذخیره کرد</value></data>
+  <data name="Auth.Cloud.NotAvailable" xml:space="preserve"><value>سرور حساب هنوز وجود ندارد، بنابراین ورود ممکن نیست. همه‌چیز روی همین دستگاه می‌ماند.</value></data>
+  <data name="Sync.Reason.NoBackend" xml:space="preserve"><value>سمت سروری برای همگام‌سازی پیکربندی نشده — تغییرها روی همین دستگاه می‌ماند</value></data>
+  <data name="Passcode.Locked" xml:space="preserve"><value>تلاش‌های بیش از حد. یک دقیقه دیگر دوباره بیازمایید.</value></data>
+  <data name="Passcode.Set" xml:space="preserve"><value>رمز عبور تنظیم شد. فقط همین برنامه را روی همین دستگاه قفل می‌کند.</value></data>
+  <data name="Passcode.Removed" xml:space="preserve"><value>رمز عبور حذف شد. چیزی بارگذاری نشد.</value></data>
+</root>
