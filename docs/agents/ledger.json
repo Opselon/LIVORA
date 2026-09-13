@@ -1,0 +1,30 @@
+{
+ "entries": [
+  {
+   "pr": 0,
+   "head_sha": "aed6f7763b7042440478d533f8e2d01e8d68b45d",
+   "state": "REVERIFIED",
+   "note": "pre-workflow baseline: master at system adoption, CI green (3/3 jobs), 439/439 tests"
+  },
+  {
+   "pr": 7,
+   "head_sha": "d1832b0cc0f503deb61d349ad501043efd7dfb46",
+   "state": "REVERIFIED",
+   "merge_sha": "5918dd4e44997e049c10ae5f866460f0d9d8e646",
+   "merged_at": "2026-09-13T17:09:00Z",
+   "merged_by": "coordinator (user-authorized step B, squash)",
+   "verified_master_sha": "5918dd4e44997e049c10ae5f866460f0d9d8e646",
+   "verification": {
+    "clean_worktree": "Temp/livora_reverify_b1 @ 5918dd4 (fresh, git status clean pre-build)",
+    "tests_local": "439/439 passed (Release)",
+    "windows_build_local": "0W/0E (net10.0-windows10.0.19041.0 Release)",
+    "android_build": "CI success (local android skipped; CI covers it)",
+    "ci_push_run_5918dd4": "Unit tests / windows / android all success",
+    "secret_scan": "clean",
+    "brace_xaml_scan": "clean",
+    "hollow_di_scan": "clean"
+   }
+  }
+ ],
+ "verified_master_sha": "5918dd4e44997e049c10ae5f866460f0d9d8e646"
+}

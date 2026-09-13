@@ -1,0 +1,159 @@
+# LIVORA ownership registry — SOURCE OF TRUTH for agent scope.
+# Enforced by .github/workflows/pr-gates.yml (scope job) and scripts/integration/livora_gates.py.
+# Classification result order: RED > YELLOW > GREEN. First matching rule wins, most-specific path first.
+
+version: 1
+
+# ---- Global policy -----------------------------------------------------------
+policy:
+  master_push_forbidden: true          # humans/agents push branches + PRs; only the controller merges
+  rebase_policy: safe_only             # never force-push a foreign branch; merge-candidate tested instead
+  auto_merge_max_changed_files: 40     # bigger -> YELLOW (oversized change needs review)
+  squash_merge: true                   # one commit per lane on master, ledger records PR head SHA
+  stale_base_seconds: 86400            # base older than master HEAD@T by more than this -> refresh required
+
+# ---- Integration-owned (shared) files: any lane edit -> YELLOW ----------------
+# These are the files every wave wants to touch. Lanes deliver APPEND blocks;
+# ONLY the integration lead applies them, on an integration branch, via PR.
+integration_owned:
+  - MauiProgram.cs
+  - AppShell.xaml
+  - AppShell.xaml.cs
+  - App.xaml
+  - App.xaml.cs
+  - LIVORA.csproj
+  - LIVORA.slnx
+  - Tests/LIVORA.Tests.csproj
+  - Resources/Localization/AppResources.resx
+  - Resources/Localization/AppResources.fa.resx
+  - Presentation/Views/Settings/SettingsPage.xaml
+  - Presentation/ViewModels/Settings/SettingsViewModel.cs
+  - Presentation/Theme.cs
+  - Presentation/Components/TrExtension.cs
+  - Resources/Styles/**
+  - global.json
+  - .gitignore
+  - .gitattributes
+  - docs/agents/**
+
+# ---- Frozen contracts: lane edits -> RED (amendment = lead-only PR) ----------
+frozen:
+  owner: lead
+  paths:
+    - Application/Abstractions/**
+    - Domain/Enums/**
+    - Application/Rules/RuleEngine.cs
+    - Tests/Tests/ApplicationPurityTests.cs
+    - Tests/Tests/Wave3Harness.cs
+    - Tests/Tests/TestFakes.cs
+
+# ---- Architecture config (workflow files, registry, scripts): RED for lanes --
+architecture_owned:
+  owner: lead
+  paths:
+    - .github/**
+    - scripts/**
+    - docs/LANES*.md
+    - docs/WAVE3*.md
+    - docs/architecture/**
+
+# ---- Lane registry ------------------------------------------------------------
+# Each active lane/agent registers here BEFORE opening a PR. No registration -> YELLOW.
+# status: active | merged | released | stalled
+lanes:
+  - id: w3b-lane02
+    agent: agent-b
+    wave: 3b
+    branch: agent/w3b/lane02-health-connect
+    task: Health Connect foundation (Android), capability discovery, permissions
+    owns:
+      - Infrastructure/HealthProviders/**
+      - Application/HealthData/Wave3b/**
+      - Tests/Tests/Wave3b*/**
+      - wave3b-keys/**
+    status: active
+  - id: w3b-lane03
+    agent: agent-b
+    wave: 3b
+    branch: agent/w3b/lane03-activities
+    task: WorkoutSession sources + adapter
+    owns:
+      - Application/Activities/**
+      - wave3b-keys/**
+    status: active
+  - id: w3b-lane04
+    agent: agent-b
+    wave: 3b
+    branch: agent/w3b/lane04-normalization
+    task: provenance stamping, unit converter, payload validation
+    owns:
+      - Application/Normalization/**
+      - wave3b-keys/**
+    status: active
+  - id: w3b-lane05
+    agent: agent-b
+    wave: 3b
+    branch: agent/w3b/lane05-baselines
+    task: 7/14/30 window baselines, sample gates, state confidence
+    owns:
+      - Application/State/Wave3b/**
+      - wave3b-keys/**
+    status: active
+  - id: w3c-lane01
+    agent: agent-c
+    wave: 3c
+    branch: agent/w3c/lane01-*
+    task: (per WAVE3C brief) engine lane 01
+    owns: []
+    status: planned
+  - id: w3c-lane02
+    agent: agent-c
+    wave: 3c
+    branch: agent/w3c/lane02-*
+    task: gateway config service + obfuscated key blob (the ONLY key owner)
+    owns:
+      - Infrastructure/Security/Gateway/**
+    status: planned
+  - id: w3c-lane03
+    agent: agent-c
+    wave: 3c
+    branch: agent/w3c/lane03-*
+    task: AI provider/context/validator lane
+    owns:
+      - Application/Intelligence/**
+      - Infrastructure/IntelligenceProviders/Wave3c/**
+    status: planned
+  - id: w3c-lane04
+    agent: agent-c
+    wave: 3c
+    branch: agent/w3c/lane04-*
+    task: accounts/passcode + local data catalog lane
+    owns:
+      - Application/Accounts/**
+      - Infrastructure/Persistence/Wave3c/**
+    status: planned
+  - id: lead
+    agent: coordinator
+    wave: all
+    branch: integration/**
+    task: contracts, APPEND application, merges, docs, ledger
+    owns:
+      - "**"
+    status: active
+  - id: qa
+    agent: agent-a
+    wave: all
+    branch: qa/**
+    task: verification lanes, adversarial checks (read-mostly; tests only under Tests/QA/**)
+    owns:
+      - Tests/QA/**
+    status: active
+
+# ---- Overlap groups: two active lanes owning intersecting patterns -> YELLOW -
+overlap_groups:
+  - name: ai-gateway
+    lanes: [w3b-lane08, w3c-lane02, w3c-lane03]
+    note: one AI gateway implementation must win; see docs/agents/WORKFLOW.md merge order
+  - name: sync-accounts
+    lanes: [w3b-lane09, w3c-lane04]
+    note: persistence/sync metadata vs accounts/portability — reconcile ILocalDataCatalogService ownership
