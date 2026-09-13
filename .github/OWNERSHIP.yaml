@@ -132,6 +132,58 @@ lanes:
       - Application/Accounts/**
       - Infrastructure/Persistence/Wave3c/**
     status: planned
+  - id: w3c-lane05
+    agent: agent-c
+    wave: 3c
+    branch: wave3c/integration
+    task: adaptive plan engine + recommendation ranker + decision log
+    owns:
+      - Application/Planning/Adaptive/**
+      - Application/Planning/Wave3b/**
+    status: merged
+  - id: w3c-lane06
+    agent: agent-c
+    wave: 3c
+    branch: wave3c/integration
+    task: durable local-first storage, sync queue, migrations, perf budgets
+    owns:
+      - Application/Sync/**
+      - Infrastructure/Persistence/Wave3b/**
+    status: merged
+  - id: w3c-lane07
+    agent: agent-c
+    wave: 3c
+    branch: wave3c/integration
+    task: AI settings / Data Studio / Lock UI, motion, RTL/a11y, i18n fragments
+    owns:
+      - Presentation/Views/AiSettings/**
+      - Presentation/Views/DataStudio/**
+      - Presentation/Views/Security/**
+      - Presentation/ViewModels/AiSettings/**
+      - Presentation/ViewModels/DataStudio/**
+      - Presentation/ViewModels/Security/**
+      - Presentation/Views/Wave3cMotion.cs
+      - wave3c-keys/**
+      - Tests/Wave3c/**
+    status: merged
+  - id: w3c-lane01b
+    agent: agent-c
+    wave: 3c
+    branch: wave3c/integration
+    task: consent store + secure storage (DPAPI) + passcode + catalog + honest cloud stub
+    owns:
+      - Infrastructure/Security/**
+      - Infrastructure/Persistence/LocalDataCatalog.cs
+      - Infrastructure/Persistence/LocalJsonStore.cs
+    status: merged
+  - id: integration-w3c
+    agent: coordinator
+    wave: 3c
+    branch: wave3c/integration
+    task: wave-3c integration docs (plan, status matrix, lane notes)
+    owns:
+      - docs/wave3c/**
+    status: active
   - id: lead
     agent: coordinator
     wave: all
