@@ -86,7 +86,8 @@ identical key order (enforced by `Wave3ResxIntegrityTests`). So:
 
 For `MauiProgram.cs`: emit an `APPEND: MauiProgram.cs` block anchored at `// WAVE3B-DI:` (the
 marker already exists in your copy, just before `// WAVE3-DI-END`). For the Settings page:
-XAML goes in an `APPEND:` block anchored at `{/* WAVE3B-SETTINGS ... */}` (SettingsPage.xaml)
+XAML goes in an `APPEND:` block anchored at `<!-- WAVE3B-SETTINGS ... -->` (SettingsPage.xaml —
+MUST be an XML comment; C-style `{/* */}` is invalid XAML and breaks MAUIX2002, fixed at fa9450f)
 and code/VM members anchored at `// WAVE3B-SETTINGS-VM:` (SettingsViewModel.cs). Lanes NEVER
 write those three shared files or `LIVORA.csproj` / `Tests/LIVORA.Tests.csproj` themselves.
 
