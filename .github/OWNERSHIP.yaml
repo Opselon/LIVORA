@@ -182,10 +182,15 @@ lanes:
     agent: coordinator
     wave: 3c
     branch: wave3c/integration
-    task: wave-3c integration docs + lead-applied gate amendments
+    task: wave-3c integration docs + lead-applied gate amendments + the completion merge
     owns:
       - docs/wave3c/**
       - Tests/Tests/Wave3ResxIntegrityTests.cs
+      - Tests/Tests/Wave3c/**
+      - Application/Patterns/**
+      - Application/Planning/RecommendationService.cs
+      - Application/Planning/Adaptive/**
+      - Application/Planning/Wave3b/**
     status: active
   - id: lead
     agent: coordinator

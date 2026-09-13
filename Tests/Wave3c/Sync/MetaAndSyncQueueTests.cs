@@ -185,7 +185,7 @@ public class MetaAndSyncQueueTests : IAsyncLifetime
     public async Task Queue_NeverStoresRawPayload_OnlyHashAndSize()
     {
         var dir = _temp.Dir("q-payload");
-        var secret = "Persian note: امروز حالت خوب بود";
+        var canary = "Persian note: امروز حالت خوب بود";
         using (var q = new SyncQueue(dir))
         {
             await q.EnqueueAsync(new SyncEnvelope
@@ -194,14 +194,14 @@ public class MetaAndSyncQueueTests : IAsyncLifetime
                 EntityId = "g-1",
                 LocalState = SyncState.Pending,
                 LocalVersion = 1,
-                PayloadHash = CanonicalJson.Sha256HexOfCanonical(CanonicalJson.Serialize(new { Name = secret })),
+                PayloadHash = CanonicalJson.Sha256HexOfCanonical(CanonicalJson.Serialize(new { Name = canary })),
                 ChangedAtUtc = DateTime.UtcNow,
-            }, payloadBytes: Encoding.UTF8.GetByteCount(secret));
+            }, payloadBytes: Encoding.UTF8.GetByteCount(canary));
 
             // Inspect the LIVE journal (appender still open) — the payload must not be in it.
             await q.FlushAsync(); // one enqueue rides the buffer; land it before reading
             var journal = string.Join('\n', await q.ReadJournalLinesAsync());
-            Assert.DoesNotContain(secret, journal);
+            Assert.DoesNotContain(canary, journal);
             Assert.DoesNotContain("حالت", journal);
             Assert.Contains("\"hash\"", journal.ToLowerInvariant());
         }

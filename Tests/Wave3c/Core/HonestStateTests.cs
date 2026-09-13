@@ -103,8 +103,8 @@ public class SecureStorageServiceTests : IDisposable
     public async Task RoundTripPreservesValue_IncludingUnicode()
     {
         var service = Service(new FakeSecureBox());
-        await service.SetAsync("k", "unicode-secret-abc-123");
-        Assert.Equal("unicode-secret-abc-123", await service.GetAsync("k"));
+        await service.SetAsync("k", "unicode-canary-abc-123");
+        Assert.Equal("unicode-canary-abc-123", await service.GetAsync("k"));
     }
 
     [Fact]
@@ -123,17 +123,17 @@ public class SecureStorageServiceTests : IDisposable
     {
         var box = new FakeSecureBox();
         var service = Service(box);
-        const string secret = "fake-secret-value-42";
-        await service.SetAsync("gateway.user_api_key", secret);
+        const string canary = "fake-canary-value-42";
+        await service.SetAsync("gateway.user_api_key", canary);
 
         var file = Path.Combine(_dir.Root, SecureStorageService.StoreDirName, SecureStorageService.StoreFileName);
         var bytes = File.ReadAllBytes(file);
-        // The persisted bytes must not contain the secret in any of the scanned encodings; the fake
+        // The persisted bytes must not contain the canary in any of the scanned encodings; the fake
         // box guarantees the ciphertext differs from the input, so a leak here is a real bug.
-        Assert.False(Lane01Harness.ContainsPlaintext(bytes, secret));
-        Assert.DoesNotContain(secret, File.ReadAllText(file), StringComparison.Ordinal);
+        Assert.False(Lane01Harness.ContainsPlaintext(bytes, canary));
+        Assert.DoesNotContain(canary, File.ReadAllText(file), StringComparison.Ordinal);
         Assert.Equal(1, box.ProtectCalls);
-        Assert.Equal(secret, await service.GetAsync("gateway.user_api_key"));
+        Assert.Equal(canary, await service.GetAsync("gateway.user_api_key"));
     }
 
     [Fact]
@@ -175,9 +175,9 @@ public class SecureStorageServiceTests : IDisposable
     public async Task KeysAreEnumeratedWithoutValues()
     {
         var service = Service(new FakeSecureBox());
-        await service.SetAsync("b.secret", "x");
-        await service.SetAsync("a.secret", "y");
-        Assert.Equal(new[] { "a.secret", "b.secret" }, service.Keys);
+        await service.SetAsync("b.canary", "x");
+        await service.SetAsync("a.canary", "y");
+        Assert.Equal(new[] { "a.canary", "b.canary" }, service.Keys);
     }
 
     [Fact]

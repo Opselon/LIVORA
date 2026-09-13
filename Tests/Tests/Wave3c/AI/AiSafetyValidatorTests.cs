@@ -196,10 +196,10 @@ public class AiSafetyValidatorTests
     [Fact]
     public void Reasons_NeverContainProviderText()
     {
-        const string secret = "SECRET-PROSE-MUST-NOT-LEAK";
-        var r = V.Validate(Resp(body: secret + " http://evil.example"), Ctx());
+        const string canary = "PROVIDER-PROSE-CANARY-NOT-TO-LEAK";
+        var r = V.Validate(Resp(body: canary + " http://evil.example"), Ctx());
         Assert.False(r.Accepted);
-        Assert.All(r.RejectionReasons, code => Assert.DoesNotContain(secret, code, StringComparison.Ordinal));
+        Assert.All(r.RejectionReasons, code => Assert.DoesNotContain(canary, code, StringComparison.Ordinal));
         Assert.True(r.Safe is null);   // rejected → no payload travels downstream at all
     }
 
