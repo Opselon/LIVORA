@@ -9,34 +9,88 @@
     x:DataType="vm:GoalsViewModel"
     x:Name="GoalsPageRef">
 
+    <!-- Page-local presentation vocabulary (status chip / progress label) — kept in the view,
+         tokens from LivoraColors.xaml. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <comp:NotConverter x:Key="Not"/>
+            <Style x:Key="StatusChip" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 12"/>
+                <Setter Property="Padding" Value="10,5"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="HorizontalOptions" Value="End"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
     <ScrollView Padding="{StaticResource PageThickness}">
-        <VerticalStackLayout Spacing="16">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
             <!-- Header: title + new-goal CTA. Start/End alignment mirrors correctly in RTL. -->
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,2">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource LDisplay}"
+                       VerticalOptions="Center"
                        LineBreakMode="WordWrap" MaxLines="2"
                        SemanticProperties.HeadingLevel="Level1"/>
                 <Button Grid.Column="1"
                         Text="{Binding NewGoalText}"
                         Style="{StaticResource PrimaryButton}"
                         Command="{Binding NewGoalCommand}"
+                        MinimumHeightRequest="44"
                         VerticalOptions="Center"
                         SemanticProperties.Description="{Binding NewGoalText}"/>
             </Grid>
 
-            <!-- Empty state -->
-            <Border Style="{StaticResource SoftCard}" IsVisible="{Binding IsEmpty}">
-                <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
-                       LineBreakMode="WordWrap"/>
-            </Border>
+            <!-- Empty state: centered, quiet, with the CTA restated so the page is never a dead
+                 end; suppressed while loading — the skeleton below is the honest state then -->
+            <VerticalStackLayout Spacing="12" Padding="8,28"
+                                 IsVisible="{Binding IsBusy, Converter={StaticResource Not}}">
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding IsEmpty}">
+                    <BoxView WidthRequest="56" HeightRequest="56" CornerRadius="28"
+                             Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"
+                             HorizontalOptions="Center"/>
+                    <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
+                           HorizontalTextAlignment="Center"
+                           LineBreakMode="WordWrap"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Button Text="{Binding NewGoalText}" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding NewGoalCommand}" HorizontalOptions="Center"
+                            MinimumHeightRequest="44"
+                            SemanticProperties.Description="{Binding NewGoalText}"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
 
-            <!-- Goals list -->
-            <comp:ItemsStackLayout ItemsSource="{Binding Goals}" Spacing="10">
+            <!-- Loading language (existing IsBusy only): three grey card ghosts -->
+            <VerticalStackLayout Spacing="10" IsVisible="{Binding IsBusy}">
+                <Border Style="{StaticResource SoftCard}" Padding="{StaticResource CardPadding}">
+                    <VerticalStackLayout Spacing="8">
+                        <BoxView HeightRequest="12" WidthRequest="150" CornerRadius="6" HorizontalOptions="Start"
+                                 Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+                        <BoxView HeightRequest="6" CornerRadius="3"
+                                 Color="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Style="{StaticResource SoftCard}" Padding="{StaticResource CardPadding}">
+                    <VerticalStackLayout Spacing="8">
+                        <BoxView HeightRequest="12" WidthRequest="110" CornerRadius="6" HorizontalOptions="Start"
+                                 Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+                        <BoxView HeightRequest="6" CornerRadius="3"
+                                 Color="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Goals list: hidden while loading so the skeleton is the only story -->
+            <comp:ItemsStackLayout ItemsSource="{Binding Goals}" Spacing="10"
+                                   IsVisible="{Binding IsBusy, Converter={StaticResource Not}}">
                 <comp:ItemsStackLayout.ItemTemplate>
                     <DataTemplate x:DataType="vm:GoalItemViewModel">
-                        <Border Style="{StaticResource Card}">
+                        <Border Style="{StaticResource Card}"
+                                comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.985"
+                                SemanticProperties.Description="{Binding Goal.Name}">
                             <VerticalStackLayout Spacing="10">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <VerticalStackLayout Grid.Column="0" Spacing="2">
@@ -45,13 +99,10 @@
                                                LineBreakMode="WordWrap" MaxLines="2"
                                                SemanticProperties.HeadingLevel="Level2"/>
                                         <Label Text="{Binding CategoryText}" Style="{StaticResource LCaption}"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
                                                LineBreakMode="WordWrap" MaxLines="2"/>
                                     </VerticalStackLayout>
-                                    <Border Grid.Column="1" VerticalOptions="Center"
-                                            HorizontalOptions="End"
-                                            Background="{StaticResource SurfaceAltBrush}"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 10"
-                                            Padding="9,4">
+                                    <Border Grid.Column="1" Style="{StaticResource StatusChip}">
                                         <Label Text="{Binding StatusText}" FontSize="11.5" FontAttributes="Bold"
                                                TextColor="{Binding StatusColor}"
                                                LineBreakMode="WordWrap" MaxLines="2"
@@ -61,11 +112,13 @@
 
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <ProgressBar Grid.Column="0" Progress="{Binding Fraction}"
+                                                 ProgressColor="{Binding StatusColor}"
                                                  Style="{StaticResource ProgressTrack}"
                                                  VerticalOptions="Center"
                                                  SemanticProperties.Description="{Binding StatusText}"/>
                                     <Label Grid.Column="1" Text="{Binding ProgressText}"
-                                           Style="{StaticResource LCaption}" VerticalOptions="Center"
+                                           Style="{StaticResource LCaption}" FontAttributes="Bold"
+                                           VerticalOptions="Center"
                                            LineBreakMode="TailTruncation" MaxLines="1"/>
                                 </Grid>
 
@@ -76,6 +129,7 @@
                                             Text="{Binding BindingContext.AddProgressText, Source={x:Reference GoalsPageRef}}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="16,8" FontSize="13"
+                                            MinimumHeightRequest="44"
                                             LineBreakMode="WordWrap"
                                             SemanticProperties.Description="{Binding BindingContext.AddProgressText, Source={x:Reference GoalsPageRef}}"
                                             Command="{Binding BindingContext.EditGoalCommand, Source={x:Reference GoalsPageRef}}"
@@ -86,6 +140,7 @@
                                             BorderColor="{StaticResource Negative}"
                                             TextColor="{StaticResource Negative}"
                                             Padding="16,8" FontSize="13"
+                                            MinimumHeightRequest="44"
                                             LineBreakMode="WordWrap"
                                             SemanticProperties.Description="{Binding BindingContext.DeleteText, Source={x:Reference GoalsPageRef}}"
                                             Command="{Binding BindingContext.DeleteGoalCommand, Source={x:Reference GoalsPageRef}}"

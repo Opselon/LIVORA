@@ -8,44 +8,99 @@
     xmlns:vm="clr-namespace:LIVORA.Presentation"
     x:DataType="vm:ProfileViewModel">
 
+    <!-- Page-local presentation vocabulary: field labels, chips, section headers with a rail,
+         hairline dividers. Kept in the view (no new shared-dictionary keys). -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+                <Setter Property="Padding" Value="9,4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+                <Setter Property="HorizontalTextAlignment" Value="End"/>
+            </Style>
+            <Style x:Key="SoonChipLabel" TargetType="Label" BasedOn="{StaticResource ChipLabel}">
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="HorizontalTextAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+            <Style x:Key="RowDivider" TargetType="BoxView">
+                <Setter Property="HeightRequest" Value="1"/>
+                <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
     <ScrollView Padding="{StaticResource PageThickness}">
-        <VerticalStackLayout Spacing="16">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
             <Label Text="{Binding Title}" Style="{StaticResource LDisplay}"
-                   LineBreakMode="WordWrap" MaxLines="2"
+                   LineBreakMode="WordWrap" MaxLines="2" Margin="0,0,0,2"
                    SemanticProperties.HeadingLevel="Level1"/>
 
             <!-- Identity -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="{Binding NameLabel}" Style="{StaticResource LCaption}" FontAttributes="Bold"
-                           LineBreakMode="WordWrap" MaxLines="2"/>
+                    <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                        <Label Grid.Column="1" Text="{Binding NameLabel}" Style="{StaticResource SectionHeader}"
+                               FontSize="17"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                    </Grid>
                     <Entry Text="{Binding Name}" Placeholder="{Binding NameLabel}"
+                           MinimumHeightRequest="44"
                            SemanticProperties.Description="{Binding NameLabel}"/>
                     <Button Text="{Binding SaveText}" Style="{StaticResource PrimaryButton}"
                             Command="{Binding SaveNameCommand}" HorizontalOptions="Start" Padding="24,10"
+                            MinimumHeightRequest="44"
                             SemanticProperties.Description="{Binding SaveText}"/>
 
-                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+                    <BoxView Style="{StaticResource RowDivider}" Margin="0,2"/>
 
                     <VerticalStackLayout Spacing="4">
-                        <Label Text="{Binding FocusAreasLabel}" Style="{StaticResource LCaption}" FontAttributes="Bold"
-                               LineBreakMode="WordWrap" MaxLines="2"/>
+                        <Label Text="{Binding FocusAreasLabel}" Style="{StaticResource FieldLabel}"/>
                         <Label Text="{Binding FocusAreasText}" Style="{StaticResource LBody}"
                                LineBreakMode="WordWrap"/>
                     </VerticalStackLayout>
 
+                    <BoxView Style="{StaticResource RowDivider}"/>
+
                     <VerticalStackLayout Spacing="4">
-                        <Label Text="{Binding ActivityLabel}" Style="{StaticResource LCaption}" FontAttributes="Bold"
-                               LineBreakMode="WordWrap" MaxLines="2"/>
+                        <Label Text="{Binding ActivityLabel}" Style="{StaticResource FieldLabel}"/>
                         <Picker ItemsSource="{Binding ActivityOptions}" SelectedIndex="{Binding ActivityIndex}"
                                 MinimumHeightRequest="44"
                                 SemanticProperties.Description="{Binding ActivityLabel}"/>
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="{Binding ScheduleLabel}" Style="{StaticResource LCaption}" FontAttributes="Bold"
-                               LineBreakMode="WordWrap" MaxLines="2"
+                    <BoxView Style="{StaticResource RowDivider}"/>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{Binding ScheduleLabel}" Style="{StaticResource FieldLabel}"
                                SemanticProperties.HeadingLevel="Level3"/>
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
@@ -77,11 +132,13 @@
                     </VerticalStackLayout>
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                         <Button Grid.Column="0" Text="{Binding EnglishText}" Command="{Binding SetEnglishCommand}"
-                                HeightRequest="48" BackgroundColor="{Binding EnglishButtonBackground}"
+                                HeightRequest="48" MinimumHeightRequest="44"
+                                BackgroundColor="{Binding EnglishButtonBackground}"
                                 TextColor="{Binding EnglishButtonText}" CornerRadius="14" FontAttributes="Bold"
                                 BorderWidth="0" SemanticProperties.Description="{Binding EnglishText}"/>
                         <Button Grid.Column="1" Text="{Binding PersianText}" Command="{Binding SetPersianCommand}"
-                                HeightRequest="48" BackgroundColor="{Binding PersianButtonBackground}"
+                                HeightRequest="48" MinimumHeightRequest="44"
+                                BackgroundColor="{Binding PersianButtonBackground}"
                                 TextColor="{Binding PersianButtonText}" CornerRadius="14" FontAttributes="Bold"
                                 BorderWidth="0" SemanticProperties.Description="{Binding PersianText}"/>
                     </Grid>
@@ -92,21 +149,27 @@
                  Dot color comes from the VM: mock=caution, not-connected=neutral-positive; wording stays honest. -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="{Binding ConnectionCenterTitle}" Style="{StaticResource LHeading}"
-                           LineBreakMode="WordWrap" MaxLines="2"
-                           SemanticProperties.HeadingLevel="Level2"/>
-                    <comp:ItemsStackLayout ItemsSource="{Binding ConnectionCenter}" Spacing="8">
+                    <Grid ColumnDefinitions="4,*,Auto" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                        <Label Grid.Column="1" Text="{Binding ConnectionCenterTitle}" Style="{StaticResource SectionHeader}"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Border Grid.Column="2" Style="{StaticResource ChipNeutral}">
+                            <Label Text="{Binding DataSourcesLabel}" Style="{StaticResource ChipLabel}"/>
+                        </Border>
+                    </Grid>
+                    <comp:ItemsStackLayout ItemsSource="{Binding ConnectionCenter}" Spacing="0">
                         <comp:ItemsStackLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:DataSourceRow">
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" MinimumHeightRequest="44">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" MinimumHeightRequest="48">
                                     <BoxView Grid.Column="0" WidthRequest="10" HeightRequest="10" CornerRadius="5"
                                              Color="{Binding DotColor}" VerticalOptions="Center"/>
                                     <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource LBody}"
                                            VerticalOptions="Center"
-                                           LineBreakMode="WordWrap" MaxLines="2"/>
-                                    <Label Grid.Column="2" Text="{Binding Status}" Style="{StaticResource LCaption}"
-                                           FontSize="12" VerticalOptions="Center" HorizontalOptions="End"
-                                           LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End"/>
+                                           LineBreakMode="WordWrap" MaxLines="2"
+                                           SemanticProperties.HeadingLevel="Level3"/>
+                                    <Border Grid.Column="2" Style="{StaticResource ChipNeutral}" VerticalOptions="Center">
+                                        <Label Text="{Binding Status}" Style="{StaticResource ChipLabel}"/>
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </comp:ItemsStackLayout.ItemTemplate>
@@ -120,34 +183,36 @@
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="10">
                     <VerticalStackLayout Spacing="2">
-                        <Label Text="{Binding PrivacyTitle}" Style="{StaticResource LHeading}"
-                               LineBreakMode="WordWrap" MaxLines="2"
+                        <Label Text="{Binding PrivacyTitle}" Style="{StaticResource SectionHeader}"
+                               HorizontalOptions="Start"
                                SemanticProperties.HeadingLevel="Level2"/>
                         <Label Text="{Binding PrivacyNote}" Style="{StaticResource LCaption}" FontSize="12"
                                LineBreakMode="WordWrap" MaxLines="3"/>
                     </VerticalStackLayout>
-                    <comp:ItemsStackLayout ItemsSource="{Binding PrivacyRows}" Spacing="6">
+                    <comp:ItemsStackLayout ItemsSource="{Binding PrivacyRows}" Spacing="0">
                         <comp:ItemsStackLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:PrivacyRowViewModel">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" MinimumHeightRequest="44">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" MinimumHeightRequest="48"
+                                      SemanticProperties.Description="{Binding Name}">
                                     <Label Grid.Column="0" Text="{Binding Name}" Style="{StaticResource LBody}"
                                            FontSize="13.5" VerticalOptions="Center"
                                            LineBreakMode="WordWrap" MaxLines="2"/>
-                                    <Label Grid.Column="1" Text="{Binding OriginText}" Style="{StaticResource LCaption}"
-                                           FontSize="11" VerticalOptions="Center" HorizontalOptions="End"
-                                           LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End"/>
+                                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" VerticalOptions="Center">
+                                        <Label Text="{Binding OriginText}" Style="{StaticResource ChipLabel}" FontSize="11"/>
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </comp:ItemsStackLayout.ItemTemplate>
                     </comp:ItemsStackLayout>
                     <Button Text="{Binding DeleteAllText}" Style="{StaticResource SecondaryButton}"
                             BorderColor="{StaticResource Negative}" TextColor="{StaticResource Negative}"
-                            Command="{Binding DeleteAllDataCommand}" FontSize="13" Padding="16,8" HorizontalOptions="Start"
+                            Command="{Binding DeleteAllDataCommand}" FontSize="13" Padding="16,8"
+                            MinimumHeightRequest="44" HorizontalOptions="Start"
                             SemanticProperties.Description="{Binding DeleteAllText}"/>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Future sections, honestly labeled -->
+            <!-- Future sections, honestly labeled: the "soon" chip carries the honest status -->
             <Border Style="{StaticResource SoftCard}">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="3">
@@ -157,10 +222,9 @@
                         <Label Text="{Binding NotificationsSoon}" Style="{StaticResource LCaption}" FontSize="12"
                                LineBreakMode="WordWrap" MaxLines="2"/>
                     </VerticalStackLayout>
-                    <Label Grid.Column="1" Text="{Binding SoonBadge}" Style="{StaticResource LCaption}" FontSize="11"
-                           VerticalOptions="Center" HorizontalOptions="End"
-                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
-                           LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End"/>
+                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" VerticalOptions="Center" HorizontalOptions="End">
+                        <Label Text="{Binding SoonBadge}" Style="{StaticResource SoonChipLabel}"/>
+                    </Border>
                 </Grid>
             </Border>
             <Border Style="{StaticResource SoftCard}">
@@ -172,16 +236,16 @@
                         <Label Text="{Binding AppearanceSoon}" Style="{StaticResource LCaption}" FontSize="12"
                                LineBreakMode="WordWrap" MaxLines="2"/>
                     </VerticalStackLayout>
-                    <Label Grid.Column="1" Text="{Binding SoonBadge}" Style="{StaticResource LCaption}" FontSize="11"
-                           VerticalOptions="Center" HorizontalOptions="End"
-                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
-                           LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End"/>
+                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" VerticalOptions="Center" HorizontalOptions="End">
+                        <Label Text="{Binding SoonBadge}" Style="{StaticResource SoonChipLabel}"/>
+                    </Border>
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource Card}">
+            <Border Style="{StaticResource Card}" Padding="18,14">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                     <Label Grid.Column="0" Text="{Binding AboutLabel}" Style="{StaticResource LSubheading}"
+                           VerticalOptions="Center"
                            LineBreakMode="WordWrap" MaxLines="2"
                            SemanticProperties.HeadingLevel="Level2"/>
                     <Label Grid.Column="1" Text="{Binding VersionLabel}" Style="{StaticResource LCaption}"

@@ -8,24 +8,65 @@
     xmlns:vm="clr-namespace:LIVORA.Presentation"
     x:DataType="vm:HealthViewModel">
 
+    <!-- Page-local presentation vocabulary (chips / section-header language) — kept in the
+         view, not the shared style dictionary; tokens come from LivoraColors.xaml. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+                <Setter Property="Padding" Value="9,4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="ChipCautionSoft" TargetType="Border" BasedOn="{StaticResource ChipNeutral}">
+                <Setter Property="Background" Value="{StaticResource MetricActivitySoftBrush}"/>
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="TailTruncation"/>
+                <Setter Property="MaxLines" Value="1"/>
+            </Style>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
     <ScrollView Padding="{StaticResource PageThickness}">
-        <VerticalStackLayout Spacing="16">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                 <Label Grid.Column="0" Text="{Binding Title}" Style="{StaticResource LDisplay}"
                        VerticalOptions="Center"
                        LineBreakMode="TailTruncation" MaxLines="1"
                        SemanticProperties.HeadingLevel="Level1"/>
-                <Border Grid.Column="1" Background="{StaticResource OverlayBrush}" StrokeThickness="0"
-                        StrokeShape="RoundRectangle 9" Padding="8,3" VerticalOptions="Center">
-                    <Label Text="{Binding SourceBadge}" FontSize="11"
-                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                           LineBreakMode="TailTruncation" MaxLines="1"/>
+                <Border Grid.Column="1" Style="{StaticResource ChipNeutral}">
+                    <Label Text="{Binding SourceBadge}" Style="{StaticResource ChipLabel}"/>
                 </Border>
             </Grid>
 
             <Label Text="{Binding BaselineNote}" Style="{StaticResource LCaption}" FontSize="12"
                    TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}" LineBreakMode="WordWrap"/>
+
+            <!-- Loading language: honest inline skeleton while the state pipeline runs
+                 (existing IsBusy flag only — no new view-model surface). -->
+            <Border Style="{StaticResource SoftCard}" Padding="14,12" IsVisible="{Binding IsBusy}">
+                <HorizontalStackLayout Spacing="12">
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource Accent}"
+                                       WidthRequest="22" HeightRequest="22" VerticalOptions="Center"/>
+                    <VerticalStackLayout Spacing="6" VerticalOptions="Center">
+                        <BoxView HeightRequest="10" WidthRequest="140" CornerRadius="5"
+                                 Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+                        <BoxView HeightRequest="10" WidthRequest="90" CornerRadius="5"
+                                 Color="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Border>
 
             <!-- Compact trend strip -->
             <Border Style="{StaticResource SoftCard}" Padding="14,10">
@@ -43,21 +84,30 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- One card per domain; the accent rail encodes the metric's own color language
+                 (sleep/activity/recovery/wellness) so sections scan before they are read. -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="{Binding SleepTitle}" Style="{StaticResource LHeading}"
-                           LineBreakMode="TailTruncation" MaxLines="1"
-                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource MetricSleep}"
+                                 CornerRadius="2" VerticalOptions="Fill"/>
+                        <Label Grid.Column="1" Text="{Binding SleepTitle}" Style="{StaticResource SectionHeader}"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                    </Grid>
                     <comp:ItemsStackLayout ItemsSource="{Binding SleepRows}" Spacing="10">
                         <comp:ItemsStackLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:HealthSectionRow">
-                                <VerticalStackLayout Spacing="4">
+                                <VerticalStackLayout Spacing="4"
+                                                     comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.99"
+                                                     SemanticProperties.Description="{Binding Label}">
                                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                         <Label Grid.Column="0" Text="{Binding Label}" Style="{StaticResource LBody}"
                                                VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="2"/>
-                                        <Label Grid.Column="1" Text="{Binding StaleBadge}" FontSize="11"
-                                               TextColor="{StaticResource Caution}" IsVisible="{Binding IsStale}"
-                                               VerticalOptions="Center" LineBreakMode="TailTruncation" MaxLines="1"/>
+                                        <Border Grid.Column="1" Style="{StaticResource ChipCautionSoft}"
+                                                IsVisible="{Binding IsStale}">
+                                            <Label Text="{Binding StaleBadge}" FontSize="11"
+                                                   TextColor="{StaticResource Caution}" FontAttributes="Bold"/>
+                                        </Border>
                                         <Label Grid.Column="2" Text="{Binding Value}" Style="{StaticResource LBody}"
                                                FontAttributes="Bold" VerticalOptions="Center"
                                                HorizontalTextAlignment="End"
@@ -65,6 +115,7 @@
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <ProgressBar Grid.Column="0" Progress="{Binding Fraction}"
+                                                     ProgressColor="{StaticResource MetricSleep}"
                                                      Style="{StaticResource ProgressTrack}" VerticalOptions="Center"
                                                      SemanticProperties.Description="{Binding Label}"/>
                                         <Label Grid.Column="1" Text="{Binding DeltaText}" FontSize="11"
@@ -81,19 +132,26 @@
 
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="{Binding ActivityTitle}" Style="{StaticResource LHeading}"
-                           LineBreakMode="TailTruncation" MaxLines="1"
-                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource MetricActivity}"
+                                 CornerRadius="2" VerticalOptions="Fill"/>
+                        <Label Grid.Column="1" Text="{Binding ActivityTitle}" Style="{StaticResource SectionHeader}"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                    </Grid>
                     <comp:ItemsStackLayout ItemsSource="{Binding ActivityRows}" Spacing="10">
                         <comp:ItemsStackLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:HealthSectionRow">
-                                <VerticalStackLayout Spacing="4">
+                                <VerticalStackLayout Spacing="4"
+                                                     comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.99"
+                                                     SemanticProperties.Description="{Binding Label}">
                                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                         <Label Grid.Column="0" Text="{Binding Label}" Style="{StaticResource LBody}"
                                                VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="2"/>
-                                        <Label Grid.Column="1" Text="{Binding StaleBadge}" FontSize="11"
-                                               TextColor="{StaticResource Caution}" IsVisible="{Binding IsStale}"
-                                               VerticalOptions="Center" LineBreakMode="TailTruncation" MaxLines="1"/>
+                                        <Border Grid.Column="1" Style="{StaticResource ChipCautionSoft}"
+                                                IsVisible="{Binding IsStale}">
+                                            <Label Text="{Binding StaleBadge}" FontSize="11"
+                                                   TextColor="{StaticResource Caution}" FontAttributes="Bold"/>
+                                        </Border>
                                         <Label Grid.Column="2" Text="{Binding Value}" Style="{StaticResource LBody}"
                                                FontAttributes="Bold" VerticalOptions="Center"
                                                HorizontalTextAlignment="End"
@@ -101,6 +159,7 @@
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <ProgressBar Grid.Column="0" Progress="{Binding Fraction}"
+                                                     ProgressColor="{StaticResource MetricActivity}"
                                                      Style="{StaticResource ProgressTrack}" VerticalOptions="Center"
                                                      SemanticProperties.Description="{Binding Label}"/>
                                         <Label Grid.Column="1" Text="{Binding DeltaText}" FontSize="11"
@@ -117,21 +176,28 @@
 
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="{Binding RecoveryTitle}" Style="{StaticResource LHeading}"
-                           LineBreakMode="TailTruncation" MaxLines="1"
-                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource MetricRecovery}"
+                                 CornerRadius="2" VerticalOptions="Fill"/>
+                        <Label Grid.Column="1" Text="{Binding RecoveryTitle}" Style="{StaticResource SectionHeader}"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                    </Grid>
                     <Label Text="{Binding PlaceholderNote}" FontSize="12"
                            TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}" LineBreakMode="WordWrap"/>
                     <comp:ItemsStackLayout ItemsSource="{Binding RecoveryRows}" Spacing="10">
                         <comp:ItemsStackLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:HealthSectionRow">
-                                <VerticalStackLayout Spacing="4">
+                                <VerticalStackLayout Spacing="4"
+                                                     comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.99"
+                                                     SemanticProperties.Description="{Binding Label}">
                                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                         <Label Grid.Column="0" Text="{Binding Label}" Style="{StaticResource LBody}"
                                                VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="2"/>
-                                        <Label Grid.Column="1" Text="{Binding StaleBadge}" FontSize="11"
-                                               TextColor="{StaticResource Caution}" IsVisible="{Binding IsStale}"
-                                               VerticalOptions="Center" LineBreakMode="TailTruncation" MaxLines="1"/>
+                                        <Border Grid.Column="1" Style="{StaticResource ChipCautionSoft}"
+                                                IsVisible="{Binding IsStale}">
+                                            <Label Text="{Binding StaleBadge}" FontSize="11"
+                                                   TextColor="{StaticResource Caution}" FontAttributes="Bold"/>
+                                        </Border>
                                         <Label Grid.Column="2" Text="{Binding Value}" Style="{StaticResource LBody}"
                                                FontAttributes="Bold" VerticalOptions="Center"
                                                HorizontalTextAlignment="End"
@@ -139,6 +205,7 @@
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <ProgressBar Grid.Column="0" Progress="{Binding Fraction}"
+                                                     ProgressColor="{StaticResource MetricRecovery}"
                                                      Style="{StaticResource ProgressTrack}" VerticalOptions="Center"
                                                      SemanticProperties.Description="{Binding Label}"/>
                                         <Label Grid.Column="1" Text="{Binding DeltaText}" FontSize="11"
@@ -155,19 +222,26 @@
 
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="{Binding WellnessTitle}" Style="{StaticResource LHeading}"
-                           LineBreakMode="TailTruncation" MaxLines="1"
-                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource MetricWellness}"
+                                 CornerRadius="2" VerticalOptions="Fill"/>
+                        <Label Grid.Column="1" Text="{Binding WellnessTitle}" Style="{StaticResource SectionHeader}"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                    </Grid>
                     <comp:ItemsStackLayout ItemsSource="{Binding WellnessRows}" Spacing="10">
                         <comp:ItemsStackLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:HealthSectionRow">
-                                <VerticalStackLayout Spacing="4">
+                                <VerticalStackLayout Spacing="4"
+                                                     comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.99"
+                                                     SemanticProperties.Description="{Binding Label}">
                                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                         <Label Grid.Column="0" Text="{Binding Label}" Style="{StaticResource LBody}"
                                                VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="2"/>
-                                        <Label Grid.Column="1" Text="{Binding StaleBadge}" FontSize="11"
-                                               TextColor="{StaticResource Caution}" IsVisible="{Binding IsStale}"
-                                               VerticalOptions="Center" LineBreakMode="TailTruncation" MaxLines="1"/>
+                                        <Border Grid.Column="1" Style="{StaticResource ChipCautionSoft}"
+                                                IsVisible="{Binding IsStale}">
+                                            <Label Text="{Binding StaleBadge}" FontSize="11"
+                                                   TextColor="{StaticResource Caution}" FontAttributes="Bold"/>
+                                        </Border>
                                         <Label Grid.Column="2" Text="{Binding Value}" Style="{StaticResource LBody}"
                                                FontAttributes="Bold" VerticalOptions="Center"
                                                HorizontalTextAlignment="End"
@@ -175,6 +249,7 @@
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <ProgressBar Grid.Column="0" Progress="{Binding Fraction}"
+                                                     ProgressColor="{StaticResource MetricWellness}"
                                                      Style="{StaticResource ProgressTrack}" VerticalOptions="Center"
                                                      SemanticProperties.Description="{Binding Label}"/>
                                         <Label Grid.Column="1" Text="{Binding DeltaText}" FontSize="11"

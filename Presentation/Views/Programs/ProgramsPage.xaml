@@ -9,8 +9,43 @@
     x:DataType="vm:ProgramsViewModel"
     x:Name="ProgramsPageRef">
 
+    <!-- Page-local presentation vocabulary: chips + the section-header language (rail + title).
+         Lives here, not in the shared style dictionary; every token is from LivoraColors.xaml. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+                <Setter Property="Padding" Value="9,4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="ChipTint" TargetType="Border" BasedOn="{StaticResource ChipNeutral}">
+                <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="TailTruncation"/>
+                <Setter Property="MaxLines" Value="1"/>
+            </Style>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
     <ScrollView Padding="{StaticResource PageThickness}">
-        <VerticalStackLayout Spacing="16">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
             <Label Text="{Binding Title}"
                    Style="{StaticResource LDisplay}"
@@ -21,14 +56,18 @@
                    LineBreakMode="WordWrap"/>
 
             <!-- Enrolled programs (adaptive, with today's plan) -->
-            <VerticalStackLayout Spacing="10" IsVisible="{Binding HasEnrolled}">
-                <Label Text="{Binding EnrolledTitle}" Style="{StaticResource LHeading}"
-                       LineBreakMode="WordWrap" MaxLines="2"
-                       SemanticProperties.HeadingLevel="Level2"/>
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasEnrolled}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                    <Label Grid.Column="1" Text="{Binding EnrolledTitle}" Style="{StaticResource SectionHeader}"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
                 <comp:ItemsStackLayout ItemsSource="{Binding Enrolled}" Spacing="12">
                     <comp:ItemsStackLayout.ItemTemplate>
                         <DataTemplate x:DataType="vm:BootcampItemViewModel">
-                            <Border Style="{StaticResource Card}">
+                            <Border Style="{StaticResource Card}"
+                                    comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.985"
+                                    SemanticProperties.Description="{Binding TitleText}">
                                 <VerticalStackLayout Spacing="10">
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                         <VerticalStackLayout Grid.Column="0" Spacing="2">
@@ -36,21 +75,35 @@
                                                    LineBreakMode="WordWrap" MaxLines="2"
                                                    SemanticProperties.HeadingLevel="Level2"/>
                                             <Label Text="{Binding CategoryText}" Style="{StaticResource LCaption}"
+                                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
                                                    LineBreakMode="WordWrap" MaxLines="2"/>
                                         </VerticalStackLayout>
-                                        <Label Grid.Column="1" Text="{Binding ProgressText}"
-                                               Style="{StaticResource LMetric}"
-                                               TextColor="{StaticResource Accent}"
-                                               VerticalOptions="Center" HorizontalOptions="End"
-                                               SemanticProperties.Description="{Binding ProgressText}"/>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding ProgressText}"
+                                                   Style="{StaticResource LMetric}"
+                                                   TextColor="{StaticResource Accent}"
+                                                   HorizontalOptions="End" HorizontalTextAlignment="End"
+                                                   SemanticProperties.Description="{Binding ProgressText}"/>
+                                            <Label Text="{Binding CreatorText}" Style="{StaticResource LCaption}" FontSize="10.5"
+                                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                                   HorizontalOptions="End" HorizontalTextAlignment="End"
+                                                   LineBreakMode="TailTruncation" MaxLines="1"/>
+                                        </VerticalStackLayout>
                                     </Grid>
 
                                     <ProgressBar Progress="{Binding Bootcamp.CompletionFraction}"
                                                  Style="{StaticResource ProgressTrack}"
                                                  SemanticProperties.Description="{Binding ProgressText}"/>
 
-                                    <Label Text="{Binding DayText}" Style="{StaticResource LCaption}" FontAttributes="Bold"
-                                           LineBreakMode="WordWrap" MaxLines="2"/>
+                                    <FlexLayout Wrap="Wrap" AlignItems="Center">
+                                        <Border Style="{StaticResource ChipNeutral}" Margin="0,0,8,0">
+                                            <Label Text="{Binding DayText}" Style="{StaticResource ChipLabel}"/>
+                                        </Border>
+                                        <Border Style="{StaticResource ChipTint}">
+                                            <Label Text="{Binding DifficultyText}" Style="{StaticResource ChipLabel}"
+                                                   TextColor="{StaticResource Accent}"/>
+                                        </Border>
+                                    </FlexLayout>
 
                                     <!-- Today's plan row -->
                                     <Border Style="{StaticResource SoftCard}" Padding="12,10">
@@ -59,6 +112,7 @@
                                                 <Label Grid.Column="0" Text="{Binding BindingContext.PlanForTodayText, Source={x:Reference ProgramsPageRef}}"
                                                        Style="{StaticResource LCaption}" FontAttributes="Bold"
                                                        VerticalOptions="Center"
+                                                       SemanticProperties.HeadingLevel="Level3"
                                                        LineBreakMode="WordWrap" MaxLines="2"/>
                                                 <Border Grid.Column="1" IsVisible="{Binding WasAdapted}"
                                                         VerticalOptions="Center" HorizontalOptions="End"
@@ -81,12 +135,31 @@
                                         </VerticalStackLayout>
                                     </Border>
 
-                                    <Button Text="{Binding BindingContext.CompleteDayText, Source={x:Reference ProgramsPageRef}}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="16,8" FontSize="13" HorizontalOptions="Start"
-                                            SemanticProperties.Description="{Binding BindingContext.CompleteDayText, Source={x:Reference ProgramsPageRef}}"
-                                            Command="{Binding BindingContext.CompleteDayCommand, Source={x:Reference ProgramsPageRef}}"
-                                            CommandParameter="{Binding .}"/>
+                                    <!-- Action row: complete is the primary ask, leave is the honest
+                                         escape hatch (both commands already exist on the VM). -->
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <Button Grid.Column="0"
+                                                Text="{Binding BindingContext.CompleteDayText, Source={x:Reference ProgramsPageRef}}"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="16,8" FontSize="13" HorizontalOptions="Fill"
+                                                MinimumHeightRequest="44"
+                                                LineBreakMode="WordWrap"
+                                                SemanticProperties.Description="{Binding BindingContext.CompleteDayText, Source={x:Reference ProgramsPageRef}}"
+                                                Command="{Binding BindingContext.CompleteDayCommand, Source={x:Reference ProgramsPageRef}}"
+                                                CommandParameter="{Binding .}"/>
+                                        <Button Grid.Column="1"
+                                                Text="{Binding BindingContext.LeaveText, Source={x:Reference ProgramsPageRef}}"
+                                                Style="{StaticResource SecondaryButton}"
+                                                BorderColor="{StaticResource Negative}"
+                                                TextColor="{StaticResource Negative}"
+                                                Padding="16,8" FontSize="13"
+                                                MinimumHeightRequest="44"
+                                                VerticalOptions="Center"
+                                                LineBreakMode="WordWrap"
+                                                SemanticProperties.Description="{Binding BindingContext.LeaveText, Source={x:Reference ProgramsPageRef}}"
+                                                Command="{Binding BindingContext.LeaveCommand, Source={x:Reference ProgramsPageRef}}"
+                                                CommandParameter="{Binding .}"/>
+                                    </Grid>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
@@ -95,14 +168,17 @@
             </VerticalStackLayout>
 
             <!-- Catalog -->
-            <VerticalStackLayout Spacing="10">
-                <Label Text="{Binding AvailableTitle}" Style="{StaticResource LHeading}"
-                       LineBreakMode="WordWrap" MaxLines="2"
-                       SemanticProperties.HeadingLevel="Level2"/>
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                    <Label Grid.Column="1" Text="{Binding AvailableTitle}" Style="{StaticResource SectionHeader}"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
                 <comp:ItemsStackLayout ItemsSource="{Binding Available}" Spacing="10">
                     <comp:ItemsStackLayout.ItemTemplate>
                         <DataTemplate x:DataType="vm:BootcampItemViewModel">
-                            <Border Style="{StaticResource Card}">
+                            <Border Style="{StaticResource Card}"
+                                    SemanticProperties.Description="{Binding TitleText}">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto">
                                     <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="3">
                                         <Label Text="{Binding TitleText}" Style="{StaticResource LSubheading}"
@@ -111,18 +187,24 @@
                                         <Label Text="{Binding DescriptionText}" Style="{StaticResource LCaption}"
                                                LineBreakMode="WordWrap" MaxLines="3"/>
                                         <FlexLayout Wrap="Wrap" AlignItems="Center">
-                                            <Label Text="{Binding DayText}" Style="{StaticResource LCaption}" FontSize="11.5"
-                                                   LineBreakMode="WordWrap" Margin="0,0,8,0"/>
-                                            <Label Text="·" Style="{StaticResource LCaption}" FontSize="11.5"
-                                                   VerticalTextAlignment="Center" Margin="0,0,8,0"/>
-                                            <Label Text="{Binding DifficultyText}" Style="{StaticResource LCaption}" FontSize="11.5"
-                                                   LineBreakMode="WordWrap"/>
+                                            <Border Style="{StaticResource ChipNeutral}" Margin="0,0,8,0">
+                                                <Label Text="{Binding DayText}" Style="{StaticResource ChipLabel}"/>
+                                            </Border>
+                                            <Border Style="{StaticResource ChipTint}">
+                                                <Label Text="{Binding DifficultyText}" Style="{StaticResource ChipLabel}"
+                                                       TextColor="{StaticResource Accent}"/>
+                                            </Border>
                                         </FlexLayout>
+                                        <!-- authorship line: programs are user-created content -->
+                                        <Label Text="{Binding CreatorText}" Style="{StaticResource LCaption}" FontSize="11"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                               LineBreakMode="TailTruncation" MaxLines="1"/>
                                     </VerticalStackLayout>
                                     <Button Grid.Row="0" Grid.Column="1" Grid.RowSpan="3"
                                             Text="{Binding BindingContext.EnrollText, Source={x:Reference ProgramsPageRef}}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="16,8" FontSize="13"
+                                            MinimumHeightRequest="44"
                                             VerticalOptions="Center"
                                             SemanticProperties.Description="{Binding BindingContext.EnrollText, Source={x:Reference ProgramsPageRef}}"
                                             Command="{Binding BindingContext.EnrollCommand, Source={x:Reference ProgramsPageRef}}"

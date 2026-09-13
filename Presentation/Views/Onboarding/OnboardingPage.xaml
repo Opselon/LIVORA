@@ -7,12 +7,27 @@
     xmlns:vm="clr-namespace:LIVORA.Presentation"
     x:DataType="vm:OnboardingViewModel">
 
+    <!-- Page-local presentation vocabulary: form group cards + field labels, in-view only. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
     <!-- Single-scroll onboarding: steps read top-to-bottom in both LTR and RTL
          (pure vertical flow + Start/End alignment, so mirroring never reorders content). -->
     <Grid RowDefinitions="Auto,*,Auto" Padding="{StaticResource PageThickness}">
 
-        <!-- Step indicator: purely decorative dots (non-interactive) -->
-        <HorizontalStackLayout Grid.Row="0" Spacing="6" HorizontalOptions="Center" Margin="0,8">
+        <!-- Step indicator: purely decorative dots (non-interactive); marked out of the
+             accessibility tree so screen readers don't announce empty items -->
+        <HorizontalStackLayout Grid.Row="0" Spacing="6" HorizontalOptions="Center" Margin="0,8"
+                               AutomationProperties.IsInAccessibleTree="False">
             <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{StaticResource Accent}"/>
             <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
             <BoxView WidthRequest="26" HeightRequest="5" CornerRadius="2.5" Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
@@ -21,73 +36,86 @@
 
         <!-- Content -->
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Spacing="16" VerticalOptions="Center" Padding="0,12">
-                <Label Text="{Binding WelcomeTitle}"
-                       Style="{StaticResource LDisplay}"
-                       LineBreakMode="WordWrap" MaxLines="2"
-                       SemanticProperties.HeadingLevel="Level1"/>
-                <Label Text="{Binding WelcomeSubtitle}"
-                       Style="{StaticResource LBodySecondary}"
-                       LineBreakMode="WordWrap"/>
-
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding NamePrompt}" Style="{StaticResource LSubheading}"
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" VerticalOptions="Center" Padding="0,12">
+                <VerticalStackLayout Spacing="4" Margin="0,0,0,4">
+                    <Label Text="{Binding WelcomeTitle}"
+                           Style="{StaticResource LDisplay}"
                            LineBreakMode="WordWrap" MaxLines="2"
-                           SemanticProperties.HeadingLevel="Level2"/>
-                    <Entry Text="{Binding Name}"
-                           Placeholder="{Binding NamePlaceholder}"
-                           SemanticProperties.Description="{Binding NamePrompt}"/>
+                           SemanticProperties.HeadingLevel="Level1"/>
+                    <Label Text="{Binding WelcomeSubtitle}"
+                           Style="{StaticResource LBodySecondary}"
+                           LineBreakMode="WordWrap"/>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding ActivityPrompt}" Style="{StaticResource LSubheading}"
-                           LineBreakMode="WordWrap" MaxLines="2"
-                           SemanticProperties.HeadingLevel="Level2"/>
-                    <Picker ItemsSource="{Binding ActivityOptions}"
-                            SelectedIndex="{Binding ActivityIndex}"
-                            MinimumHeightRequest="44"
-                            SemanticProperties.Description="{Binding ActivityPrompt}"/>
-                </VerticalStackLayout>
+                <!-- One card per question group: consistent field rhythm (label -> control)
+                     and 44dp+ interactive targets everywhere. -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding NamePrompt}" Style="{StaticResource FieldLabel}"
+                               FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Entry Text="{Binding Name}"
+                               Placeholder="{Binding NamePlaceholder}"
+                               MinimumHeightRequest="44"
+                               SemanticProperties.Description="{Binding NamePrompt}"/>
+                    </VerticalStackLayout>
+                </Border>
 
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding SchedulePrompt}" Style="{StaticResource LSubheading}"
-                           LineBreakMode="WordWrap" MaxLines="2"
-                           SemanticProperties.HeadingLevel="Level2"/>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                            <Label Text="{Binding BedtimeLabel}" Style="{StaticResource LCaption}" FontSize="12"
-                                   LineBreakMode="WordWrap" MaxLines="2"/>
-                            <TimePicker Time="{Binding Bedtime}" MinimumHeightRequest="44"
-                                        SemanticProperties.Description="{Binding BedtimeLabel}"/>
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                            <Label Text="{Binding WakeLabel}" Style="{StaticResource LCaption}" FontSize="12"
-                                   LineBreakMode="WordWrap" MaxLines="2"/>
-                            <TimePicker Time="{Binding WakeTime}" MinimumHeightRequest="44"
-                                        SemanticProperties.Description="{Binding WakeLabel}"/>
-                        </VerticalStackLayout>
-                    </Grid>
-                </VerticalStackLayout>
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding ActivityPrompt}" Style="{StaticResource FieldLabel}"
+                               FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Picker ItemsSource="{Binding ActivityOptions}"
+                                SelectedIndex="{Binding ActivityIndex}"
+                                MinimumHeightRequest="44"
+                                SemanticProperties.Description="{Binding ActivityPrompt}"/>
+                    </VerticalStackLayout>
+                </Border>
 
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding LanguagePrompt}" Style="{StaticResource LSubheading}"
-                           LineBreakMode="WordWrap" MaxLines="2"
-                           SemanticProperties.HeadingLevel="Level2"/>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                        <Button Grid.Column="0" Text="{Binding EnglishText}"
-                                Command="{Binding SetEnglishCommand}"
-                                HeightRequest="48" CornerRadius="14" FontAttributes="Bold"
-                                BackgroundColor="{Binding EnglishButtonBackground}"
-                                TextColor="{Binding EnglishButtonText}"
-                                SemanticProperties.Description="{Binding EnglishText}"/>
-                        <Button Grid.Column="1" Text="{Binding PersianText}"
-                                Command="{Binding SetPersianCommand}"
-                                HeightRequest="48" CornerRadius="14" FontAttributes="Bold"
-                                BackgroundColor="{Binding PersianButtonBackground}"
-                                TextColor="{Binding PersianButtonText}"
-                                SemanticProperties.Description="{Binding PersianText}"/>
-                    </Grid>
-                </VerticalStackLayout>
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding SchedulePrompt}" Style="{StaticResource FieldLabel}"
+                               FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding BedtimeLabel}" Style="{StaticResource LCaption}" FontSize="12"
+                                       LineBreakMode="WordWrap" MaxLines="2"/>
+                                <TimePicker Time="{Binding Bedtime}" MinimumHeightRequest="44"
+                                            SemanticProperties.Description="{Binding BedtimeLabel}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="{Binding WakeLabel}" Style="{StaticResource LCaption}" FontSize="12"
+                                       LineBreakMode="WordWrap" MaxLines="2"/>
+                                <TimePicker Time="{Binding WakeTime}" MinimumHeightRequest="44"
+                                            SemanticProperties.Description="{Binding WakeLabel}"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource AccentCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding LanguagePrompt}" Style="{StaticResource FieldLabel}"
+                               FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Grid.Column="0" Text="{Binding EnglishText}"
+                                    Command="{Binding SetEnglishCommand}"
+                                    HeightRequest="48" MinimumHeightRequest="44" CornerRadius="14" FontAttributes="Bold"
+                                    BackgroundColor="{Binding EnglishButtonBackground}"
+                                    TextColor="{Binding EnglishButtonText}"
+                                    SemanticProperties.Description="{Binding EnglishText}"/>
+                            <Button Grid.Column="1" Text="{Binding PersianText}"
+                                    Command="{Binding SetPersianCommand}"
+                                    HeightRequest="48" MinimumHeightRequest="44" CornerRadius="14" FontAttributes="Bold"
+                                    BackgroundColor="{Binding PersianButtonBackground}"
+                                    TextColor="{Binding PersianButtonText}"
+                                    SemanticProperties.Description="{Binding PersianText}"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
 
                 <!-- Honest sample-data note: never implies a real device connection -->
                 <Label Text="{Binding FinishNote}"

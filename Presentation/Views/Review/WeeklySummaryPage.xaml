@@ -8,12 +8,29 @@
     xmlns:vm="clr-namespace:LIVORA.Presentation"
     x:DataType="vm:WeeklySummaryViewModel">
 
+    <!-- Page-local presentation vocabulary (rails/chips) — in-view only, no new shared keys. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
     <ScrollView Padding="{StaticResource PageThickness}">
-        <VerticalStackLayout Spacing="16">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
             <!-- Header: title + back/close. CloseCommand behavior unchanged. -->
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                <VerticalStackLayout Grid.Column="0" Spacing="2">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,2">
+                <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
                     <Label Text="{Binding Title}" Style="{StaticResource LDisplay}"
                            LineBreakMode="WordWrap" MaxLines="2"
                            SemanticProperties.HeadingLevel="Level1"/>
@@ -21,31 +38,40 @@
                            LineBreakMode="WordWrap" MaxLines="2"/>
                 </VerticalStackLayout>
                 <Button Grid.Column="1" Text="{Binding BackText}" Style="{StaticResource SecondaryButton}"
-                        Padding="14,8" FontSize="13"
+                        Padding="14,8" FontSize="13" MinimumHeightRequest="44"
                         VerticalOptions="Center"
                         SemanticProperties.Description="{Binding BackText}"
                         Command="{Binding CloseCommand}"/>
             </Grid>
 
-            <!-- Not enough history -->
-            <Border Style="{StaticResource SoftCard}" IsVisible="{Binding IsEmpty}">
+            <!-- Not enough history: an honest, centered empty state (never a fake review) -->
+            <VerticalStackLayout Spacing="12" Padding="8,28" IsVisible="{Binding IsEmpty}">
+                <BoxView WidthRequest="56" HeightRequest="56" CornerRadius="28"
+                         Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"
+                         HorizontalOptions="Center"/>
                 <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
-                       LineBreakMode="WordWrap"/>
-            </Border>
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="WordWrap"
+                       SemanticProperties.HeadingLevel="Level2"/>
+            </VerticalStackLayout>
 
-            <VerticalStackLayout Spacing="16" IsVisible="{Binding HasSummary}">
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasSummary}">
 
                 <!-- Trends -->
                 <Border Style="{StaticResource Card}">
-                    <VerticalStackLayout Spacing="10">
-                        <comp:ItemsStackLayout ItemsSource="{Binding Trends}" Spacing="8">
+                    <VerticalStackLayout Spacing="6">
+                        <comp:ItemsStackLayout ItemsSource="{Binding Trends}" Spacing="6">
                             <comp:ItemsStackLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TrendLineViewModel">
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                        <Label Grid.Column="0" Text="{Binding DomainText}" Style="{StaticResource LBody}"
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" MinimumHeightRequest="44"
+                                          SemanticProperties.Description="{Binding DomainText}">
+                                        <BoxView Grid.Column="0" WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                                                 Color="{Binding TrendColorKey, Converter={StaticResource ColorByKey}}"
+                                                 VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="{Binding DomainText}" Style="{StaticResource LBody}"
                                                VerticalOptions="Center"
                                                LineBreakMode="WordWrap" MaxLines="2"/>
-                                        <Label Grid.Column="1" Text="{Binding TrendText}" Style="{StaticResource LCaption}"
+                                        <Label Grid.Column="2" Text="{Binding TrendText}" Style="{StaticResource LCaption}"
                                                FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="End"
                                                TextColor="{Binding TrendColorKey, Converter={StaticResource ColorByKey}}"
                                                LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End"
@@ -63,16 +89,20 @@
                 <!-- Improvements -->
                 <Border Style="{StaticResource Card}" IsVisible="{Binding HasImprovements}">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="{Binding ImprovementsHeader}" Style="{StaticResource LHeading}"
-                               LineBreakMode="WordWrap" MaxLines="2"
-                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                            <BoxView Grid.Column="0" Color="{StaticResource Positive}"
+                                     CornerRadius="2" VerticalOptions="Fill"/>
+                            <Label Grid.Column="1" Text="{Binding ImprovementsHeader}" Style="{StaticResource SectionHeader}"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                        </Grid>
                         <comp:ItemsStackLayout ItemsSource="{Binding Improvements}" Spacing="4">
                             <comp:ItemsStackLayout.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
-                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" MinimumHeightRequest="40">
                                         <BoxView Grid.Column="0" WidthRequest="8" HeightRequest="8" CornerRadius="4"
                                                  Color="{StaticResource Positive}" VerticalOptions="Center"/>
                                         <Label Grid.Column="1" Text="{Binding .}" Style="{StaticResource LBody}"
+                                               VerticalOptions="Center"
                                                LineBreakMode="WordWrap"/>
                                     </Grid>
                                 </DataTemplate>
@@ -84,16 +114,20 @@
                 <!-- Declines / watch -->
                 <Border Style="{StaticResource Card}" IsVisible="{Binding HasDeclines}">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="{Binding DeclinesHeader}" Style="{StaticResource LHeading}"
-                               LineBreakMode="WordWrap" MaxLines="2"
-                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                            <BoxView Grid.Column="0" Color="{StaticResource Caution}"
+                                     CornerRadius="2" VerticalOptions="Fill"/>
+                            <Label Grid.Column="1" Text="{Binding DeclinesHeader}" Style="{StaticResource SectionHeader}"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                        </Grid>
                         <comp:ItemsStackLayout ItemsSource="{Binding Declines}" Spacing="4">
                             <comp:ItemsStackLayout.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
-                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" MinimumHeightRequest="40">
                                         <BoxView Grid.Column="0" WidthRequest="8" HeightRequest="8" CornerRadius="4"
                                                  Color="{StaticResource Caution}" VerticalOptions="Center"/>
                                         <Label Grid.Column="1" Text="{Binding .}" Style="{StaticResource LBody}"
+                                               VerticalOptions="Center"
                                                LineBreakMode="WordWrap"/>
                                     </Grid>
                                 </DataTemplate>
@@ -102,24 +136,28 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Numbers row -->
+                <!-- Numbers row: stat tiles — big number first, label above as a caption -->
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                    <Border Grid.Column="0" Style="{StaticResource SoftCard}">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding HabitsHeader}" Style="{StaticResource LCaption}"
+                    <Border Grid.Column="0" Style="{StaticResource SoftCard}" Padding="16,14">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding HabitsHeader}" Style="{StaticResource LCaption}" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
                                    LineBreakMode="WordWrap" MaxLines="2"
                                    SemanticProperties.HeadingLevel="Level3"/>
-                            <Label Text="{Binding HabitConsistencyText}" Style="{StaticResource LMetric}"
+                            <Label Text="{Binding HabitConsistencyText}" Style="{StaticResource LMetricLarge}" FontSize="28"
+                                   TextColor="{StaticResource Accent}"
                                    LineBreakMode="TailTruncation" MaxLines="1"
                                    SemanticProperties.HeadingLevel="Level3"/>
                         </VerticalStackLayout>
                     </Border>
-                    <Border Grid.Column="1" Style="{StaticResource SoftCard}">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding GoalsHeader}" Style="{StaticResource LCaption}"
+                    <Border Grid.Column="1" Style="{StaticResource SoftCard}" Padding="16,14">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding GoalsHeader}" Style="{StaticResource LCaption}" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
                                    LineBreakMode="WordWrap" MaxLines="2"
                                    SemanticProperties.HeadingLevel="Level3"/>
-                            <Label Text="{Binding GoalProgressText}" Style="{StaticResource LMetric}"
+                            <Label Text="{Binding GoalProgressText}" Style="{StaticResource LMetricLarge}" FontSize="28"
+                                   TextColor="{StaticResource Accent}"
                                    LineBreakMode="TailTruncation" MaxLines="1"
                                    SemanticProperties.HeadingLevel="Level3"/>
                         </VerticalStackLayout>
@@ -128,13 +166,16 @@
 
                 <!-- Next-week focus -->
                 <Border Style="{StaticResource AccentCard}">
-                    <VerticalStackLayout Spacing="6">
-                        <Label Text="{Binding NextFocusHeader}" Style="{StaticResource LSubheading}"
-                               LineBreakMode="WordWrap" MaxLines="2"
-                               SemanticProperties.HeadingLevel="Level2"/>
-                        <Label Text="{Binding NextFocusText}" Style="{StaticResource LBody}"
-                               LineBreakMode="WordWrap"/>
-                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                            <Label Text="{Binding NextFocusHeader}" Style="{StaticResource LSubheading}"
+                                   LineBreakMode="WordWrap" MaxLines="2"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                            <Label Text="{Binding NextFocusText}" Style="{StaticResource LBody}"
+                                   LineBreakMode="WordWrap"/>
+                        </VerticalStackLayout>
+                    </Grid>
                 </Border>
             </VerticalStackLayout>
 
