@@ -174,7 +174,10 @@ def parse_pr_contract(body: str) -> dict:
 
 # ---------------------------------------------------------------- matching
 def norm(p: str) -> str:
-    return p.replace("\\", "/").lstrip("./")
+    p = p.replace("\\", "/")
+    while p.startswith("./"):
+        p = p[2:]
+    return p.lstrip("/")
 
 
 def matches_any(path: str, patterns: list[str]) -> bool:
@@ -214,29 +217,35 @@ SECRET_PATTERNS = [
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     re.compile(r"(?i)(password|passwd|secret)\s*[:=]\s*['\"][^'\"]{8,}['\"]"),
 ]
-BAD_XAML_COMMENT = re.compile(r"\{/\*")
+BAD_XAML_COMMENT = re.compile(r"\{" + chr(47) + r"\*")
 DI_HOLLOW = re.compile(r"services\.Add(Singleton|Scoped|Transient)<(\w+)>\(\);")
 BRUSH_ON_COLOR = re.compile(r"(TextColor|BackgroundColor|FieldBackgroundColor)\s*=\s*\"\{StaticResource\s+\w*Brush\}\"\s*")
 
 
 def scan_added_lines(additions_path: str):
     hits = {"secret": [], "brace_xaml": [], "hollow_di": [], "brush": []}
+    cur = ""
     try:
         with open(additions_path, encoding="utf-8", errors="replace") as f:
             for ln in f:
-                if not (ln.startswith("+") and not ln.startswith("+++")):
+                if ln.startswith("diff --git ") or ln.startswith("--- "):
+                    continue
+                if ln.startswith("+++ b/"):
+                    cur = norm(ln[6:].strip())
+                    continue
+                if not ln.startswith("+") or ln.startswith("+++"):
                     continue
                 code = ln[1:]
-                loc = f"{ln!r}"[:160]
+                loc = f"{cur}: {ln!r}"[:160]
                 for pat in SECRET_PATTERNS:
                     if pat.search(code):
                         hits["secret"].append(loc)
                         break
-                if BAD_XAML_COMMENT.search(code):
+                if cur.endswith(".xaml") and BAD_XAML_COMMENT.search(code):
                     hits["brace_xaml"].append(loc)
-                if DI_HOLLOW.search(code):
+                if cur.endswith(".cs") and DI_HOLLOW.search(code):
                     hits["hollow_di"].append(loc)
-                if BRUSH_ON_COLOR.search(code):
+                if cur.endswith(".xaml") and BRUSH_ON_COLOR.search(code):
                     hits["brush"].append(loc)
     except OSError:
         fail_hard("additions.diff not readable")
@@ -289,18 +298,23 @@ def main() -> None:
     # 4. per-path classification (per-rule findings aggregated so a 45-file PR
     #    reports one drift line, not 45)
     declared = [norm(x.strip()) for x in re.split(r"[,;]", contract.get("owned_scope") or "") if x.strip()]
+    # lead-amendment exception: a PR declaring the registry lead's Agent-Id may touch
+    # frozen/architecture/integration-owned paths, but only as YELLOW (never auto-GREEN).
+    lead_agent = next((l.get("agent") for l in (reg.get("lanes") or [])
+                       if isinstance(l, dict) and l.get("id") == "lead"), None)
+    acting_as_lead = bool(lead_agent) and contract.get("agent_id") == lead_agent
+    lead_yellow: list[str] = []
     shared_hits: list[str] = []
     drift_hits: list[str] = []
     red_path_hits = 0
     for path in changed:
-        if matches_any(path, frozen) or matches_any(path, arch):
-            if red_path_hits < 6:
-                red.append(f"FROZEN/ARCHITECTURE EDIT: {path} — contracts (Application/Abstractions, Domain/Enums) and "
-                           f".github/scripts/architecture docs are lead-only; open a separate coordinator PR.")
-            red_path_hits += 1
-            continue
-        if matches_any(path, integ):
-            shared_hits.append(path)
+        if matches_any(path, frozen) or matches_any(path, arch) or matches_any(path, integ):
+            if acting_as_lead:
+                lead_yellow.append(path)
+            elif matches_any(path, frozen):
+                red.append(f"FROZEN CONTRACT EDIT: {path} — Application/Abstractions/** + Domain/Enums/** are lead-only; ask the lead to amend via a separate PR.")
+            else:
+                red.append(f"ARCHITECTURE-OWNED EDIT: {path} — workflows/registry/scripts/integration-owned files are lead-only.")
             continue
         lane_id, _owns = lane_for_path(path, reg)
         if lane_id is None:
@@ -309,6 +323,8 @@ def main() -> None:
             red_path_hits += 1
         elif declared and not matches_any(path, declared):
             drift_hits.append(path)
+    if lead_yellow:
+        yellow.append(f"LEAD AMENDMENT ({len(lead_yellow)} files): frozen/architecture/integration-owned paths touched by the lead lane itself ({lead_yellow[:6]}...) — human/coordinator review required, never auto-GREEN.")
     if shared_hits:
         yellow.append(f"SHARED FILE ({len(shared_hits)}): {shared_hits[:6]}{'...' if len(shared_hits) > 6 else ''} "
                       f"— integration-owned; deliver APPEND blocks instead of editing.")
