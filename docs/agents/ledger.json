@@ -1,0 +1,11 @@
+{
+  "entries": [
+    {
+      "pr": 0,
+      "head_sha": "aed6f7763b7042440478d533f8e2d01e8d68b45d",
+      "state": "REVERIFIED",
+      "note": "pre-workflow baseline: master at system adoption, CI green (3/3 jobs), 439/439 tests"
+    }
+  ],
+  "verified_master_sha": "aed6f7763b7042440478d533f8e2d01e8d68b45d"
+}

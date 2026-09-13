@@ -1,0 +1,137 @@
+name: Integrate
+
+# THE ONLY automation allowed to move master. Serialized; one merge per run.
+# Merges only when the roll-up gate check is a SUCCESS on the PR's CURRENT
+# head SHA, then re-verifies a clean checkout of real master. Fail-safe: any
+# doubt -> skip, never merge.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "PR number to integrate now (must be gate-GREEN on current head)"
+        required: true
+      override_yellow:
+        description: "set 'yes' to merge a coordinator-approved YELLOW PR despite gate hold"
+        required: false
+        default: "no"
+  schedule:
+    - cron: "*/30 * * * *"   # heartbeat: integrate the OLDEST eligible GREEN PR (FIFO)
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+
+concurrency:
+  group: integrate-master
+  cancel-in-progress: false
+
+jobs:
+  pick-and-merge:
+    name: merge-if-green
+    runs-on: ubuntu-latest
+    outputs:
+      merged: ${{ steps.decide.outputs.merged }}
+      pr: ${{ steps.decide.outputs.pr }}
+      head: ${{ steps.decide.outputs.head }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select and validate candidate (fail-safe - skip unless GREEN on current head)
+        id: decide
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          PR=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.pr }}" ]; then
+            PR="${{ inputs.pr }}"
+          else
+            PR=$(gh pr list --state open --limit 200 --json number,createdAt,isDraft \
+                  --jq '[.[] | select(.isDraft==false)] | sort_by(.createdAt) | .[0].number // empty')
+          fi
+          if [ -z "${PR:-}" ]; then echo "no candidate PR"; exit 0; fi
+          HEAD=$(gh pr view "$PR" --json headRefOid --jq .headRefOid)
+          STATE=$(gh pr view "$PR" --json state --jq .state)
+          MERGEABLE=$(gh pr view "$PR" --json mergeable --jq .mergeable)
+          if [ "$STATE" != "OPEN" ]; then echo "PR#$PR state=$STATE - skip"; exit 0; fi
+          if [ "$MERGEABLE" != "MERGEABLE" ]; then echo "PR#$PR mergeable=$MERGEABLE - skip (RED)"; exit 0; fi
+          OK=$(gh api "repos/$GH_REPO/commits/$HEAD/check-runs" \
+                --jq '[.check_runs[] | select(.name=="roll-up status")] | sort_by(.startedAt) | last | .conclusion // "none"')
+          OVR="${{ inputs.override_yellow }}"
+          if [ "$OK" != "success" ]; then
+            if [ "$OVR" = "yes" ] && [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "OVERRIDE: merging PR#$PR with gate=$OK (coordinator-authorized; recorded in ledger)"
+              echo "override=yes" >> "$GITHUB_OUTPUT"
+            else
+              echo "PR#$PR gate=$OK on head $HEAD - not GREEN on current head; skip (fail-safe)"
+              exit 0
+            fi
+          fi
+          gh pr merge "$PR" --squash
+          echo "merged=$PR" >> "$GITHUB_OUTPUT"
+          echo "pr=$PR" >> "$GITHUB_OUTPUT"
+          echo "head=$HEAD" >> "$GITHUB_OUTPUT"
+
+      - name: Ledger - MERGED
+        if: steps.decide.outputs.merged != ''
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: ${{ github.repository }}
+        run: python scripts/integration/livora_ledger.py merge --pr ${{ steps.decide.outputs.pr }} --sha ${{ steps.decide.outputs.head }} ${{ steps.decide.outputs.override == 'yes' && '--override' || '' }}
+
+  reverify:
+    name: post-merge re-verification (clean checkout of real master)
+    needs: pick-and-merge
+    if: needs.pick-and-merge.outputs.merged != ''
+    runs-on: windows-latest
+    steps:
+      - name: Fetch actual master HEAD (never trust the merge API result alone)
+        shell: pwsh
+        run: |
+          mkdir verify; cd verify
+          git init -q .
+          git remote add origin https://github.com/$env:GH_REPO
+          git fetch -q --depth=1 origin master
+          git checkout -q FETCH_HEAD
+          "master_head=" + (git rev-parse HEAD) | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+        env:
+          GH_REPO: ${{ github.repository }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: verify/global.json
+
+      - name: Install MAUI workloads
+        run: dotnet workload install maui-windows
+
+      - name: Tests on merged master
+        working-directory: verify
+        run: dotnet test Tests/LIVORA.Tests.csproj --configuration Release
+
+      - name: Windows app build on merged master
+        working-directory: verify
+        run: dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release
+
+      - name: Ledger - REVERIFIED
+        if: success()
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: ${{ github.repository }}
+        working-directory: verify
+        run: python verify/scripts/integration/livora_ledger.py verify --sha ${master_head}
+
+      - name: Recovery - RECOVERY_REQUIRED issue and freeze signal
+        if: failure()
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python verify/scripts/integration/livora_ledger.py fail --sha ${master_head} || true
+          gh issue create \
+            --title "RECOVERY_REQUIRED: master ${master_head} failed post-merge verification" \
+            --body "integrate.yml re-verification failed after merging PR #${{ needs.pick-and-merge.outputs.pr }}. FREEZE integrations until a coordinator restores a green master (revert via a normal PR, or fix-forward with a GREEN PR). Run: ${RUN_URL}"

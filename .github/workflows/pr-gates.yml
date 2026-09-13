@@ -1,0 +1,147 @@
+name: PR Gates
+
+# Evaluates every open PR against CURRENT master (fresh fetch, synthetic merge
+# commit — never the stale base). Posts checks; the integrate workflow merges.
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "PR number to (re-)evaluate"
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+concurrency:
+  group: gates-${{ github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: controller-gate
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
+    outputs:
+      verdict: ${{ steps.classify.outputs.verdict }}
+    steps:
+      - name: Resolve PR number
+        id: prnum
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "n=${{ inputs.pr }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "n=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch PR metadata + diff (derive from GitHub, never from agent claims)
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: "${{ github.repository }}"
+          PR: ${{ steps.prnum.outputs.n }}
+        run: |
+          gh pr view "$PR" --json number,title,body,baseRefOid,headRefOid,potentialMergeCommit,mergeable,commits,author > pr.json
+          gh pr diff "$PR" --patch > additions.diff
+
+      - name: Compute changed files + meta.json
+        run: |
+          python - <<'PY'
+          import json, subprocess
+          pr = json.load(open("pr.json"))
+          base, head = pr["baseRefOid"], pr["headRefOid"]
+          merge = pr.get("potentialMergeCommit") or ""
+          out = subprocess.run(["git", "diff", "--name-only", f"{base}...{head}"],
+                               capture_output=True, text=True, check=True).stdout
+          mb = subprocess.run(["git", "merge-base", base, head],
+                              capture_output=True, text=True).stdout.strip()
+          files = [l for l in out.splitlines() if l.strip()]
+          open("changed.txt", "w").write("\n".join(files) + ("\n" if files else ""))
+          meta = {
+            "pr": pr["number"], "title": pr["title"], "body": pr.get("body") or "",
+            "base_sha": base, "head_sha": head, "merge_sha": merge, "merge_base": mb,
+            "mergeable": (pr.get("mergeable") or "unknown").lower(),
+            "commits": len(pr.get("commits") or []),
+            "author": (pr.get("author") or {}).get("login", "?"),
+          }
+          json.dump(meta, open("meta.json", "w"))
+          print(f"PR#{pr['number']} base={base[:8]} head={head[:8]} mergeable={meta['mergeable']} files={len(files)}")
+          PY
+
+      - name: Ownership / scope / security classification
+        id: classify
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: |
+          set +e
+          python scripts/integration/livora_gates.py | tee gate-output.txt
+          rc=${PIPESTATUS[0]}
+          case $rc in
+            0) v=GREEN ;; 1) v=YELLOW ;; *) v=RED ;;
+          esac
+          echo "verdict=$v" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Controller gate — PR#${{ steps.prnum.outputs.n }}"; echo
+            echo "Verdict: **$v** — classification only (build/tests are separate gates)"; echo
+            echo '```'
+            cat gate-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          gh pr comment "${{ steps.prnum.outputs.n }}" --body "controller gate verdict: **$v** (details in the run summary)" || true
+
+      - name: Hard stop on RED (YELLOW proceeds so the coordinator sees build/test too)
+        if: steps.classify.outputs.verdict == 'RED'
+        run: exit 1
+
+  build-test:
+    name: verify merge state (base HEAD + PR applied)
+    needs: gate
+    runs-on: windows-latest
+    steps:
+      - name: Checkout PR merge ref (kills stale-baseline false-greens)
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number || inputs.pr }}/merge
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install MAUI workloads
+        run: dotnet workload install maui-windows
+
+      - name: Unit tests (Release)
+        run: dotnet test Tests/LIVORA.Tests.csproj --configuration Release
+
+      - name: App build (Windows head — test project cannot see XAML/DI breaks)
+        run: dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release
+
+  report:
+    name: roll-up status
+    needs: [gate, build-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Final classification
+        env:
+          VERDICT: ${{ needs.gate.outputs.verdict }}
+          BUILD: ${{ needs.build-test.result }}
+        run: |
+          echo "gate=$VERDICT build=$BUILD" | tee -a "$GITHUB_STEP_SUMMARY"
+          # This job is the SINGLE merge authority: success => auto-merge eligible.
+          if [ "$BUILD" != "success" ]; then echo "RED — build/tests failed ($BUILD)"; exit 1; fi
+          case "$VERDICT" in
+            GREEN)  echo "GREEN — integrate workflow may merge this PR"; exit 0 ;;
+            YELLOW) echo "::warning::HELD for coordinator review (YELLOW)"; exit 1 ;;
+            *)      echo "RED — gate verdict $VERDICT"; exit 1 ;;
+          esac
