@@ -1,0 +1,25 @@
+<root>
+  <!-- ==========================================================================
+       Wave 3b lane 02 — Health Connect capability + permission status lines (EN).
+       Inert on purpose (.keys.xml, not .resx): the orchestrator appends these AFTER
+       Resources/Localization/AppResources.resx, originals winning on duplicates.
+       Reused existing keys (NOT redefined here): Health.Sleep, Health.Steps,
+       Health.ActiveMinutes, Health.NotAvailable, Profile.Status.NotConnected.
+       Arg counts are a code contract — see HealthCapabilityMap.StatusArgsFor /
+       StatusArgCount and Wave3bHealthProviderTests.
+       ======================================================================== -->
+  <data name="Health.Provider.HealthConnect" xml:space="preserve"><value>Health Connect</value></data>
+  <data name="Health.Cap.Provider.Connected" xml:space="preserve"><value>Connected · reading data</value></data>
+  <data name="Health.Cap.Provider.NotInstalled" xml:space="preserve"><value>Health Connect isn't installed on this device</value></data>
+  <data name="Health.Cap.Provider.NeedsPermission" xml:space="preserve"><value>Allow health access so LIVORA can read your data</value></data>
+  <data name="Health.Cap.Provider.Unavailable" xml:space="preserve"><value>Not available on this device</value></data>
+  <data name="Health.Cap.Status.Available" xml:space="preserve"><value>Available</value></data>
+  <data name="Health.Cap.Status.NeedsPermission" xml:space="preserve"><value>Needs permission for {0}</value></data>
+  <data name="Health.Cap.Status.NoData" xml:space="preserve"><value>No {0} records for this period</value></data>
+  <data name="Health.Cap.Status.Unsupported" xml:space="preserve"><value>{0} isn't supported by this connection yet</value></data>
+  <data name="Health.Cap.Permission.Granted" xml:space="preserve"><value>Allowed</value></data>
+  <data name="Health.Cap.Permission.Denied" xml:space="preserve"><value>Not allowed</value></data>
+  <data name="Health.Cap.Permission.NotAsked" xml:space="preserve"><value>Not asked yet</value></data>
+  <data name="Health.Cap.Permission.AskLimit" xml:space="preserve"><value>LIVORA won't ask again this session ({0} tries used)</value></data>
+  <data name="Health.Cap.Permission.Unavailable" xml:space="preserve"><value>Not available in this version</value></data>
+</root>

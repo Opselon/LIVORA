@@ -101,11 +101,15 @@ public sealed class DailyPlanService : IDailyPlanService
 {
     private readonly IRuleEngine _rules;
     private readonly IRepository<Bootcamp> _bootcamps;
+    // WAVE3C-LANE05: optional second-pass engine; null (unregistered) keeps today's behavior.
+    private readonly IPlanAdaptationEngine? _adaptationEngine;
 
-    public DailyPlanService(IRuleEngine rules, IRepository<Bootcamp> bootcamps)
+    public DailyPlanService(IRuleEngine rules, IRepository<Bootcamp> bootcamps,
+        IPlanAdaptationEngine? adaptationEngine = null)
     {
         _rules = rules;
         _bootcamps = bootcamps;
+        _adaptationEngine = adaptationEngine;
     }
 
     public async Task<DailyPlan> BuildPlanAsync(PersonalState state, UserProfile profile,
@@ -173,12 +177,15 @@ public sealed class DailyPlanService : IDailyPlanService
             adaptationKeys.Add(r.RuleKey);
         }
 
-        return new DailyPlan
+        var assembled = new DailyPlan
         {
             Date = now.Date,
             Items = items,
             AdaptationRuleKeys = adaptationKeys,
         };
+        // WAVE3C-LANE05: route through the adaptive engine only when one is registered; it is
+        // idempotent and skips rule keys the assembly pass already applied.
+        return _adaptationEngine?.Adapt(assembled, state, now).Plan ?? assembled;
     }
 
     /// <summary>Adjustment grammar: "exercise:*0.5" / "bedtime:-30min" / "focus:-1block" / "recovery:+15min" / "walk:+15min" / "winddown:+30min" / "habit:&lt;id&gt;:prompt"</summary>

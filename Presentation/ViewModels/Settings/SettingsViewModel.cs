@@ -17,6 +17,8 @@ namespace LIVORA.Presentation;
 public sealed class SettingsViewModel : ObservableObject
 {
     // WAVE3B-SETTINGS-VM: lane APPEND blocks add services/properties/commands here.
+    // WAVE3C-LANE07: second-level entries into the wave-3c surfaces (routed the same way as
+    // reminders/updates — NavigateSafelyAsync reports honestly if a route has not merged).
     // WAVE3B-SETTINGS-VM-END
 
     private readonly ILocalizationService _loc;
@@ -49,6 +51,10 @@ public sealed class SettingsViewModel : ObservableObject
         OpenSystemSettingsCommand = new Command(OpenSystemSettings);
         OpenRemindersCommand = new Command(() => NavigateRequested?.Invoke("reminders"));
         OpenUpdatesCommand = new Command(() => NavigateRequested?.Invoke("updates"));
+        // WAVE3C-LANE07: entries into the wave-3c surfaces (same safe-navigation path).
+        OpenAiSettingsCommand = new Command(() => NavigateRequested?.Invoke("ai-settings"));
+        OpenDataStudioCommand = new Command(() => NavigateRequested?.Invoke("data-studio"));
+        OpenLockCommand = new Command(() => NavigateRequested?.Invoke("lock"));
         CheckNowCommand = new Command(async () => await Banner.RefreshAsync(force: true));
         WhatsNewCommand = new Command(ShowWhatsNew);
 
@@ -70,6 +76,10 @@ public sealed class SettingsViewModel : ObservableObject
     public Command OpenSystemSettingsCommand { get; }
     public Command OpenRemindersCommand { get; }
     public Command OpenUpdatesCommand { get; }
+    // WAVE3C-LANE07 (labels render through localize:Tr in XAML; nothing to re-raise).
+    public Command OpenAiSettingsCommand { get; }
+    public Command OpenDataStudioCommand { get; }
+    public Command OpenLockCommand { get; }
     public Command CheckNowCommand { get; }
     public Command WhatsNewCommand { get; }
     public Command BackCommand { get; }

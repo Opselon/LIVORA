@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wave 3c lane 02 keys (EN). Format: plain <data> XML inside <root> — merged into AppResources.resx by the orchestrator. -->
+<root>
+  <data name="Ai.Headline.Provider" xml:space="preserve"><value>Today's insight</value></data>
+  <data name="Ai.Body.Provider" xml:space="preserve"><value>{0}</value></data>
+  <data name="Ai.SourceBadge.Rules" xml:space="preserve"><value>From your routines</value></data>
+  <data name="Ai.SourceBadge.Validated" xml:space="preserve"><value>AI wording · checked locally</value></data>
+  <data name="Ai.SourceBadge.Fallback" xml:space="preserve"><value>AI unavailable — rules only</value></data>
+  <data name="Ai.Settings.Title" xml:space="preserve"><value>AI insights</value></data>
+  <data name="Ai.Settings.Enable" xml:space="preserve"><value>Let AI rephrase your insights</value></data>
+  <data name="Ai.Settings.InsecureWarning" xml:space="preserve"><value>Warning: the built-in AI gateway uses plain HTTP — your derived state leaves this device unencrypted. Off by default.</value></data>
+  <data name="Ai.Settings.KeySource" xml:space="preserve"><value>Key: {0}</value></data>
+  <data name="Ai.Consent.Explain" xml:space="preserve"><value>LIVORA sends only your computed metric deltas and goal titles to the AI — never notes, history, or your name.</value></data>
+</root>

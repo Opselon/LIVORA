@@ -85,7 +85,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<IUserStateService, UserStateService>();
         builder.Services.AddSingleton<IRuleEngine, RuleEngine>();
         builder.Services.AddSingleton<IRecommendationService, RecommendationService>();
-        builder.Services.AddSingleton<IIntelligenceProvider, SampleIntelligenceProvider>();
+        // NOTE (wave3c): IIntelligenceProvider is registered once in the WAVE3B-DI region below,
+        // wired to the AiOrchestratorProvider whose deterministic fallback IS SampleIntelligenceProvider.
+        // The legacy `AddSingleton<IIntelligenceProvider, SampleIntelligenceProvider>()` was removed
+        // to avoid a silent last-wins duplicate (see NoServiceInterface_IsRegisteredTwiceInMauiProgram).
         builder.Services.AddSingleton<IDailyPlanService, DailyPlanService>();
         builder.Services.AddSingleton<IIntelligenceService, IntelligenceOrchestrator>();
         builder.Services.AddSingleton<WeeklySummaryService>();
@@ -182,6 +185,171 @@ public static class MauiProgram
         Routing.RegisterRoute("review", typeof(LIVORA.Presentation.Views.Review.WeeklySummaryPage));
         // WAVE3B-DI: Wave 3b (master) registrations — AI providers, consent, persistence metadata,
         // normalization, patterns, activity. Merged by the orchestrator from lane APPEND blocks.
+
+        // ---- WAVE3C LANE 01: security + data portability (MAUI-free classes, composition root
+        // resolves them; same app-data layout as the existing stores — no second data root). ----
+        var livoraDataDir = System.IO.Path.Combine(FileSystem.AppDataDirectory, "LIVORA");
+        var secureDirStore = new System.Lazy<LIVORA.Infrastructure.Persistence.LocalJsonStore>(
+            () => new LIVORA.Infrastructure.Persistence.LocalJsonStore(
+                System.IO.Path.Combine(livoraDataDir, LIVORA.Infrastructure.Security.SecureStorageService.StoreDirName)));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Persistence.LocalJsonStore(livoraDataDir));
+        // At-rest box: real DPAPI (CurrentUser) on Windows; elsewhere a private app-data file with
+        // IsPlatformHardwareBacked=false — the UI can never claim a cipher this head does not have.
+        builder.Services.AddSingleton<LIVORA.Infrastructure.Security.IPlatformSecureBox>(
+#if WINDOWS
+            _ => new LIVORA.Infrastructure.Security.WindowsPlatformSecureBox());
+#else
+            _ => new LIVORA.Infrastructure.Security.PrivateFileSecureBox());
+#endif
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ISecureStorageService>(sp =>
+            new LIVORA.Infrastructure.Security.SecureStorageService(secureDirStore.Value,
+                sp.GetRequiredService<LIVORA.Infrastructure.Security.IPlatformSecureBox>()));
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IConsentService>(sp =>
+            new LIVORA.Infrastructure.Security.ConsentStore(
+                sp.GetRequiredService<LIVORA.Infrastructure.Persistence.LocalJsonStore>()));
+        // The AI-gateway seam: user-entered key beats the obfuscated embedded fallback; ships
+        // DISABLED (plain-HTTP endpoint), so nothing is sent anywhere until the user opts in.
+        // Register the concrete type once; IGatewayConfigService aliases it (no duplicate entry).
+        builder.Services.AddSingleton<LIVORA.Infrastructure.Security.Gateway.GatewayConfigService>(sp =>
+            new LIVORA.Infrastructure.Security.Gateway.GatewayConfigService(
+                new LIVORA.Infrastructure.Persistence.LocalJsonStore(System.IO.Path.Combine(
+                    livoraDataDir, LIVORA.Infrastructure.Security.Gateway.GatewayConfigService.GatewayDirName)),
+                sp.GetRequiredService<LIVORA.Application.Abstractions.ISecureStorageService>()));
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IGatewayConfigService>(sp =>
+            sp.GetRequiredService<LIVORA.Infrastructure.Security.Gateway.GatewayConfigService>());
+        // Catalog arbitration (integration decision, per PR#5 risk 2): lane 01's LocalDataCatalog
+        // binds the frozen ILocalDataCatalogService for the UI; lane 06's richer
+        // LocalDataCatalogService (meta bumps + sync-queue enqueue on every write) stays
+        // resolvable by concrete type for the storage lanes' own consumers.
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ILocalDataCatalogService>(sp =>
+            new LIVORA.Infrastructure.Persistence.LocalDataCatalog(
+                sp.GetRequiredService<LIVORA.Infrastructure.Persistence.LocalJsonStore>()));
+        builder.Services.AddSingleton<LIVORA.Infrastructure.Persistence.Wave3b.LocalDataCatalogService>();
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ILocalPasscodeService>(sp =>
+            new LIVORA.Infrastructure.Security.LocalPasscodeService(
+                sp.GetRequiredService<LIVORA.Application.Abstractions.ISecureStorageService>(),
+                () => sp.GetRequiredService<SessionState>().CurrentProfile?.Id));
+        // Honest placeholders until wave 4: cloud auth never succeeds (no backend exists), the
+        // sync transport is never configured (queue stays Pending, UI says so).
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ICloudAuthService,
+            LIVORA.Infrastructure.Security.CloudAuthService>();
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ISyncTransport,
+            LIVORA.Infrastructure.Security.NoopSyncTransport>();
+
+        // ---- WAVE3C LANE 02: real AI orchestration (OpenAI-compatible gateway) + safety -------
+        // Order: gate (consent + enabled + configured) -> minimal context -> provider -> tolerant
+        // parse -> safety validator -> interpretation; ANY failure falls back to the deterministic
+        // SampleIntelligenceProvider below. SSE-even-when-not-streaming handled by the provider.
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IUnitConverter,
+            LIVORA.Application.Normalization.UnitConverter>();
+        builder.Services.AddSingleton<LIVORA.Application.Normalization.PayloadValidator>();
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IPayloadValidator>(sp =>
+            sp.GetRequiredService<LIVORA.Application.Normalization.PayloadValidator>());
+        builder.Services.AddSingleton<LIVORA.Application.Normalization.ProviderDayMapper>();
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IContextBuilder>(sp =>
+            new LIVORA.Application.Intelligence.ContextBuilder(
+                () => sp.GetRequiredService<LIVORA.Application.Abstractions.ILocalizationService>()
+                        .CurrentLanguage == LIVORA.Domain.Enums.AppLanguage.Persian ? "fa" : "en"));
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IAiOutputValidator,
+            LIVORA.Application.Intelligence.AiSafetyValidator>();
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.IntelligenceProviders.Wave3c.OpenAiCompatibleChatProvider(
+            sp.GetRequiredService<LIVORA.Application.Abstractions.IGatewayConfigService>()));
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IIntelligenceProviderRegistry>(sp =>
+            new LIVORA.Infrastructure.IntelligenceProviders.Wave3c.ProviderRegistry(
+                new LIVORA.Application.Abstractions.IIntelligenceChatProvider[]
+                {
+                    sp.GetRequiredService<LIVORA.Infrastructure.IntelligenceProviders.Wave3c.OpenAiCompatibleChatProvider>(),
+                },
+                sp.GetRequiredService<LIVORA.Application.Abstractions.IConsentService>(),
+                sp.GetRequiredService<LIVORA.Application.Abstractions.IGatewayConfigService>()));
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IIntelligenceProvider>(sp =>
+            new LIVORA.Application.Intelligence.AiOrchestratorProvider(
+                sp.GetRequiredService<LIVORA.Application.Abstractions.IContextBuilder>(),
+                () => sp.GetRequiredService<LIVORA.Application.Abstractions.IIntelligenceProviderRegistry>().PickEffective(),
+                sp.GetRequiredService<LIVORA.Application.Abstractions.IAiOutputValidator>(),
+                // deterministic fallback = the shipped Wave 2 provider (rule-driven phrasing),
+                // rebuilt here from the live rule engine (the single IIntelligenceProvider
+                // registration above replaced the legacy Sample one; this instance is only the
+                // worst-case phrasing source when the AI path fails or is opted out).
+                new LIVORA.Infrastructure.IntelligenceProviders.SampleIntelligenceProvider(
+                    sp.GetRequiredService<IRuleEngine>()),
+                sp.GetRequiredService<LIVORA.Application.Abstractions.IConsentService>(),
+                sp.GetRequiredService<LIVORA.Application.Abstractions.IGatewayConfigService>()));
+        // "Connected" may only ever render after a real round-trip: the tester records its verdict
+        // through the ONE writer of probe state (GatewayConfigService.RecordProbeResult).
+        LIVORA.Presentation.AiSettingsViewModel.ConnectionTester = async ct =>
+        {
+            var chat = ServiceHelper.Get<LIVORA.Infrastructure.IntelligenceProviders.Wave3c.OpenAiCompatibleChatProvider>();
+            var gateway = ServiceHelper.Get<LIVORA.Infrastructure.Security.Gateway.GatewayConfigService>();
+            var text = await chat.CompleteStructuredAsync(
+                "Reply with exactly {\"ok\":true} and nothing else.", "{}", TimeSpan.FromSeconds(20), ct)
+                .ConfigureAwait(false);
+            var ok = text is not null && text.Contains("ok", StringComparison.OrdinalIgnoreCase);
+            gateway.RecordProbeResult(ok, ok ? null : "AiSettings.Test.Fail");
+            return ok;
+        };
+
+        // ---- WAVE3C LANE 05: adaptive plan engine + ranked decision layer ----------------------
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IPlanAdaptationEngine,
+            LIVORA.Application.Planning.Adaptive.PlanAdaptationEngine>();
+        builder.Services.AddSingleton<LIVORA.Application.Planning.Wave3b.RecommendationRanker>();
+        builder.Services.AddSingleton<LIVORA.Application.Planning.Wave3b.DecisionLog>();
+
+        // ---- WAVE3C LANE 06: durable local-first storage + sync queue + migrations -------------
+        builder.Services.AddSingleton(sp => new LIVORA.Application.Sync.MetaIndex(livoraDataDir));
+        builder.Services.AddSingleton(sp => new LIVORA.Application.Sync.SyncQueue(
+            livoraDataDir, sp.GetRequiredService<LIVORA.Application.Sync.MetaIndex>()));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Persistence.Wave3b.JsonFileStoreV2(livoraDataDir));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Persistence.Wave3b.MigrationRunner(livoraDataDir));
+
+        // ---- WAVE3C LANE 04/06 consumers: pattern cache (pure, lock-guarded LRU) --------------
+        builder.Services.AddSingleton<LIVORA.Application.Patterns.PatternCache>();
+
+        // ---- WAVE3B LANE 02/03: Health Connect foundation + workouts ---------------------------
+        // The Health Connect record client is NOT bundled this wave (no new NuGet allowed), so the
+        // bridge honestly probes Unavailable/ApiNotBundled and the provider returns null days —
+        // IDataProvider deliberately STAYS ManualOverlayProvider; swapping it would blank the
+        // pipeline in exchange for an unsupported connection (see lane02 report).
+        builder.Services.AddSingleton<LIVORA.Application.HealthData.Wave3bHealth.IHealthPlatformBridge>(
+            _ => LIVORA.Infrastructure.HealthProviders.HealthConnectProvider.DefaultBridge());
+        builder.Services.AddSingleton<LIVORA.Infrastructure.HealthProviders.HealthConnectProvider>(sp =>
+            new LIVORA.Infrastructure.HealthProviders.HealthConnectProvider(
+                sp.GetRequiredService<LIVORA.Application.HealthData.Wave3bHealth.IHealthPlatformBridge>(),
+                new LIVORA.Application.HealthData.Wave3bHealth.PermissionFlow(
+                    sp.GetRequiredService<LIVORA.Application.HealthData.Wave3bHealth.IHealthPlatformBridge>()),
+                sp.GetRequiredService<IDateTimeProvider>()));
+        builder.Services.AddSingleton<LIVORA.Application.HealthData.Wave3bHealth.IHealthDataProviderRegistry>(sp =>
+            LIVORA.Application.HealthData.Wave3bHealth.HealthDataProviderRegistry.Live(() =>
+            {
+                var provider = sp.GetRequiredService<LIVORA.Infrastructure.HealthProviders.HealthConnectProvider>();
+                return new[]
+                {
+                    LIVORA.Application.HealthData.Wave3bHealth.HealthDataProviderRegistry.For(
+                        provider,
+                        sp.GetRequiredService<LIVORA.Application.HealthData.Wave3bHealth.IHealthPlatformBridge>(),
+                        provider.Permissions.State),
+                };
+            }));
+        // Real user-data path: workouts the user exported into app-data/livora/workouts_inbox
+        // themselves (Origin=Imported). No files => honest empty list; nothing is simulated.
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.IWorkoutSource>(sp =>
+            new LIVORA.Application.Activities.ImportedWorkoutSource(
+                LIVORA.Application.Activities.ImportedWorkoutSource.ComposeInboxPath(
+                    System.IO.Path.Combine(FileSystem.AppDataDirectory, "LIVORA")),
+                sp.GetRequiredService<LIVORA.Application.Abstractions.IUnitConverter>()));
+
+        // ---- WAVE3C LANE 07: wave-3c surfaces (pages/VMs/routes; VMs resolve services lazily via
+        // ServiceHelper.TryGet, so each row renders an honest not-available state until its
+        // backing service is registered — never a crash, never a dead button). ----
+        builder.Services.AddTransient<LIVORA.Presentation.AiSettingsViewModel>();
+        builder.Services.AddTransient<LIVORA.Presentation.DataStudioViewModel>();
+        builder.Services.AddTransient<LIVORA.Presentation.LockViewModel>();
+        builder.Services.AddTransient<LIVORA.Presentation.Views.AiSettingsPage>();
+        builder.Services.AddTransient<LIVORA.Presentation.Views.DataStudioPage>();
+        builder.Services.AddTransient<LIVORA.Presentation.Views.LockPage>();
+        Routing.RegisterRoute("ai-settings", typeof(LIVORA.Presentation.Views.AiSettingsPage));
+        Routing.RegisterRoute("data-studio", typeof(LIVORA.Presentation.Views.DataStudioPage));
+        Routing.RegisterRoute("lock", typeof(LIVORA.Presentation.Views.LockPage));
         // WAVE3B-DI-END
 
         // WAVE3-DI-END

@@ -1,0 +1,22 @@
+<root>
+  <!-- ==========================================================================
+       Wave 3b lane 02 — EN/FA key blocks. Identical key ORDER, identical {0} counts.
+       The brand token "Health Connect" is kept verbatim inside the Persian strings
+       (it is a product name), and every FA value still carries Persian script so the
+       FaValues_ContainPersianCodepoints integrity test keeps passing after merge.
+       ======================================================================== -->
+  <data name="Health.Provider.HealthConnect" xml:space="preserve"><value>هلث‌کانکت (Health Connect)</value></data>
+  <data name="Health.Cap.Provider.Connected" xml:space="preserve"><value>متصل است · داده‌ها خوانده می‌شوند</value></data>
+  <data name="Health.Cap.Provider.NotInstalled" xml:space="preserve"><value>برنامهٔ Health Connect روی این دستگاه نصب نیست</value></data>
+  <data name="Health.Cap.Provider.NeedsPermission" xml:space="preserve"><value>برای خواندن داده‌هایت، اجازهٔ دسترسی به سلامت را بده</value></data>
+  <data name="Health.Cap.Provider.Unavailable" xml:space="preserve"><value>روی این دستگاه در دسترس نیست</value></data>
+  <data name="Health.Cap.Status.Available" xml:space="preserve"><value>در دسترس</value></data>
+  <data name="Health.Cap.Status.NeedsPermission" xml:space="preserve"><value>برای {0} باید اجازه بدهی</value></data>
+  <data name="Health.Cap.Status.NoData" xml:space="preserve"><value>برای این بازه هیچ رکورد {0} وجود ندارد</value></data>
+  <data name="Health.Cap.Status.Unsupported" xml:space="preserve"><value>{0} هنوز با این اتصال پشتیبانی نمی‌شود</value></data>
+  <data name="Health.Cap.Permission.Granted" xml:space="preserve"><value>اجازه داده شد</value></data>
+  <data name="Health.Cap.Permission.Denied" xml:space="preserve"><value>اجازه داده نشد</value></data>
+  <data name="Health.Cap.Permission.NotAsked" xml:space="preserve"><value>هنوز پرسیده نشده است</value></data>
+  <data name="Health.Cap.Permission.AskLimit" xml:space="preserve"><value>در این نشست دوباره نمی‌پرسد ({0} بار تلاش شد)</value></data>
+  <data name="Health.Cap.Permission.Unavailable" xml:space="preserve"><value>در این نسخه در دسترس نیست</value></data>
+</root>

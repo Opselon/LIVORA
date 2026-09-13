@@ -1,0 +1,14 @@
+<root>
+  <data name="Plan.Change.ShrinkExercise" xml:space="preserve"><value>Shortened a {0}-minute training block to {1} minutes</value></data>
+  <data name="Plan.Change.AddRecovery" xml:space="preserve"><value>Added {0} minutes of recovery time</value></data>
+  <data name="Plan.Evidence.RecoveryBelowBaseline" xml:space="preserve"><value>your recovery is {0}% below your usual level</value></data>
+  <data name="Plan.Change.ShiftFocusEarlier" xml:space="preserve"><value>Moved your earliest focus block {0} minutes earlier</value></data>
+  <data name="Plan.Change.AddWindDown" xml:space="preserve"><value>Added a {0}-minute evening wind-down</value></data>
+  <data name="Plan.Evidence.SleepBelowBaseline" xml:space="preserve"><value>last night's sleep was {0}% below your usual</value></data>
+  <data name="Plan.Change.KeptStale" xml:space="preserve"><value>Kept your standard plan — your data is {0} days old</value></data>
+  <data name="Plan.Evidence.StaleData" xml:space="preserve"><value>your sleep data hasn't refreshed for {0} days</value></data>
+  <data name="Plan.Change.ProtectDeadlineItem" xml:space="preserve"><value>Protected a deadline-linked block at a {0}-minute floor</value></data>
+  <data name="Plan.Evidence.DeadlineRisk" xml:space="preserve"><value>your goal is due in {0} days at {1}% progress</value></data>
+  <data name="Plan.Change.RecoveryAware" xml:space="preserve"><value>Planned with yesterday's high activity in mind</value></data>
+  <data name="Plan.Evidence.HighActivityYesterday" xml:space="preserve"><value>yesterday you were {0}% more active than usual</value></data>
+</root>

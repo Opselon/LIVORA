@@ -1,0 +1,12 @@
+<!--
+  Wave 3b lane 03 (Activity & Workout) — Persian (Farsi) keys.
+
+  DELIBERATELY EMPTY — see lane03.en.keys.xml: this lane emits no user-facing strings, so there
+  is nothing to translate. The key namespaces below are reserved for the lane that wires the UI
+  consumer (lane 13), with suggested native-register values (ZWNJ included) so the merge has a
+  starting point if keys become unavoidable:
+    Activity.Workout.Summary  = {0} جلسه، {1} دقیقه   (session count + minutes)
+    Activity.Workout.Estimated = تخمینی (بر پایهٔ فعالیت ثبت‌شده)
+  These are NOT emitted by any code in this lane and are NOT part of the merge.
+-->
+<keys lane="03" language="fa" count="0" />

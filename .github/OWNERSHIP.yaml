@@ -69,6 +69,8 @@ lanes:
     owns:
       - Infrastructure/HealthProviders/**
       - Application/HealthData/Wave3b/**
+      - Application/HealthData/Wave3bHealth/**
+      - Tests/Tests/Wave3b*
       - Tests/Tests/Wave3b*/**
       - wave3b-keys/**
     status: active
@@ -180,9 +182,10 @@ lanes:
     agent: coordinator
     wave: 3c
     branch: wave3c/integration
-    task: wave-3c integration docs (plan, status matrix, lane notes)
+    task: wave-3c integration docs + lead-applied gate amendments
     owns:
       - docs/wave3c/**
+      - Tests/Tests/Wave3ResxIntegrityTests.cs
     status: active
   - id: lead
     agent: coordinator
