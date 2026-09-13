@@ -380,4 +380,8 @@
   <data name="Privacy.Origin.Manual" xml:space="preserve"><value>you entered</value></data>
   <data name="Privacy.DeleteAll" xml:space="preserve"><value>Delete all local data</value></data>
   <data name="Privacy.Deleted" xml:space="preserve"><value>All local data deleted.</value></data>
+
+  <!-- ============ Global error safety net (App.xaml.cs) ============ -->
+  <data name="ErrorDialog_Title" xml:space="preserve"><value>Something went wrong</value></data>
+  <data name="ErrorDialog_Body" xml:space="preserve"><value>LIVORA hit an unexpected error. Your data is safe on this device — you can keep going.</value></data>
 </root>

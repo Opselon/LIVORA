@@ -375,4 +375,7 @@
   <data name="Privacy.Origin.Manual" xml:space="preserve"><value>ورودی تو</value></data>
   <data name="Privacy.DeleteAll" xml:space="preserve"><value>حذف همه داده‌های محلی</value></data>
   <data name="Privacy.Deleted" xml:space="preserve"><value>همه داده‌های محلی حذف شد.</value></data>
+
+  <data name="ErrorDialog_Title" xml:space="preserve"><value>مشکلی پیش آمد</value></data>
+  <data name="ErrorDialog_Body" xml:space="preserve"><value>لیورا با یک خطای غیرمنتظره روبه‌رو شد. داده‌های شما روی همین دستگاه امن است — می‌توانید ادامه دهید.</value></data>
 </root>

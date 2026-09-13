@@ -16,4 +16,12 @@ public static class AppResources
 
     public static string Get(string key, System.Globalization.CultureInfo? culture = null)
         => _rm.GetString(key, culture ?? Culture) ?? $"[{key}]";
+
+    // ---- Named accessors for keys consumed from C# outside the localization service ----
+
+    /// <summary>Title of the global unhandled-exception alert (App.xaml.cs).</summary>
+    public static string ErrorDialog_Title => Get(nameof(ErrorDialog_Title));
+
+    /// <summary>Body of the global unhandled-exception alert (App.xaml.cs).</summary>
+    public static string ErrorDialog_Body => Get(nameof(ErrorDialog_Body));
 }

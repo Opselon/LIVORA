@@ -55,6 +55,18 @@ public abstract class BaseContentPage : ContentPage
                 StyleElement(cc, family);
                 Walk(cc, family);
                 break;
+            // CollectionView items are realized as logical children of the control (they are not
+            // a Layout), so the case above misses them. Only materialized items are walked —
+            // recycled items get the font via inherited-property defaults when realized.
+            case CollectionView cvw:
+                foreach (var item in ((IElementController)cvw).LogicalChildren.OfType<VisualElement>())
+                {
+                    StyleElement(item, family);
+                    Walk(item, family);
+                }
+                break;
+            // Note: BindableLayout-attached panels realize their items directly into the host
+            // Layout.Children, so the Layout case already covers them — no extra branch needed.
         }
     }
 
