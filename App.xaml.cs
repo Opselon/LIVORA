@@ -22,6 +22,9 @@ public partial class App : Microsoft.Maui.Controls.Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
+        // WAVE3-APP: window/theme bootstrap hook (lane 04 supplies the block: Windows default
+        // size, IThemeService.Apply, RequestedThemeChanged). Applied once by the orchestrator.
+        // WAVE3-APP-END
         var loc = ServiceHelper.Get<ILocalizationService>();
         var settings = ServiceHelper.Get<ISettingsService>();
 

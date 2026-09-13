@@ -15,6 +15,8 @@ public sealed class PreferencesSettingsService : ISettingsService
     private const string KeyLanguageSet = "language_explicitly_set";
     private const string KeyOnboarding = "onboarding_completed";
     private const string KeyProfileId = "profile_id";
+    private const string KeyThemeMode = "theme_mode";
+    private const string KeyLastSeenVersion = "last_seen_version";
 
     private readonly ILogger<PreferencesSettingsService> _logger;
 
@@ -48,5 +50,23 @@ public sealed class PreferencesSettingsService : ISettingsService
     {
         get => Preferences.Default.Get<string?>(KeyProfileId, null);
         set => Preferences.Default.Set(KeyProfileId, value);
+    }
+
+    // Wave 3: theme choice ("System" must persist as such, not as the currently resolved theme).
+    public ThemeMode ThemeMode
+    {
+        get
+        {
+            var raw = Preferences.Default.Get<string?>(KeyThemeMode, null);
+            return Enum.TryParse<ThemeMode>(raw, out var m) ? m : ThemeMode.System;
+        }
+        set => Preferences.Default.Set(KeyThemeMode, value.ToString());
+    }
+
+    /// <summary>Version the "What's new" sheet was already shown for (null = never shown).</summary>
+    public string? LastSeenVersion
+    {
+        get => Preferences.Default.Get<string?>(KeyLastSeenVersion, null);
+        set => Preferences.Default.Set(KeyLastSeenVersion, value);
     }
 }

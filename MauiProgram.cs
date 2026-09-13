@@ -83,6 +83,11 @@ public static class MauiProgram
         builder.Services.AddSingleton<IPermissionService, PermissionService>();
         builder.Services.AddSingleton<IPrivacyService, PrivacyService>();
 
+        // WAVE3-DI: Wave 3 service registrations (updates, manual entry, reminders, theme).
+        // The orchestrator applies each lane's `APPEND MauiProgram.cs // WAVE3-DI:` block here
+        // exactly once. Do not register a concrete type anywhere else.
+        // WAVE3-DI-END
+
         // ---- ViewModels --------------------------------------------------------
         builder.Services.AddTransient<TodayViewModel>();
         builder.Services.AddTransient<HealthViewModel>();

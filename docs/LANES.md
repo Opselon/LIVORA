@@ -1,428 +1,405 @@
-# LIVORA — Wave 3 lane protocol (10 parallel implementers)
+# LIVORA — Wave 3 lane protocol (10 parallel lanes, disjoint file sets)
 
-Repo: `C:\Users\Capsizer\source\repos\LIVORA` (.NET 10 MAUI, root ns `LIVORA`).
-Each lane works in its own full copy of the repo under
-`C:\Users\Capsizer\AppData\Local\Temp\livora_w3\laneNN\`.
+Repo: `C:\Users\Capsizer\source\repos\LIVORA`. Your copy:
+`C:\Users\Capsizer\AppData\Local\Temp\livora_w3\laneNN\` — work ONLY there.
 
-## 0. Shared rules (hard — every lane)
+Wave 3 goal: make the app genuinely useful to a client — log your own data, edit real goals and
+habits, open an adaptive program, see a real chart, get reminders, check for updates in-app,
+look right on a desktop window — while keeping clean architecture, DDD boundaries, SOLID seams,
+bilingual EN/FA with real RTL, and the honesty rules (never present mock data as real).
 
-1. **Your lane directory is the only place you may write.** Never touch the real repo or another
-   lane. Never run `git` (no commit/branch/push) — the orchestrator merges and commits.
-2. **Frozen files — read-only for you** (already updated by the orchestrator, identical in every
-   copy): `Application/Abstractions/IWave3Contracts.cs`,
-   `Application/Abstractions/ILocalizationService.cs`, `Application/Abstractions/IRepository.cs`,
-   `Application/Abstractions/IStateContracts.cs`, `Domain/Enums/DomainEnums.cs`,
-   `Domain/Enums/HealthDataEnums.cs`, `Domain/Enums/StateEnums.cs`, `Domain/Enums/PlanningEnums.cs`,
-   `Domain/Enums/SecurityEnums.cs`, `LIVORA.csproj`, `Tests/LIVORA.Tests.csproj`,
-   `Resources/Localization/AppResources.resx`, `Resources/Localization/AppResources.fa.resx`,
-   `Resources/Localization/AppResources.cs`, `Resources/Styles/LivoraColors.xaml`,
-   `Resources/Styles/LivoraStyles.xaml`, `Presentation/Components/*`, `Presentation/Theme.cs`,
-   `Presentation/ObservableObject.cs`, `Presentation/Views/BaseContentPage.cs`, `global.json`,
-   `.github/**`.
-   **Exception:** lane 06 owns `Resources/Styles/LivoraColors.xaml`, `Resources/Styles/LivoraStyles.xaml`,
-   `Presentation/Theme.cs` and `Presentation/Components/*` — everyone else treats them as frozen.
-3. **Never add or edit anything in:** `App.xaml`, `App.xaml.cs`, `AppShell.xaml`, `AppShell.xaml.cs`,
-   `MauiProgram.cs`, `Platforms/**`, `Domain/**` (except lane 03/09 owners noted in its section).
-   Anything you need registered there goes into your patch as a `NEWFILE:` or `APPEND:` block
-   (see §11) — the orchestrator applies it once in the merged tree.
-4. **You may create files only inside your owned paths** (listed in your section). If you need a
-   file another lane owns, do not create it — code against the contract and declare the need as an
-   `// ORPHAN:` comment plus a line in your report.
-5. **No new NuGet packages.** The app project already references: `Microsoft.Maui.Controls`,
-   `Microsoft.Extensions.Logging.Debug`, `Plugin.LocalNotification`, `SkiaSharp`,
-   `SkiaSharp.Views.Maui.Controls`, `SystemSecurityCryptor` — no, correction: only
-   `Plugin.LocalNotification`, `SkiaSharp`, `SkiaSharp.Views.Maui.Controls` were added for Wave 3.
-6. **Localize every user-facing string.** Use `{localize:Tr Key.Name}` in XAML (markup extension
-   `TrExtension` in `LIVORA.Presentation.Components`, resolves at load **and** on live language
-   change) or `L("Key")` / `Loc["Key"]` in ViewModels. Keys you invent must be appended to your
-   resx blocks (§11), **EN and FA together**, following existing key style
-   (`Feature.PascalCase.dot.sub`). No key may collide with the 331 existing ones — grep first.
-   Never put prose in Domain/Application: emit keys + args.
-7. **Honesty invariants (product law).** Never display a connected/real/AI claim that is not true.
-   Mock data stays labeled; manual data is labeled self-reported; the update checker reports
-   "couldn't check" instead of "up to date" when offline; notifications report the real grant state.
-8. **RTL is free, don't fight it:** use `Start`/`End` (never `Left`/`Right`) for
-   `HorizontalOptions`, `Grid.ColumnDefinitions` ordering, and `Margin`/`Padding` shorthand; set
-   `FlowDirection="{Binding FlowDirection}"` only on pages that are not `BaseContentPage`
-   descendants. Page content must not assume text length: `LineBreakMode="WordWrap"` + `MaxLines`
-   on labels, `MinHeightRequest` on rows.
-9. **Theme tokens only.** Colors come from `LivoraColors.xaml` resource keys (`Card`, `SoftCard`,
-   `AccentCard`, `LDisplay`, `LHeading`, `LSubheading`, `LBody`, `LBodySecondary`, `LCaption`,
-   `LMetric`, `LMetricLarge`, `PrimaryButton`, `SecondaryButton`, `ChipLabel`, `IconGlyph`,
-   `ProgressTrack`, `SegmentText`; brushes `BgPrimaryBrush`, `SurfaceBrush`, `SurfaceAltBrush`,
-   `OverlayBrush`, `AccentSoftBrush`, `Metric*SoftBrush`; and Color-typed `Accent`, `Positive`,
-   `Caution`, `Negative`, `TextPrimary`, `TextSecondary`, `TextTertiary`, `Metric*`).
-   **Brushes go on brush-typed properties only (`Border.Background`, `Border.Stroke`);
-   Color-typed properties (`TextColor`, `BackgroundColor`, `ProgressColor`, `Shell.*Color`) must use
-   a Color or an inline `{AppThemeBinding Light=…, Dark=…}`.** Violating that logs
+## 0. Hard rules
+
+1. Never run git commands that change state (commit/checkout/branch/stash/push). Read-only
+   `git diff`/`git log` are fine. The orchestrator merges and commits.
+2. **Edit only files inside your owned paths.** Anything you need in a shared file goes into your
+   report as an `APPEND:` block (§5) — exact code, exact target marker. Never write those files.
+3. Frozen for everyone (read-only): `Domain/**` except where your lane explicitly owns a file,
+   `Application/Abstractions/IWave3Contracts.cs`, `Application/Abstractions/ILocalizationService.cs`,
+   `Application/Abstractions/IRepository.cs`, `Application/Abstractions/ISettingsService.cs`,
+   `Application/Abstractions/IStateContracts.cs`, `Application/Abstractions/IIntelligenceContracts.cs`,
+   `Application/Abstractions/IDataProvider.cs`, `Application/Abstractions/IFormatService.cs`,
+   `Application/Abstractions/ISecurityContracts.cs`, `Application/Abstractions/IDataSource.cs`,
+   `Application/Abstractions/IIntelligenceService.cs`, `Application/Rules/RuleEngine.cs`,
+   `Application/State/**`, `Application/Insights/**`, `Application/HealthData/SampleHealthProvider.cs`,
+   `Application/HealthData/DataNormalizer.cs`,
+   `Domain/Enums/Wave3Enums.cs`, `Resources/Localization/AppResources*.resx`,
+   `Resources/Localization/AppResources.cs`, `Presentation/ObservableObject.cs`,
+   `Presentation/Theme.cs`, `Presentation/Components/TrExtension.cs`, `global.json`, `LIVORA.csproj`,
+   `Tests/**` (lane 10 only), `.github/**`, `Platforms/**`, `Infrastructure/Localization/*`,
+   `Infrastructure/Persistence/JsonFileStore.cs`, `Infrastructure/Persistence/DailyHistoryStore.cs`,
+   `Infrastructure/Settings/PreferencesSettingsService.cs`, `docs/LANES.md`.
+4. **Localize every user-facing string.** XAML: `{localize:Tr Key.Name}` with
+   `xmlns:localize="clr-namespace:LIVORA.Presentation.Components"` (this extension re-resolves on
+   live language change — prefer it over `{Binding SomeText}` for static labels; both are allowed).
+   C#: `L("Key")` / `L("Key", args)` from `ObservableObject`, or
+   `ServiceHelper.Get<ILocalizationService>()`. Keys you invent must be emitted in your
+   `KEYS-EN`/`KEYS-FA` block, identical key order and count, real idiomatic Persian (native
+   register, ZWNJ, not Arabic), same `{0}`/`{1}` argument counts in both languages.
+   Grep the existing keys first — no collisions. Application/Domain code may only emit keys+args.
+5. **Honesty (product law).** Never claim a connection, a measurement, an AI model, a delivered
+   notification, or an up-to-date version that isn't true. Mock stays labeled mock; user input is
+   labeled self-reported; a failed check is reported as a failure, not as "up to date".
+6. **RTL.** `Start`/`End`, never `Left`/`Right`. Wrap long Persian text (`LineBreakMode="WordWrap"`
+   + sensible `MaxLines`); never truncate a sentence. Grids must read correctly mirrored.
+7. **Theme tokens only** (§2). `*Brush` resources are valid **only** on `Border.Background`,
+   `Border.Stroke`, `Shape.Fill`. Color-typed properties (`TextColor`, `BackgroundColor`,
+   `ProgressColor`, `PlaceholderColor`, `Shell.*Color`) take a Color or an inline
+   `{AppThemeBinding Light=…, Dark=…}`. A brush on a Color property logs
    "Cannot convert SolidColorBrush to type Color" and crashes Android renderers.
-10. **Verify before reporting.** Run:
-    `dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 --nologo -v q`
-    (pass `-p:BaseIntermediateOutputPath=objw3\ -p:BaseOutputPath=binw3\` if `obj/` is stale).
-    If you touched a file the test project compiles (Domain/Application/Infrastructure non-MAUI),
-    also run `dotnet test Tests/LIVORA.Tests.csproj --nologo -v q`. Iterate until both are green.
-    Report only what you actually observed. A lane that cannot build must say so and still deliver
-    its patch.
-11. **Output contract — this is how your work is merged.** Run, from your lane directory:
-    ```bash
-    git add -A >/dev/null 2>&1; git -c core.quotepath=false diff --cached --binary
-    ```
-    Put that unified diff (`diff --git` … blocks, binary-safe for fonts/png) in a fenced block in
-    your final message, and end with these plain lines:
-    `BUILD: ok|fail|not-run` — `TESTS: ok|fail|not-run` — `FILES: <count>` —
-    `KEYS: <count added>` — `NOTES: <one line per thing the orchestrator must do or know>`.
-    Keep prose under 25 lines. Do not paste file contents outside the diff.
+8. Pages derive from `views:BaseContentPage` and pass their VM to the base ctor
+   (`public FooPage(FooViewModel vm) : base(vm)`), set `x:DataType`, and do not set BindingContext.
+   VMs inherit `ObservableObject`, call `SubscribeLanguage()` in the ctor, and re-raise every
+   localized property in `protected override void OnLanguageChanged()`.
+9. `async Task` services; `Command`/`Command<T>` in VMs; no `.Result`/`.Wait()` on the UI thread;
+   no new NuGet packages; no reflection-based service location beyond the existing `ServiceHelper`.
+10. **Verify before reporting.** `dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0
+    --nologo -v q` must be green in your lane (use
+    `-p:BaseIntermediateOutputPath=objw3\ -p:BaseOutputPath=binw3\` if `obj/` is stale). If you
+    compile into the test project (`Application/**`, `Domain/**`, MAUI-free `Infrastructure/**`),
+    also run `dotnet test Tests/LIVORA.Tests.csproj --nologo -v q`. Never claim a result you did not
+    observe: report `fail`/`not-run` honestly.
 
-## 1. Lane 01 — In-app updates
+## 1. Contracts already in your copy (do not edit)
 
-Owned paths: `Services/Updates/**` (create), `Presentation/ViewModels/Updates/**` (create),
-`Presentation/Views/Updates/**` (create).
+`Application/Abstractions/IWave3Contracts.cs`:
+- `IUpdateService` (`CheckAsync(force)`, `PeekCachedAsync()`, `IsFeedConfigured`) + `UpdateInfo`
+  (Status, CurrentVersion, LatestVersion, Notes, DownloadLinks, ReleaseUrl, IsNewerThanFeed,
+  CheckedAtUtc, ErrorDetail, FromCache) + pure `AppVersion.TryParse/Compare`.
+- `IManualEntryService` + `ManualEntryDraft` (nullable per-metric values, `IsEmpty`).
+- `IReminderService` + `ReminderSetting` (`Kind`, `TargetId`, `TimeOfDay`, `DaysMask`, `TextKey`)
+  + `NotificationGrantState`.
+- `IThemeService` (`Mode`, `ResolvedTheme`, `IsDark`, `SetMode`, `ThemeChanged`, `Apply`).
 
-Build Wave 3's headline client feature: an honest update experience.
+`Application/Abstractions/ISettingsService.cs` — Wave 3 added `ThemeMode` and `LastSeenVersion`
+(both implemented by `PreferencesSettingsService` in your copy).
+`Domain/Enums/Wave3Enums.cs` — `UpdateCheckStatus`, `NotificationGrantState`, `ThemeMode`.
+`Domain/Enums/DomainEnums.cs` — `GoalMeasurement` + `HabitFrequencyKind` already exist.
+`Presentation/Components/TrExtension.cs` — the `{localize:Tr …}` markup extension (verified builds).
+`MauiProgram.cs` / `App.xaml.cs` / `AppShell.xaml.cs` carry marker comments where your `APPEND:`
+blocks land: `// WAVE3-DI:`, `// WAVE3-APP:`, `// WAVE3-SHELL:`.
 
-- `Services/Updates/GitHubReleaseFeed.cs` + `UpdateService.cs` implementing `IUpdateService`
-  (contract in `IWave3Contracts.cs`). Fetch `https://api.github.com/repos/<owner>/<repo>/releases`
-  with `HttpClient` (name the client, set a User-Agent — GitHub 403s without one), timeout 8s,
-  no auth, no API keys. Config: owner/repo from constants in **your** file, read `AppInfo.Current`
-  for the installed version. Map the newest release: `tag_name` (strip leading `v`), `name`,
-  `body` (split into ≤5 note lines, strip markdown noise), `assets[].browser_download_url`,
-  `html_url` → `DownloadLinks["all"]`, `prerelease`.
-  Compare with `AppVersion.Compare` (pure, already in `IWave3Contracts.cs`).
-- Offline/cache: persist the last successful answer via a JSON file
-  (`FileSystem.AppDataDirectory/LIVORA/update_feed.json`) using your own tiny store — do **not**
-  reuse `JsonFileStore`'s repository registrations. Respect a 6-hour minimum re-check interval
-  unless `force: true`. Never report `UpToDate` from cache as if it were fresh (set `FromCache`).
-- Statuses: `UpdateAvailable`, `UpToDate`, `NewerThanFeed`, `NoConnection`, `RateLimited`, `Error`,
-  `Unknown`, `Disabled` — the UI text comes from `Update.*` keys.
-- UI: `UpdatePage` (a pushed page, not a tab) with a big current/latest card, notes, and a
-  "Download update" button that opens the store/page via `Browser.OpenAsync`. It must degrade
-  gracefully when `DownloadLinks` has no entry for the current platform
-  (`DevicePlatform` → key `android|ios|windows|macos`, fall back to `all`).
-  Also expose a compact `UpdateBannerViewModel` used by Profile: idle → "Check for updates",
-  spinner while checking, "Update available — 1.3" chip, muted "Couldn't check — retry" on failure.
-- Windows-only nicety: `#if WINDOWS` detect whether an MSIX is installed (`AppInfo.Package` style
-  check) and if so surface `UpdateStatus` through `Microsoft.Maui.ApplicationModel`
-  (`Marketplace.Rate`-style API is not needed — keep it simple: if `AppInfo.Current.Package` is
-  available use `Windows.ApplicationModel.Store.ReportingServices`? NO — do not use WinRT store
-  APIs; just mark that path `Disabled` with a "installed from Microsoft Store" note when
-  `AppInfo.Current.Package?.IsBundle ?? false` is not reliable. Prefer: skip MSIX, keep the feed path.)
-- DI keys to hand to the orchestrator: `IUpdateService → UpdateService` (singleton),
-  `UpdateFeedConfig` (singleton with owner/repo), `UpdatePage` + `UpdateViewModel` (transient).
-- Tests: `Tests/Tests/UpdateVersionTests.cs` for `AppVersion.TryParse/Compare` (edge cases listed in
-  the contract comment) and for the feed JSON parsing (parse from a string literal, no network).
+Existing seams to reuse instead of reinventing: `IDataProvider`, `IDataNormalizer`,
+`IHistoryRepository`, `IUserStateService`, `IBaselineService`, `ITrendService`, `IRuleEngine`,
+`IRecommendationService`, `IDailyPlanService`, `IIntelligenceProvider`, `IIntelligenceService`,
+`IWeeklySummaryService`, `IPrivacyService`, `IPermissionService`, `IFormatService`
+(`LongDate`, `ShortDate`, `Time`, `Duration`, `DurationFromMinutes`, `Number`, `Percent`),
+`SessionState.CurrentProfile`, `IDateTimeProvider`, `JsonFileStore` (ctor takes an optional
+directory override — use that in tests), `DemoDataSeeder.CreateBootcampCatalog(l)`,
+`ItemsStackLayout`, `ColorByKey`/`IsNotEmpty`/`NotConverter`, `TappableFeedback`.
 
-## 2. Lane 02 — Manual health entry + 14-day chart
+## 2. Tokens (lane 05 owns these files; everyone else reads)
 
-Owned paths: `Infrastructure/Persistence/ManualEntryStore.cs` (create),
-`Presentation/ViewModels/Log/**`, `Presentation/Views/Log/**`, `Services/Charts/**` (create).
+Color keys: `Accent`, `AccentSoft`, `AccentDeep`, `BgPrimary`, `Surface`, `SurfaceAlt`, `Overlay`,
+`TextPrimary`, `TextSecondary`, `TextTertiary`, `TextOnAccent`, `MetricSleep|MetricActivity|MetricRecovery|MetricWellness`
+(+ `*Soft`), `Positive`, `Caution`, `Negative` (+ `*Dark` mirrors).
+Brush keys: `BgPrimaryBrush`, `SurfaceBrush`, `SurfaceAltBrush`, `OverlayBrush`, `AccentSoftBrush`,
+`Metric*SoftBrush`, `AccentBrush`, `Metric*Brush`, `PositiveBrush`, `CautionBrush`, `NegativeBrush`,
+`TextPrimaryBrush`, `TextSecondaryBrush`, `TextTertiaryBrush`.
+Styles: `LDisplay`, `LHeading`, `LSubheading`, `LBody`, `LBodySecondary`, `LCaption`, `LTiny`,
+`LQuote`, `LMetric`, `LMetricLarge`, `LButton`, `ChipLabel`, `IconGlyph`, `FieldLabel`,
+`InputField`, `Card`, `SoftCard`, `AccentCard`, `ElevatedCard`, `MetricCard`, `PrimaryButton`,
+`SecondaryButton`, `GhostButton`, `IconButton`, `ProgressTrack`, `SegmentText`, `Skeleton`,
+plus `SwitchStyle`, `SliderStyle`, `PickerStyle`, `EditorStyle`, `DatePickerStyle`, `TimePickerStyle`.
+Geometry: `CardRadius`/`CardCornerRadius` 20, `ChipRadius`/`ChipCornerRadius` 14, `PagePadding` 20,
+`CardSpacing` 14, `CardPadding` 18, `PageThickness` 20,12.
+Anything missing from that list is lane 05's job — if you need a token that isn't there yet,
+define it **inline** in your own XAML and note it in `NOTES:` (do not edit the dictionaries).
+Fonts are applied by `BaseContentPage` from `ObservableObject.AppFont`; never hardcode `FontFamily`
+except `views:BaseContentPage.FontFamilyOverride="True"` (brand wordmark).
 
-Give the client a reason to open the app every day: log sleep/steps/active minutes/mood/energy/
-stress for today or a past day, and see a real chart.
+## 3. Lanes
 
-- `ManualEntryStore` implements `IManualEntryService` (§IWave3Contracts). Storage: JSON via the
-  existing `JsonFileStore` pattern — write your own `LoadObjectAsync`-style calls, file name
-  `livora_manual_entries.json` (declare the constant in your file, not in `AppConstants`).
-  Persist `UpdatedAt` and mark entries `DataOrigin.Manual`.
-- Apply manual values to the pipeline by wrapping the provider: create
-  `ManualOverlayProvider : IDataProvider` in `Application/HealthData/ManualOverlayProvider.cs`
-  (you own that file) that composes `SampleHealthProvider` + `IManualEntryService` and overrides
-  any field the user logged, setting `Origin = Manual`, `Quality = Complete`,
-  `Confidence = 1.0` (self-reported, not device-grade — say so in the label, not by lying).
-  Keep `SampleHealthProvider` untouched; the overlay is wired in `MauiProgram.cs` by the
-  orchestrator (declare the exact registration lines as `APPEND:` in your patch).
-- UI: `LogEntryPage` (pushed) with numeric inputs (sleep hours+minutes, steps, active minutes) and
-  0..1 sliders/steppers for mood, energy, stress, sleep quality; date picker defaulting to today
-  with a "yesterday" quick chip; validation (no negative, sane caps — 24h sleep, 100k steps);
-  save → toast-free inline confirmation, and honest note: "self-reported, not measured".
-  Add `SleepTrendChart` in `Services/Charts/`: a `SkiaSharp.Views.Maui.Controls.SKCanvasView`
-  drawing a 14-day line/bar of sleep minutes with the personal baseline as a dashed line and
-  per-day markers colored by origin (Manual = hollow/dotted). Must render correctly in RTL
-  (x-axis reversed) and in dark theme. Also draw axis labels via `SKPaint` with the active
-  language's font (`SKTypeface` from the embedded TTFs: `Vazirmatn-Regular.ttf` / `OpenSans-Regular.ttf`)
-  and Persian digits when `ILocalizationService.IsRightToLeft`.
-  If SkiaSharp proves awkward, keep `SKCanvasView` but simplify — do NOT fall back to hand-built
-  BoxViews.
-- Keep `HealthPage`/`HealthViewModel` untouched (lane 06's copy of them is being edited by lane 07
-  — you must not touch them at all). Your entry point is reachable from the Log tab (lane 07 wires
-  the tab; you only expose `LogEntryPage`).
-- Tests: `Tests/Tests/ManualEntryTests.cs` — store round-trip through a temp dir, overlay
-  precedence (manual beats mock), origin/quality honesty, validation bounds.
+### Lane 01 — In-app update experience (the client-visible flagship)
+Own: `Infrastructure/Updates/**`, `Presentation/ViewModels/Updates/**`,
+`Presentation/Views/Updates/**`.
+- `Infrastructure/Updates/GitHubReleaseFeed.cs`: fetch
+  `https://api.nuget.org`-free, plain `https://api.github.com/repos/Opselon/LIVORA/releases?per_page=10`
+  with `HttpClient` (named/`static` client, `User-Agent: LIVORA-app`, 8s timeout, no token, no keys),
+  parse with `System.Text.Json` into `ReleaseEntry` (tag_name, name, body, html_url, prerelease,
+  published_at, `assets[].browser_download_url`), and map to `UpdateInfo` using `AppVersion.Compare`.
+  Never invent a version: on any failure return the status (`NoConnection`/`RateLimited`/`Error`) with
+  `LatestVersion = null`.
+- `Infrastructure/Updates/UpdateService.cs : IUpdateService`: 6-hour re-check throttle, cached answer
+  in `update_feed.json` (own writer under `FileSystem.AppDataDirectory/LIVORA`, `FromCache = true`
+  when served from it), `PeekCachedAsync`, and `IsFeedConfigured`. Persist `last_successful_check_utc`.
+- `Presentation/Views/Updates/UpdatePage.xaml` + `UpdateViewModel`: current vs latest card, release
+  notes list, platform-correct "Download update" (`android|ios|windows|macos`, falling back to
+  `all` → `ReleaseUrl`) opened with `Browser.OpenAsync`, honest status chip per
+  `UpdateCheckStatus`, manual "Check again" (force), "installed from source" note when
+  `NewerThanFeed`, and a first-run-after-upgrade "What's new" entry point that records
+  `ISettingsService.LastSeenVersion`.
+- `Presentation/ViewModels/Updates/UpdateBannerViewModel.cs`: small reusable banner VM (idle /
+  checking / update available / up to date / couldn't check) that lane 06's Profile page hosts.
+- `APPEND:` DI marker: `IUpdateService`→`UpdateService` singleton, `GitHubReleaseFeed` singleton,
+  `UpdateViewModel` transient, `UpdateBannerViewModel` transient. Shell marker:
+  `Routing.RegisterRoute("updates", typeof(LIVORA.Presentation.Views.UpdatePage));`
 
-## 3. Lane 03 — Real goal/habit editor (CRUD)
+### Lane 02 — Manual entry pipeline (persistence + data layer, no UI)
+Own: `Infrastructure/Persistence/ManualEntryStore.cs`, `Application/HealthData/ManualMerge.cs`,
+`Application/HealthData/ManualOverlayProvider.cs`, `Domain/Models/Health/ManualEntryRecord.cs`.
+- `ManualEntryStore : IManualEntryService` — JSON file `livora_manual_entries.json` through
+  `JsonFileStore` (inject it; ctor accepts an optional directory override so tests can isolate),
+  upsert-by-date, range query, `CountEntriesAsync`, corrupt-file-safe, records
+  `SavedAtUtc` + `DataOrigin.Manual`.
+- `Domain/Models/Health/ManualEntryRecord.cs`: the persisted shape (date + nullable values + note +
+  saved-at). Pure data, no formatting.
+- `ManualMerge.Overlay(Domain.Models.Health.NormalizedDay day, ManualEntryRecord? record)` — pure,
+  static, no IO: manual values win per field, `Origin = Manual`, `Quality = Complete`,
+  `Confidence = 1.0`; untouched fields keep the provider's provenance.
+- `ManualOverlayProvider : IDataProvider` — composes `SampleHealthProvider` + `IManualEntryService`
+  (both injected) and applies `ManualMerge`; advertises only capabilities it can really honor, and
+  its `Origin` reports `Manual` when an override applied for that day, else the underlying origin.
+- Everything must stay MAUI-free so the test project compiles it: no `FileSystem`, no
+  `Microsoft.Maui.*` in the two `Application/` files (`JsonFileStore`'s MAUI dependency lives in the
+  default ctor path only — pass the store in).
+- `APPEND:` DI marker: `IManualEntryService`→`ManualEntryStore` singleton; replace the existing
+  `IDataProvider` registration so it resolves to `ManualOverlayProvider` (give the exact lines).
+  Tell lane 10 which test files to write (round-trip in a temp dir, precedence, origin honesty,
+  `ManualMerge` bounds).
 
-Owned paths: `Presentation/ViewModels/Editor/**` (create), `Presentation/Views/Editor/**` (create),
-`Domain/Models/Goals/GoalEditorDto.cs` (create if needed).
+### Lane 03 — Daily check-in UI: Log tab + real chart
+Own: `Presentation/Views/Log/**`, `Presentation/ViewModels/Log/**`,
+`Presentation/ViewModels/Log/LogEntryViewModel.cs`, `Application/HealthData/LogEntryRules.cs`.
+- `LogPage` (tab content) + `LogViewModel`: date selector (Today/Yesterday chips + `DatePicker`),
+  inputs for sleep hours + minutes, steps, active minutes, and 0..1 sliders for sleep quality,
+  mood, energy, stress; save through `IManualEntryService`; inline localized confirmation;
+  "self-reported, not measured" honesty note; recent-entries list with tap-to-edit and delete;
+  proper empty state; refresh when the language changes.
+- `LogEntryPage` (pushed, route `log-entry`) — same editor focused on one day, reachable from
+  Health/Today, so both flows share one implementation (extract the editor into a `ContentView`
+  under `Presentation/Views/Log/`).
+- `Application/HealthData/LogEntryRules.cs` — pure validation + defaults + clamping (≤24h sleep,
+  0..100000 steps, 0..1440 active minutes, sliders within 0..1, past dates only within 60 days,
+  "no values entered" detection). MAUI-free, so it is testable: tell lane 10 the file name.
+- `SleepTrendChart` — a real 14-day chart using
+  `SkiaSharp.Views.Maui.Controls.SKCanvasView` (package already referenced): bars/line of sleep
+  minutes, dashed personal-baseline line from `IBaselineService`, per-day marker styled by origin
+  (Manual = hollow/hatched, Mock = soft fill), axis labels drawn with the active language's font
+  (`SKTypeface.FromStream` over the embedded `Vazirmatn-Regular.ttf` / `OpenSans-Regular.ttf`) and
+  Persian digits when RTL, RTL-reversed x-axis, dark-theme aware colors. Wrap the paint in
+  try/catch and render a token-styled placeholder on failure — never throw from the paint handler.
+- `APPEND:` DI + shell marker lines (`LogPage`, `LogViewModel`, `LogEntryPage`, `LogEntryViewModel`,
+  route `log-entry`).
 
-Today's "New goal" button invents "New goal 1" and "+1" bumps a counter. Replace that with a real
-editor while leaving the existing pages alone.
+### Lane 04 — Shell, tab order, responsive desktop layouts
+Own: `App.xaml`, `App.xaml.cs`, `AppShell.xaml`, `AppShell.xaml.cs`, `Presentation/Responsive/**`.
+- Add the 6th tab **Log** between Health and Goals (`Resources/Icons/tab_log.svg`,
+  `ContentTemplate` → `views:LogPage`, `Route="Log"`, title key `Tab.Log`) and keep every tab title
+  re-resolved on language change.
+- `Presentation/Responsive/Breakpoint.cs` + `AdaptiveLayout.cs`: attached properties
+  `AdaptiveLayout.Columns="1,2,3"` (per breakpoint) and `AdaptiveLayout.MaxContentWidth="980"`,
+  driven by `Page.SizeChanged` (no timers, no polling, no thrash — recompute only on real width
+  bucket changes). Breakpoints: Narrow `<700`, Medium `<1000`, Wide `>=700…1000/<1000` — pick and
+  document exact effective-px values; expose `Breakpoint` as a bindable/attached value pages can key
+  `IsVisible`/`Grid.ColumnSpan` off.
+- In `BaseContentPage`… it is **not yours** (lane 06 edits it). Instead ship `AdaptiveLayout` as a
+  pure helper + a `ResponsiveGrid` layout class other pages can use, and hand the orchestrator an
+  `APPEND:` snippet for the one-line hook into `BaseContentPage` (it will land after lane 06's
+  changes; write it as a small addition to the ctor, not a rewrite).
+- `App.xaml.cs`: inside the existing Wave 3 marker region add Windows window sizing
+  (`#if WINDOWS`, min ~1100×800, no fixed size), `RequestedThemeChanged` → notify `IThemeService`
+  (null-safe, `ServiceHelper.TryGet`), and keep every existing behavior (onboarding-vs-shell window
+  creation, `ApplyFlowDirection`, the new global error safety net) intact.
+- `AppShell.xaml.cs`: `// WAVE3-SHELL:` region — leave it to lanes (the orchestrator merges their
+  `Routing.RegisterRoute` lines); do not register routes for pages you don't own.
+- Verify with a wide-window reasoning pass: at 1200px the Today/Health pages must not stretch text
+  to full width. Report the exact hook you need in `BaseContentPage` as `APPEND:`.
 
-- `GoalEditorPage` + `GoalEditorViewModel`: name (validated, ≤80 chars), description,
-  category picker (all `GoalCategory` values, localized via `Enum.GoalCategory.*`),
-  target value + unit (`GoalUnit`), period (`GoalPeriod`), optional deadline (date picker),
-  measurement mode (`GoalMeasurement`), metric key for metric-measured goals.
-  Edit mode loads by `Goal.Id` from `IRepository<Goal>`; create mode leaves progress 0.
-  Delete = `IsArchived = true` (keep data) with an "archive" confirmation; hard delete only for
-  goals the user created (declare this rule in code comments).
-- `HabitEditorPage` + `HabitEditorViewModel`: name, `HabitFrequencyKind`, times-per-week when
-  applicable, optional reminder time hook (`ReminderSetting` id — just persist `TimeSpan` fields
-  `ReminderTime` … NO: do not edit `Habit` (Domain is frozen); instead pass the reminder through
-  `ReminderSetting.TargetId` and store it via `IReminderService` — declare the DI keys you need).
-  Habit list page (lane 07 builds it) will call `Shell.GoToAsync` with a parameter dictionary —
-  so read your navigation args in the standard way
-  (`QueryProperty` attributes or `Shell.Current.Navigation.PushAsync(new GoalEditorPage(...))`
-  constructor args: prefer **constructor + DI scope resolve**, matching `BaseContentPage`'s
-  "resolve VM from DI" pattern; keep both paths possible by exposing a public ctor taking an id).
-- Keep the pure progress/status logic in `Domain` (already there: `Goal.Fraction`, `Status`,
-  `Habit.CurrentStreak`). Do not re-implement it.
-- Localization: `Editor.*` keys (incl. validation messages `Editor.Error.*`).
-- Tests: `Tests/Tests/GoalEditorRulesTests.cs` for any pure rule you add (e.g. name validation,
-  archive-vs-delete decision function) — put such rules in `Application/` as a small
-  `GoalEditorRules` static class in `Application/Planning/GoalEditorRules.cs` (you own it).
+### Lane 05 — Design system v2, theme service, icons, wordmark
+Own: `Resources/Styles/LivoraColors.xaml`, `Resources/Styles/LivoraStyles.xaml`,
+`Infrastructure/Settings/ThemeService.cs`, `Presentation/Components/SegmentedControlView.xaml(.cs)`,
+`Presentation/Components/StatChip.xaml(.cs)`, `Presentation/Components/ProgressRing.cs`,
+`Presentation/Components/PressableBorder.cs`, `Resources/Icons/**` (add),
+`Resources/Splash/splash.svg`, `Resources/AppIcon/appiconfg.svg`,
+`Resources/AppIcon/appicon.svg`.
+- `ThemeService : IThemeService` (persists `ThemeMode` via `ISettingsService`, resolves System
+  against `Application.Current.RequestedTheme`, `Apply()` sets `UserAppTheme`, re-raises on OS
+  change). Declare its DI line as `APPEND:`.
+- Styles: add every §2 token still missing, correct light/dark bindings, focus/pressed states via
+  `VisualStateManager` where it works cross-platform, and a `Skeleton` style. Keep existing keys
+  and their meaning stable (lanes 01-09 build against them); refine sizes/line-heights so
+  Vazirmatn and OpenSans both look intentional (cap-height differences are real).
+- Audit the two dictionaries for brush-on-color misuse and fix it; add
+  `TextPrimaryBrush`/`TextSecondaryBrush`/`TextTertiaryBrush`.
+- `ProgressRing` (pure MAUI `Arc`/`Circle` shapes, no Skia) + `StatChip` + `SegmentedControlView`
+  (used by lanes 01/03/06/09 for theme + language + filters; RTL-correct) + `PressableBorder`
+  (tap + press feedback, `Command`+`CommandParameter`; complement `TappableFeedback`, don't fight it).
+- Icons: draw missing glyphs as SVG (calm, 1.75 stroke, brand `#2C5D53`): bell, download, refresh,
+  close, check-circle, alert, sparkle, chart, moon, sun, system, chevron-right/left, plus, pencil,
+  trash, calendar, clock, footprint, heart, book. They become `MauiImage` automatically (the csproj
+  globs `Resources/Icons/*`). Keep the 5 existing tab icons' weight; make sure `tab_log.svg`
+  (lane 04's tab) exists — it is in the repo already, verify and improve it if thin.
+- Refresh splash + appicon foreground for a premium first-launch impression.
 
-## 4. Lane 04 — Bootcamp detail + adaptive day view
+### Lane 06 — Profile + Settings pages, privacy, connection center, page base
+Own: `Presentation/Views/Profile/**`, `Presentation/ViewModels/Profile/**`,
+`Presentation/Views/Settings/**`, `Presentation/ViewModels/Settings/**`,
+`Presentation/Views/BaseContentPage.cs`.
+- `BaseContentPage`: keep the font walk + FlowDirection sync, and add the one-line
+  `AdaptiveLayout` hook lane 04 requests (apply `MaxContentWidth` centering on wide windows) plus
+  a safe `SetLoading(bool)`-style helper VMs can use. Do not remove behavior.
+- Rework `ProfilePage` into a real account hub: initials avatar, name edit, primary-goal chips,
+  activity level, schedule (bedtime/wake), language segmented control (live, persisted), theme mode,
+  reminders entry, settings entry, updates card (lane 01's `UpdateBannerViewModel` + route
+  `updates`), connection center (mock active / not connected — keep the honesty),
+  data & privacy inventory extended with the Wave 3 stores (`livora_manual_entries.json`,
+  `update_feed.json`, `livora_reminders.json`, `livora_snoozed.json`) labeled by real origin
+  (Manual/Mock) and location (Device), and **Delete all local data** wired so the new stores are
+  cleared too (via `IPrivacyService` + `APPEND:` for the extra deletions if the abstraction can't
+  reach them).
+- New `SettingsPage` + `SettingsViewModel`: notification grant state with a real
+  `IReminderService.RequestGrantAsync` button that reports exactly what the OS said
+  (`AppInfo.ShowSettingsUI()` when denied), theme mode, language, "check for updates",
+  reminders shortcut, sample-data disclosure, about/version (`AppInfo.Current.VersionString`)
+  and a "What's new" replay.
+- Every row ≥44dp touch target, `SemanticProperties.Description` on interactive elements, no
+  hardcoded strings, both languages must look deliberate.
+- `APPEND:` DI + shell markers for `SettingsPage`/`SettingsViewModel` (route `settings`).
 
-Owned paths: `Presentation/ViewModels/Programs/BootcampDetailViewModel.cs` (create),
-`Presentation/Views/Programs/BootcampDetailPage.xaml(.cs)` (create),
-`Application/Planning/BootcampProgress.cs` (create, pure).
+### Lane 07 — Goals & habits: real editors
+Own: `Presentation/Views/Goals/**`, `Presentation/ViewModels/Goals/**`,
+`Presentation/Views/Editor/**`, `Presentation/ViewModels/Editor/**`,
+`Application/Planning/GoalEditorRules.cs`.
+- `Application/Planning/GoalEditorRules.cs` (MAUI-free, testable): name validation (1..80,
+  trimmed, duplicate-name warning), numeric target validation, archive-vs-delete decision,
+  defaults suggested from `UserProfile.FocusAreas`, and a "is this goal metric-measured" helper.
+- `GoalsPage`: replace the fake "New goal 1 / +1 / Delete" flow with navigation to the editors
+  (`Shell.GoToAsync("goal-editor?mode=new")` style — the routes come from `APPEND:`), a
+  Goals/Habits segmented filter, per-habit today toggle, streak chips, weekly progress, real empty
+  states, and archive with undo (uses `GoalEditorRules`, no re-seeding of persisted data).
+- `GoalEditorPage` + VM: name, description, category, target value + `GoalUnit` + `GoalPeriod`,
+  optional deadline, `GoalMeasurement` + metric key, save, archive; edit mode loads by id from
+  `IRepository<Goal>`; validation messages localized.
+- `HabitEditorPage` + VM: name, `HabitFrequencyKind`, times-per-week, and a reminder time that
+  upserts a `ReminderSetting` (`Kind = "habit"`, `TargetId = habit.Id`) through `IReminderService`.
+- Both editors must be reachable by ctor (DI) *and* by route (query args) so lane 04's shell works.
+- `APPEND:` DI + shell markers for the 4 types (routes `goal-editor`, `habit-editor`).
 
-Make Programs useful instead of a 3-button list.
+### Lane 08 — Programs/Bootcamps, discovery, week progress
+Own: `Presentation/Views/Programs/**`, `Presentation/ViewModels/Programs/**`,
+`Presentation/Views/Bootcamps/**`, `Presentation/ViewModels/Bootcamps/**`,
+`Application/Planning/BootcampProgress.cs`, `Application/Discovery/**`.
+- `Application/Planning/BootcampProgress.cs` (pure, MAUI-free): completed/today/upcoming day math,
+  in-program streak, days remaining, projected finish date, adapted-day count, completion fraction
+  from `Days[].IsCompleted` (not just `CurrentDay`), next milestone. Tell lane 10 to cover it.
+- `Application/Discovery/ProgramDiscovery.cs` (pure): recommend programs from
+  `UserProfile.FocusAreas` + current state (deterministic, explainable — return keys, never prose).
+- `Application/Discovery/WeekProgress.cs` (pure): weekly habit/goal/bootcamp bars from
+  `IHistoryRepository` + habits + goals, with `InsufficientData` honesty below 3 days.
+- `BootcampDetailPage` + VM (route `bootcamp-detail`): header (title/desc from keys, category,
+  difficulty, duration, creator `LIVORA`), progress, a day calendar with completed/today/adapted/
+  upcoming states, today's plan card with the adaptation explanation (`ProgramAdapter`,
+  `Bootcamp.AdaptationRuleKeys`), enroll / leave / mark-day-done actions, and an honest
+  "sample program" label.
+- `ProgramsPage`: category filter chips + search over localized titles, enrolled-first ordering,
+  per-card progress, "adapted today" badge, empty state, and a "recommended for you" rail from
+  `ProgramDiscovery`.
+- `WeekProgressView` (`ContentView`, used by the Review page — hand the orchestrator an `APPEND:`
+  snippet for `WeeklySummaryPage.xaml` instead of editing it; lane 09 owns that page's VM only, and
+  the page file belongs to no lane, so `APPEND:` is required).
+- `APPEND:` DI + shell markers.
 
-- `BootcampProgress` (pure, Application layer): day-by-day completion math over `Bootcamp.Days`,
-  streak within a program, "days remaining", projected finish date, and an honest
-  `AdaptedDaysCount`. Cover it with `Tests/Tests/BootcampProgressTests.cs`.
-- `BootcampDetailPage`: header card (title/desc from keys, category, difficulty, duration,
-  creator), progress ring or bar with day math, a 3-column day calendar (`ItemsStackLayout` +
-  `Grid` inside the template) showing completed / today / upcoming / adapted states, the current
-  day's plan with the adaptation explanation from `ProgramAdapter` +
-  `Today.PlanAdapted`-style keys, actions: enroll / leave / mark today done / jump to
-  `LogEntryPage` if the day needs a logged value.
-- Do not modify `ProgramsPage.xaml`/`ProgramsViewModel.cs` (lane 07 owns them); expose a public
-  ctor taking a `Bootcamp` id, and add the DI keys to your patch as `APPEND:`.
-- Reuse: `Card`/`SoftCard`/`AccentCard`, `StatusBadge`-equivalent Borders (see lane 06's
-  `ChipLabel`), `L*` text styles. All copy through `Update`-free `Programs.*`/`Bootcamp.*` keys —
-  new ones go in your resx block.
-
-## 5. Lane 05 — Design system v2 + shell polish
-
-Owned paths: `Resources/Styles/LivoraColors.xaml`, `Resources/Styles/LivoraStyles.xaml`,
-`Presentation/Theme.cs`, `Presentation/Components/**`, `App.xaml`, `App.xaml.cs`,
-`AppShell.xaml`, `AppShell.xaml.cs`, `MauiProgram.cs` (**only** the two
-`// WAVE3-LANE05:` marker regions you were given), `Resources/Icons/**`,
-`Resources/Splash/**`, `Resources/AppIcon/**`.
-
-You are the visual system owner. Every other lane reuses your tokens, so finish first-ish and keep
-names exactly as in §0.9 (they are already published — extend, don't rename).
-
-- `TrExtension` already exists (frozen, do not touch) — verify it works in a page you own.
-- Add tokens/styles: `ChipLabel`, `IconGlyph`, `SegmentText` (already added — refine spacing/size),
-  new `Card` variants (`ElevatedCard`, `MetricCard`), `FieldLabel`, `InputField` (Entry +
-  Editor styles with focus states), `SwitchStyle`, `SliderStyle`, `PickerStyle`, `TabBar` metrics,
-  `LQuote` (insight body), `LTiny` (11px caption), focus/pressed visual states via
-  `VisualStateManager` setters where supported, and a `Skeleton` style for loading states.
-- Dark theme: audit every token for AA contrast in both modes (state the ratio you targeted,
-  ≥4.5:1 for body text); add any missing `*Dark` mirrors. Fix the two hardcoded
-  `SolidColorBrush x:Key="TextPrimaryBrush"`/`TextSecondaryBrush` if the palette needs them.
-- Shell: `AppShell` grows to 6 tabs (`tab_log.svg` exists) — set
-  `Shell.TabBarIsVisible` behavior, add a `FlyoutItem`-free design (keep tabs), set
-  `Shell.NavBarIsVisible=False` (already), and add `Shell.TitleColor`/indicator tokens so the
-  tab bar looks premium in RTL too. Keep the existing 5 routes and add `log` + `updates` routes
-  registered by other lanes (do not reference their page types — the orchestrator wires routes;
-  you may add `Routing.RegisterRoute` calls inside the `// WAVE3-LANE05:` marker region using
-  string-based registration? NO: use `Routing.RegisterRoute("bootcamp-detail",
-  typeof(Presentation.Views.BootcampDetailPage))` etc. inside the marker region ONLY if the type
-  exists in your copy — it does not. So: leave route registration to the orchestrator and instead
-  provide `Core/Navigation/INavigator` (create `Services/Navigation/ShellNavigator.cs`, you own
-  it): `Task GoToAsync(string route, IReadOnlyDictionary<string,object>? args)`,
-  `Task PushAsync(Page page)`, `Task PopAsync()`; VMs get it injected so lanes never call Shell
-  directly.
-- Icons: draw 3 more premium line SVGs if you find any lane needing them, and refresh
-  `Resources/Splash/splash.svg` + `Resources/AppIcon/appiconfg.svg` to match the wordmark style
-  (calm/premium; the accent `#2C5D53` is the brand color). Do not break `MauiIcon`/`MauiSplashScreen`.
-- App shell polish in `App.xaml.cs`: register
-  `Application.Current.RequestedThemeChanged` → `IThemeService`-independent re-flow (keep it
-  null-safe), set default `Window` size on Windows (`window.Width = 1180; window.Height = 820;`
-  guarded by `#if WINDOWS`) for a desktop-first feel, and `Microsoft.Maui.Controls`
-  `PlatformDefaults`-style tweaks you can justify. **Keep everything the other lanes need**:
-  `ApplyFlowDirection()`, onboarding-vs-shell window creation, `ServiceHelper.Initialize`.
-- Report a short list of tokens/keys lanes can now use, as a `NOTES:` line.
-
-## 6. Lane 06 — Responsive desktop layouts
-
-Owned paths: `Presentation/Responsive/**` (create), `Presentation/Views/BaseContentPage.cs`
-(you are the co-owner: append, do not remove behavior), `App.xaml.cs` (only a
-`// WAVE3-LANE06:` marker region — see below), plus page-level edits to
-`Presentation/Views/Today/TodayPage.xaml`, `Presentation/Views/Health/HealthPage.xaml` ONLY.
-
-Desktop must not be a stretched phone.
-
-- Create `Presentation/Responsive/AdaptiveLayout.cs`: a reusable MAUI control/helper exposing
-  `Breakpoint` (`Narrow` < 700 effective px, `Medium` < 1000, `Wide` ≥ 1000) from
-  `Page.Width` changes (use `SizeChanged` + weak events; no polling) and a
-  `Grid`-column-count/`ItemsLayout` provider, plus a XAML-friendly attached property
-  `Adaptive.ColumnSpan` / `Adaptive.Columns` so pages can declare layouts without code-behind.
-  `BaseContentPage`: add `AdaptiveLayout.Attach(this)` wiring without breaking font/flow logic.
-  (You own `BaseContentPage.cs`; `ObservableObject.cs` stays frozen — add your own partial
-  `ObservableObject` extension if needed.)
-- Today page: at `Wide`, render 2–3 columns (intelligence card + plan | metrics + habits |
-  goals + recommendations) inside a `CollectionView`-free layout (use `Grid` + `IsVisible`
-  per breakpoint or `ItemsStackLayout` variants) with the same bound properties — do NOT fork
-  view models. At `Narrow`, the existing stack must look exactly as good.
-- Health page: same treatment (chart column + metric column at Wide).
-- Window chrome on Windows: use the `// WAVE3-LANE06:` marker region in `App.xaml.cs` to set
-  `TitleBar`-adjacent niceties only if they don't need WinUI interop beyond what
-  `Microsoft.Maui.Controls` exposes (`Window.Title`, `MinimumWidth`). Keep it trivial.
-- `AppShell.xaml`: do not touch (lane 05 owns it). Instead, make sure each page's own content
-  handles wide widths (max content width ~ 980 effective px, centered, generous spacing) so a
-  4K window doesn't smear text.
-- Verify with a manual resize test if you can run the app (`dotnet build` + launch the exe
-  headlessly is not required); if not, say so in NOTES and rely on layout math.
-
-## 7. Lane 07 — Client workflows + new Log tab + pages
-
-Owned paths: `Presentation/Views/Log/**`, `Presentation/ViewModels/Log/**` (create),
-`Presentation/Views/Goals/**`, `Presentation/Views/Programs/**`,
-`Presentation/ViewModels/Goals/**`, `Presentation/ViewModels/Programs/**`,
-`Presentation/Views/Profile/**`, `Presentation/ViewModels/Profile/**`,
-`Presentation/Views/Health/**`, `Presentation/ViewModels/Health/**`,
+### Lane 09 — Reminders, Today page, Weekly review, shared state
+Own: `Application/Reminders/**`, `Infrastructure/Notifications/**`,
 `Presentation/Views/Today/**`, `Presentation/ViewModels/Today/**`,
-`Presentation/Views/Onboarding/**`, `Presentation/ViewModels/Onboarding/**`,
-`Presentation/Views/Review/**`, `Presentation/ViewModels/Review/**`, `AppShell.xaml`,
-`AppShell.xaml.cs`, `MauiProgram.cs` (**only** the `// WAVE3-LANE07:` marker region).
+`Presentation/Views/Review/**`, `Presentation/ViewModels/Review/**`,
+`Application/Insights/SnoozeStore.cs` (pure contract) + `Infrastructure/Notifications/SnoozeStore.cs`,
+`Presentation/Views/Reminders/**`, `Presentation/ViewModels/Reminders/**`,
+`Presentation/Components/EmptyStateView.xaml(.cs)`, `Presentation/Components/SearchBarView.xaml(.cs)`,
+`Presentation/Components/FilterChipsView.xaml(.cs)`.
+- `Application/Reminders/ReminderEngine.cs` (pure, testable): from state/goals/habits/bootcamps +
+  `ReminderSetting` list + already-fired map → what to notify, with per-day dedupe; mirrors
+  `RuleEngine.HabitAtRisk` semantics (streak ≥3, nothing logged after 18:00), wind-down when sleep
+  debt is High, "haven't logged today" after 21:00 (uses `IManualEntryService` counts), bootcamp day
+  pending. Output = keys + args only.
+- `Infrastructure/Notifications/LocalReminderService.cs : IReminderService` on
+  `Plugin.LocalNotification` (14.1.2): settings + fired-map in `livora_reminders.json`,
+  `SyncAsync` schedules enabled reminders (`Schedule.NotifyTime`, repeating per `DaysMask`),
+  `GetGrantStateAsync`/`RequestGrantAsync` map the real platform answer to `NotificationGrantState`
+  (never report Allowed unless the API said so), `ClearAllAsync` cancels, `AddReceivedCallback`
+  wiring so tapping a reminder opens Today. Declare `builder.UseLocalNotification();` as `APPEND:`
+  for `MauiProgram.cs`, and list every Android/Windows manifest or permission requirement you could
+  NOT verify on a device in `NOTES:` — do not claim device verification.
+- `RemindersPage` + VM (route `reminders`: list of built-in reminder kinds with switch, `TimePicker`,
+  weekday chips, grant banner with the real state, "Grant"/"Open system settings", and a
+  "send test reminder (+1 min)" that says exactly what happened.
+- Today page: `RefreshView` pull-to-refresh, "Log today" nudge when no manual entry exists (route
+  `log-entry`), a quick-actions row (check-in, reminders, updates, weekly review) that must
+  navigate via `Shell.GoToAsync` routes declared by other lanes (code defensively: catch route
+  failures and show the honest "not available yet" state), tappable recommendation cards that
+  expand why/benefit/confidence (`ExplainKey`, `ExpectedBenefitKey`) with snooze persisted in
+  `livora_snoozed.json`, skeleton/loading polish, and the existing honesty note.
+- Weekly review: finish issue #1 properly — `WeeklySummaryPage` reachable from Today **and**
+  Profile, week navigation (this week / last week), `WeekProgress`-style bars rendered from the
+  VM (lane 08's `APPEND:` provides the view; you host it), empty/insufficient-data state.
+- `EmptyStateView` / `SearchBarView` / `FilterChipsView` `ContentView`s with `BindableProperty`
+  APIs exactly as §2 names them (lanes 07/08 code against those names in parallel; if a type is
+  missing in your copy, `// ORPHAN:` it and keep your build green).
+- `APPEND:` DI + shell markers for everything above.
 
-Wire the wave's features into one coherent, genuinely useful client experience.
+### Lane 10 — Tests + documentation (and the merge gate helper)
+Own: `Tests/**`, `README.md`, `docs/**` (except `docs/LANES.md`).
+- The suite is 117 green — never break it. Add ≥45 tests covering:
+  `AppVersion` parse/compare (all edge cases in the contract comment), localization lookup +
+  `[missing]` + Persian digits/percent/duration + `CultureBootstrap` fallback, `DataNormalizer`
+  sanity/staleness, `BaselineService` incl. wrap-around bedtime + confidence gates, `TrendService`
+  insufficient data, every `RuleEngine` rule boundary, `RecommendationService` cap + dedupe,
+  `DailyPlanService` adaptation grammar, `ProgramAdapter`, `WeeklySummaryService` null-below-3,
+  `Goal`/`Habit` math (Saturday week start, streaks), `DemoDataSeeder` idempotency, honesty suite
+  (every mock-labeled key exists in both resx; `NormalizedDay.Completeness`; `MetricState.Level`
+  dead band; no prose in Application outputs — assert keys), resx integrity (EN/FA key sets equal,
+  no empty values, FA contains Persian codepoints — locate the files from `AppContext.BaseDirectory`
+  and skip cleanly when absent), DI smoke test that every Wave 3 contract is resolvable **only**
+  if it can run without MAUI (otherwise skip and say why).
+- Add the tests other lanes ask for in their `NOTES:`/report (they will name pure files under
+  `Application/`): that is where the lane-specific coverage lands, because only you may edit
+  `Tests/**`.
+- You may add `<Compile Include>` lines to `Tests/LIVORA.Tests.csproj` (you own it) for pure files
+  outside the current globs, e.g. `Infrastructure/Notifications/*` pure helpers — but never include
+  anything that needs a MAUI head.
+- Rewrite `README.md` for Wave 3 (data flow incl. manual overlay, layers, 6 tabs, update feed,
+  notification honesty, charts, desktop breakpoints, build/test commands, status table with
+  real/mock/not-implemented) and write `docs/WAVE3.md` (decisions + honesty rationale). Anything you
+  cannot verify from the code goes under "Unverified".
+- Also produce `docs/WAVE3-MERGE.md`: a checklist you derive from the lane protocol (which markers
+  exist, which DI lines each lane needs) so the orchestrator's merge can be diffed against it.
 
-1. **New `Log` tab** (`ShellContent` route `Log`, `Icon="tab_log.svg"`, `views:LogPage`) — the
-   daily check-in hub: today's manual-entry summary, a big "Log today" button → `LogEntryPage`,
-   the 14-day `SleepTrendChart` (lane 02 exposes it as a view/VM you host), recent entries list,
-   and an honest "sample data" note when no manual entry exists yet.
-   Create `LogPage.xaml(.cs)` + `LogViewModel` (constructor-inject `IManualEntryService`,
-   `IUserService`-style deps as needed; register in the marker region).
-2. **Goals page**: replace the auto-named "New goal 1" flow with navigation to
-   `GoalEditorPage` / `HabitEditorPage` (lane 03), habit list with per-day completion toggles,
-   weekly ring, streak chip, empty states, undo for archive, filter chips (All / Goals / Habits).
-3. **Programs page**: enroll/leave/complete-day moved into cards that navigate to
-   `BootcampDetailPage` (lane 04), plus filter by category and a "your program adapted today"
-   badge sourced from `Bootcamp.WasAdaptedToday`.
-4. **Profile page**: add the update card (lane 01's `UpdateBannerViewModel`/`CheckAsync`) with
-   "Check for updates" + "What's new" navigation to `UpdatePage`; theme mode segmented control
-   (`ThemeMode` via `IThemeService`); reminders entry (lane 09's `RemindersPage`); privacy
-   inventory extended with the new stores (`livora_manual_entries.json`, `update_feed.json`,
-   `reminders.json`) — list them honestly with Manual/Device origin; version row + "about" text.
-5. **Health page**: header action "Log" (push `LogEntryPage`), surface the manual-vs-mock origin
-   per section, and a 7-day sparkline row (lane 02's chart if reusable, else simple bars).
-6. **Today page**: pull-to-refresh (`RefreshView`), a "Log today" nudge when no manual entry,
-   quick actions row (reminders/updates/review), and confirm the weekly review button navigates
-   (`OpenWeeklyReview` already exists — make sure it pushes `WeeklySummaryPage`).
-7. **Onboarding**: add a step that offers first-time notifications (lane 09 `RequestGrantAsync`)
-   and explains data stays on device; keep it short.
-8. **Shell**: tab titles refresh on language change (already), add the Log tab in the right order
-   (Today, Health, Log, Goals, Programs, Profile) and register routes inside the marker region:
-   `log-entry`, `goal-editor`, `habit-editor`, `bootcamp-detail`, `updates`, `reminders` using the
-   page types created by lanes 01-04/09 — reference them by their documented namespaces
-   (`LIVORA.Presentation.Views.LogEntryPage`, `...GoalEditorPage`, `...HabitEditorPage`,
-   `LIVORA.Presentation.Views.BootcampDetailPage`, `...UpdatePage`, `...RemindersPage`).
-   If a type is missing at your build time, comment the line with `// ORPHAN:` and note it.
-9. Keep every string localized (your new keys in §11 resx blocks) and every binding live-updating
-   on `OnLanguageChanged`.
+## 4. Cross-lane names you MUST use exactly (they are being written in parallel)
 
-## 8. Lane 08 — Search, filter, sort, insights UX, empty states
+- VM/service type names: `UpdateViewModel`, `UpdateBannerViewModel`, `UpdateService`,
+  `GitHubReleaseFeed`, `ManualEntryStore`, `ManualOverlayProvider`, `LogViewModel`,
+  `LogEntryViewModel`, `LogPage`, `LogEntryPage`, `GoalEditorViewModel`, `HabitEditorViewModel`,
+  `GoalEditorPage`, `HabitEditorPage`, `BootcampDetailViewModel`, `BootcampDetailPage`,
+  `ProgramsViewModel`, `GoalsViewModel`, `ProfileViewModel`, `SettingsViewModel`, `SettingsPage`,
+  `RemindersViewModel`, `RemindersPage`, `TodayViewModel`, `LocalReminderService`, `ThemeService`,
+  `ReminderEngine`, `BootcampProgress`, `GoalEditorRules`, `LogEntryRules`, `ProgramDiscovery`,
+  `WeekProgress`, `ManualMerge`.
+- Page namespaces: `LIVORA.Presentation.Views` (existing convention — every page lives in it).
+- Routes: `updates`, `settings`, `reminders`, `log-entry`, `goal-editor`, `habit-editor`,
+  `bootcamp-detail`.
+- Components: `EmptyStateView`, `SearchBarView`, `FilterChipsView`, `SegmentedControlView`,
+  `StatChip`, `ProgressRing`, `PressableBorder`, `AdaptiveLayout`, `ResponsiveGrid` (namespaces
+  `LIVORA.Presentation.Components` / `LIVORA.Presentation.Responsive`).
+- Localization key prefixes: `Update.*`, `Log.*`, `Editor.*`, `Bootcamp.*` (extend), `Programs.*`,
+  `Goals.*`, `Settings.*`, `Reminders.*`, `Profile.*`, `Today.*`, `Health.*`, `Theme.*`,
+  `Notification.*`, `Privacy.*`, `Common.*`, `Enum.*`, `Format.*`.
 
-Owned paths: `Presentation/ViewModels/Discovery/**` (create),
-`Presentation/Components/SearchBarView.xaml` (create as a `ContentView`), plus *template-level*
-polish inside `Presentation/Views/Today/TodayPage.xaml` (recommendation cards only) and
-`Resources/Styles/` — wait: styles are lane 05's. So: put your styles inline in your own XAML.
+## 5. Report format (all lanes)
 
-Make the app feel considered:
+From your lane directory:
 
-- `SearchBarView` (reusable: placeholder, clear button, `TextChanged` event, RTL-correct magnifier,
-  `IconGlyph` style) + a `FilterChipsView` (single-select chip row bound to a
-  `IReadOnlyList<FilterOption>` with `SelectedKey`), both `ContentView`s with `BindableProperty`s.
-- `Discovery/FilterSortService.cs` (pure logic in `Application/Discovery/` — you own that file):
-  predicates + comparers over goals/habits/bootcamps (by category, status, streak, days left,
-  progress, "at risk"), with **locale-aware** text matching (case-insensitive, diacritic-insensitive,
-  and matching Persian digits typed as Latin and vice versa — reuse
-  `IFormatService`/`LocalizationService` behavior through `ILocalizationService`).
-- Recommendation cards on Today: tappable → an explanation sheet (`FlyoutBase`/`DisplayAnimated`
-  — use a `Border` overlay or `Shell` modal-free approach that works on all four heads) showing
-  why (rule key), expected benefit, confidence bar, and "why this, why now" copy from the existing
-  `ExplainKey`/`ExpectedBenefitKey`. Add an `ICommand` to dismiss/snooze a recommendation
-  (persist snooze in a file you own: `livora_snoozed.json`).
-- Empty/skeleton/error states: `EmptyStateView` `ContentView` (icon glyph + title + body + CTA,
-  localized), used where lists are empty.
-- Do not touch files owned by lanes 07 for Goals/Programs pages (they get the components through
-  your NOTES).
-- Tests: `Tests/Tests/DiscoveryFilterTests.cs` for the pure matcher/comparers (incl. Persian).
-
-## 9. Lane 09 — Reminders + notifications + settings depth
-
-Owned paths: `Services/Reminders/**` (create), `Presentation/Views/Settings/**`,
-`Presentation/ViewModels/Settings/**` (create), `Application/Reminders/**` (create),
-`Domain/Enums/ReminderEnums.cs` (create).
-
-Real client value: LIVORA tells you at 18:00 that your morning-walk streak is at risk — and never
-lies about whether it can.
-
-- `Application/Reminders/ReminderEngine.cs` (pure): given `PersonalState`, goals, habits and
-  `ReminderSetting`s, decide what to notify (habit-at-risk ≥18:00, sleep-debt wind-down,
-  bootcamp day pending, "you haven't logged today"), dedupe per day (`lastFired` map persisted by
-  the service layer), compute the exact localized `TextKey`/args. Unit-test it.
-- `Services/Reminders/LocalReminderService.cs` implements `IReminderService` using
-  `Plugin.LocalNotification` (v14.1.2 — `INotificationService`,
-  `NotificationRequest` with `Schedule.NotifyTime`, `Permissions.Notifications`
-  `AreNotificationsEnabledAsync`/`RequestPermissionsAsync`). Store settings + last-fired dates in
-  `livora_reminders.json` (own tiny store, same pattern as lane 01). Android needs the platform
-  init — `MauiProgram` line: `builder.UseLocalNotification();` (declare as `APPEND:` for the
-  orchestrator; also declare the `Platforms/Android` + `Platforms/Windows` requirements you find
-  in the package docs and mark them honestly as untested on device).
-- `RemindersPage` + `RemindersViewModel`: list of built-in reminder kinds with enable switch,
-  time picker, repeat-days chips, a grant-state banner
-  (`NotificationGrantState` → localized: allowed / blocked / not requested / system-managed) and a
-  "grant notifications" button that reflects the real result — never a fake success.
-  Plus app settings depth here: theme mode segmented control, language segmented control (reuse
-  the Profile pattern), data-source note, and an "about/updates" link to `UpdatePage`.
-- Tests: `Tests/Tests/ReminderEngineTests.cs` (dedupe, threshold times, mask logic, key selection).
-
-## 10. Lane 10 — Tests, docs, coverage
-
-Owned paths: `Tests/**`, `README.md`, `docs/**`.
-
-- Add the Wave 3 tests named in the other lanes' sections ONLY for code that already exists in
-  `Application/`/`Domain/`/`Infrastructure/` in your copy — you will not see lane code. So instead:
-  extend coverage of what IS here: `AppVersion.Compare/TryParse` (contract exists — test it hard),
-  `DataNormalizer` edge cases, `BaselineService` wrap-around bedtime, `TrendService` insufficient
-  data, `RuleEngine` each rule boundary (find the thresholds by reading the code),
-  `RecommendationService` cap logic, `ProgramAdapter`, `WeeklySummaryService` null-below-3-days,
-  `LocalizationService` key lookup + `[missing]` behavior + Persian digit/percent/duration
-  formatting, `CultureBootstrap` fallback, `Goal`/`Habit` progress and streak math (incl. Saturday
-  week start), `DemoDataSeeder` idempotency, and an honesty suite: mock-labeled strings must be
-  reachable via keys, `NormalizedDay.Completeness()`, `MetricState.Level` dead band.
-  Target +40 tests, all green.
-- Localization integrity test: parse both `.resx` files in the test project (they are not compiled
-  into the test project — read from disk relative to the repo root computed from
-  `AppContext.BaseDirectory`, with a clear skip when not found) and assert equal key sets, no
-  empty values, and that `fa` values actually contain Persian codepoints.
-- `README.md`: rewrite §3 (Wave 1→2→3), §7 build/test, §8 status, §9 roadmap for Wave 3 — describe
-  the new features, the 6 tabs, the update feed, notifications honesty, desktop layout, and the
-  lane protocol. Keep the honesty table accurate; move "Real providers" to still-not-implemented.
-- `docs/WAVE3.md`: architecture decisions (why `IUpdateService` is keyless, why manual overlay
-  beats replacing the provider, the `TrExtension` mechanism, chart/RTL approach, what is
-  deliberately still mock).
-
-## 11. The resx append block format (lanes 01,02,03,04,07,08,09)
-
-Your diff cannot edit the frozen resx files. Instead, after the diff, emit:
-
-```
-KEYS-EN
-<data name="Update.Title" xml:space="preserve"><value>Updates</value></data>
-...
-KEYS-FA
-<data name="Update.Title" xml:space="preserve"><value>بروزرسانی‌ها</value></data>
-...
+```bash
+git add -A >/dev/null 2>&1
+git -c core.quotepath=false diff --cached --binary
 ```
 
-Rules: same indentation/style as existing entries, one line per key, EN and FA with **identical key
-order and count**, `xml:space="preserve"`, arguments as `{0}`/`{1}` in both languages (Persian may
-reorder indices but must use the same count), no English-only keys, no duplicate keys, and every key
-you emit must appear in your own code. Persian must be real idiomatic Persian (native register,
-"تو" form, ZWNJ where natural), not transliteration and not Arabic.
+Then in your final message, in this order:
+1. One fenced ```diff block with the complete diff (binary-safe — do not split or summarize it).
+2. `KEYS-EN` and `KEYS-FA` blocks: raw `<data name="…" xml:space="preserve"><value>…</value></data>`
+   lines, one per key, same order in both, no resx wrapper.
+3. `APPEND <target-file> <marker>` blocks with the exact code to insert.
+4. Stats: `BUILD: ok|fail|not-run`, `TESTS: ok|fail|not-run`, `FILES: n`, `KEYS: n`.
+5. `NOTES:` one line each — orphans, unverified platform claims, tokens you need from lane 05,
+   tests you want lane 10 to write, files you expect to conflict.
+Prose under 20 lines. Never paste a full file outside the diff.
