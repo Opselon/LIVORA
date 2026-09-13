@@ -38,9 +38,18 @@ Reconciliation steps that the merge MUST repeat (all mechanical, 10 minutes at m
    that, so both docs must be reworded to "done" (and docs/WAVE3.md keeps the historical note that
    a pre-fix install needs the TitleKey idempotency guard).
 
-Probe artifacts: reconciled test/doc files live in `Temp/livora_w3/probe09/Tests/` — regenerate
-lane 10's patch from there so the merge lands them already reconciled:
-`git -C probe09 add -A && git -C probe09 diff --cached -- Tests docs README.md` (paths relative).
+8. `docs/WAVE3.md` debt item 2 (seeder) + README test-table line: reworded to FIXED in the probe.
+
+Probe artifacts — READY TO APPLY, already reconciled against `bf5edbd`/`0dfb783`:
+- `Temp/lane09.diff`  (lane 09, applies clean at `bf5edbd`; needs only step 1, which is central)
+- `Temp/lane10.diff`  (lane 10 full; fails on `docs/WAVE3-MERGE.md` — see below)
+- `Temp/lane10.reconciled.diff` (14 files: the Tests/** + README + docs/WAVE3.md fixups, i.e.
+  steps 2-5+8 already done — 439 tests green on the probe tree with it applied)
+
+Merge procedure for lane 10: `git rm docs/WAVE3-MERGE.md` (my 60-line notes, superseded by lane
+10's 204-line checklist; the deltas I care about live in WAVE3-MERGE-STATE.md), then
+`git apply lane10.diff`, then `git apply lane10.reconciled.diff`. Skip the reconciled file if
+lane 10's own patch was regenerated post-fix-up instead.
 
 ## Tripwires lane 10 left that MUST be updated at merge time (they pin pre-fix behavior)
 
