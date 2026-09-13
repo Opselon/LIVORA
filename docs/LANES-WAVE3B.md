@@ -102,7 +102,7 @@ write those three shared files or `LIVORA.csproj` / `Tests/LIVORA.Tests.csproj` 
 - App build at HEAD: 0 errors (may report MSB3026/27 file-lock errors if the app is running —
   that's an environment artifact, not your code; report it as such).
 - External AI gateway (real, probed): base `http://sub.legoten.com:4455/v1`, key
-  `sk-1cdcb3a694e83bc3-nwuufr-dd7c7367`, model `coding`. It streams even for `stream:false`
+  `«redacted:sk-…»`, model `coding`. It streams even for `stream:false`
   (SSE `data:` lines must be parsed), `choices[0].message.content` carries the answer, the real
   model behind `coding` may differ (`qwen3.8-flash` observed). Plain HTTP → the app must default
   the AI off until the user enables it, and never put the key in a log or a crash report.

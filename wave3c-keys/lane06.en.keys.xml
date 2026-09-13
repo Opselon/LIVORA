@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wave 3c lane 06 keys (EN). Plain <data> XML (NOT .resx) — merged by the orchestrator.
+     These are EXACTLY the strings lane 06 code emits as keys (no prose in code):
+       SyncQueue.DrainAsync           -> Sync.Reason.TransportNotConfigured
+       SyncQueue journal/UI counters  -> Sync.Status.* (args: counts) / Sync.Reason.ConflictsAwaitDecision
+       MigrationRunner.StoreResult    -> Migration.Failed.<store>.<version>  (concrete pairs below)
+       LocalDataCatalogService        -> Error.Catalog.* (incl. the per-kind suffixed keys it builds)
+     A missing key still degrades honestly (raw key shown), but each of these is emitted today. -->
+<root>
+  <data name="Sync.Reason.TransportNotConfigured" xml:space="preserve"><value>No sync backend is configured yet — your changes stay pending on this device.</value></data>
+  <data name="Sync.Reason.ConflictsAwaitDecision" xml:space="preserve"><value>{0} change(s) differ from the other copy and wait for your decision.</value></data>
+  <data name="Sync.Status.PendingCount" xml:space="preserve"><value>{0} change(s) waiting to sync</value></data>
+  <data name="Sync.Status.ConflictCount" xml:space="preserve"><value>{0} change(s) need your decision</value></data>
+  <data name="Sync.Status.Dropped" xml:space="preserve"><value>{0} queued change record(s) left the sync buffer (your data is safe on this device)</value></data>
+  <data name="Sync.Action.KeepLocal" xml:space="preserve"><value>Keep my version</value></data>
+  <data name="Sync.Action.KeepRemote" xml:space="preserve"><value>Use the other version</value></data>
+  <data name="Migration.Failed.goals.2" xml:space="preserve"><value>The goals data upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.habits.2" xml:space="preserve"><value>The habits data upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.bootcamps.2" xml:space="preserve"><value>The bootcamp data upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.profile.2" xml:space="preserve"><value>The profile upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.history.2" xml:space="preserve"><value>The history upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.manual.2" xml:space="preserve"><value>The manual-entry upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.settings.2" xml:space="preserve"><value>The settings upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.consents.2" xml:space="preserve"><value>The consent records upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.reminders.2" xml:space="preserve"><value>The reminders upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Error.Catalog.UnknownKind" xml:space="preserve"><value>Unknown data kind.</value></data>
+  <data name="Error.Catalog.InvalidJson" xml:space="preserve"><value>The text is not valid JSON.</value></data>
+  <data name="Error.Catalog.MissingKinds" xml:space="preserve"><value>The backup has no kinds section.</value></data>
+  <data name="Error.Catalog.MissingIdentity" xml:space="preserve"><value>The record has no identity (Id or Date).</value></data>
+  <data name="Error.Catalog.SchemaVersionTooNew" xml:space="preserve"><value>This backup was made by a newer version of the app.</value></data>
+  <data name="Error.Catalog.Missing.goals.Id" xml:space="preserve"><value>A goal needs an id.</value></data>
+  <data name="Error.Catalog.Missing.goals.Name" xml:space="preserve"><value>A goal needs a name.</value></data>
+  <data name="Error.Catalog.Missing.habits.Id" xml:space="preserve"><value>A habit needs an id.</value></data>
+  <data name="Error.Catalog.Missing.habits.Name" xml:space="preserve"><value>A habit needs a name.</value></data>
+  <data name="Error.Catalog.Missing.bootcamps.Id" xml:space="preserve"><value>A bootcamp needs an id.</value></data>
+  <data name="Error.Catalog.Missing.reminders.Id" xml:space="preserve"><value>A reminder needs an id.</value></data>
+  <data name="Error.Catalog.Missing.reminders.Kind" xml:space="preserve"><value>A reminder needs a kind.</value></data>
+  <data name="Error.Catalog.Missing.reminders.TextKey" xml:space="preserve"><value>A reminder needs its text key.</value></data>
+  <data name="Error.Catalog.Missing.history.Date" xml:space="preserve"><value>A history record needs a date.</value></data>
+  <data name="Error.Catalog.Missing.manual.Date" xml:space="preserve"><value>A manual entry needs a date.</value></data>
+  <data name="Error.Catalog.Range.goals.TargetValue" xml:space="preserve"><value>A goal target must be between 0 and 1,000,000.</value></data>
+  <data name="Error.Catalog.Range.goals.ProgressValue" xml:space="preserve"><value>A goal's progress must be between 0 and 1,000,000.</value></data>
+  <data name="Error.Catalog.Range.habits.TimesPerWeek" xml:space="preserve"><value>A habit must be set between 1 and 7 times per week.</value></data>
+  <data name="Error.Catalog.Range.bootcamps.DurationDays" xml:space="preserve"><value>A bootcamp length must be between 1 and 3650 days.</value></data>
+  <data name="Error.Catalog.Range.bootcamps.CurrentDay" xml:space="preserve"><value>A bootcamp's current day must be between 0 and 3650.</value></data>
+  <data name="Error.Catalog.Range.history.SleepMinutes" xml:space="preserve"><value>Sleep minutes must be between 0 and 1440.</value></data>
+  <data name="Error.Catalog.Range.history.Steps" xml:space="preserve"><value>Steps must be between 0 and 1,000,000.</value></data>
+  <data name="Error.Catalog.Range.history.ActiveMinutes" xml:space="preserve"><value>Active minutes must be between 0 and 1440.</value></data>
+  <data name="Error.Catalog.Range.history.Completeness" xml:space="preserve"><value>Completeness must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.history.SleepQuality" xml:space="preserve"><value>Sleep quality must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.history.Stress" xml:space="preserve"><value>Stress must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.history.Mood" xml:space="preserve"><value>Mood must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.history.Energy" xml:space="preserve"><value>Energy must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.manual.SleepMinutes" xml:space="preserve"><value>Sleep minutes must be between 0 and 1440.</value></data>
+  <data name="Error.Catalog.Range.manual.Steps" xml:space="preserve"><value>Steps must be between 0 and 1,000,000.</value></data>
+  <data name="Error.Catalog.Range.manual.SleepQuality" xml:space="preserve"><value>Sleep quality must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.manual.Stress" xml:space="preserve"><value>Stress must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.manual.Mood" xml:space="preserve"><value>Mood must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.manual.Energy" xml:space="preserve"><value>Energy must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.BadDate.history" xml:space="preserve"><value>The history date is not readable.</value></data>
+  <data name="Error.Catalog.BadDate.manual" xml:space="preserve"><value>The manual entry date is not readable.</value></data>
+  <data name="Error.Catalog.Shape.goals" xml:space="preserve"><value>A goal record must be a JSON object.</value></data>
+  <data name="Data.Wipe.Done" xml:space="preserve"><value>All local data was erased on {0}.</value></data>
+  <data name="Data.Store.CorruptQuarantined" xml:space="preserve"><value>An unreadable data file was preserved for inspection; the app continued with a clean copy.</value></data>
+</root>

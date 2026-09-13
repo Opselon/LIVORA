@@ -808,4 +808,253 @@
   <data name="WeekProgress.ProgramDone" xml:space="preserve"><value>day done</value></data>
   <data name="Health.DataSource.ManualOverlay" xml:space="preserve"><value>Your own entries</value></data>
 
+
+
+  <!-- ===== Wave3b/3c lane key fragments (merged by the integration lane; originals win on conflict) ===== -->
+  <data name="Health.Provider.HealthConnect" xml:space="preserve"><value>Health Connect</value></data>
+  <data name="Health.Cap.Provider.Connected" xml:space="preserve"><value>Connected · reading data</value></data>
+  <data name="Health.Cap.Provider.NotInstalled" xml:space="preserve"><value>Health Connect isn't installed on this device</value></data>
+  <data name="Health.Cap.Provider.NeedsPermission" xml:space="preserve"><value>Allow health access so LIVORA can read your data</value></data>
+  <data name="Health.Cap.Provider.Unavailable" xml:space="preserve"><value>Not available on this device</value></data>
+  <data name="Health.Cap.Status.Available" xml:space="preserve"><value>Available</value></data>
+  <data name="Health.Cap.Status.NeedsPermission" xml:space="preserve"><value>Needs permission for {0}</value></data>
+  <data name="Health.Cap.Status.NoData" xml:space="preserve"><value>No {0} records for this period</value></data>
+  <data name="Health.Cap.Status.Unsupported" xml:space="preserve"><value>{0} isn't supported by this connection yet</value></data>
+  <data name="Health.Cap.Permission.Granted" xml:space="preserve"><value>Allowed</value></data>
+  <data name="Health.Cap.Permission.Denied" xml:space="preserve"><value>Not allowed</value></data>
+  <data name="Health.Cap.Permission.NotAsked" xml:space="preserve"><value>Not asked yet</value></data>
+  <data name="Health.Cap.Permission.AskLimit" xml:space="preserve"><value>LIVORA won't ask again this session ({0} tries used)</value></data>
+  <data name="Health.Cap.Permission.Unavailable" xml:space="preserve"><value>Not available in this version</value></data>
+  <data name="Norm.Reject.MalformedJson" xml:space="preserve"><value>The file is not valid JSON</value></data>
+  <data name="Norm.Reject.NotObject" xml:space="preserve"><value>This entry is not an object</value></data>
+  <data name="Norm.Reject.TooLarge" xml:space="preserve"><value>This entry is larger than 1 MB and was not read</value></data>
+  <data name="Norm.Reject.Empty" xml:space="preserve"><value>Nothing was entered</value></data>
+  <data name="Norm.Reject.UnknownKind" xml:space="preserve"><value>Unknown data type</value></data>
+  <data name="Norm.Reject.NotFound" xml:space="preserve"><value>No stored entry matches that id</value></data>
+  <data name="Norm.Reject.StoreCorrupt" xml:space="preserve"><value>The stored file cannot be read and was left untouched</value></data>
+  <data name="Norm.Reject.UnknownField" xml:space="preserve"><value>This field is not part of the schema and was rejected</value></data>
+  <data name="Norm.Reject.MissingField" xml:space="preserve"><value>A required field is missing</value></data>
+  <data name="Norm.Reject.MissingId" xml:space="preserve"><value>The entry has no id</value></data>
+  <data name="Norm.Reject.DuplicateId" xml:space="preserve"><value>Two entries share the same id</value></data>
+  <data name="Norm.Reject.Type" xml:space="preserve"><value>This field is not the expected type</value></data>
+  <data name="Norm.Reject.NotFinite" xml:space="preserve"><value>The recorded value is not a valid number</value></data>
+  <data name="Norm.Reject.Range" xml:space="preserve"><value>This value is outside the possible range</value></data>
+  <data name="Norm.Reject.StringTooLong" xml:space="preserve"><value>This text is longer than the field allows</value></data>
+  <data name="Norm.Reject.UnknownEnum" xml:space="preserve"><value>This option is not one the app knows</value></data>
+  <data name="Norm.Reject.DateInverted" xml:space="preserve"><value>The dates are in the wrong order, or outside the supported range</value></data>
+  <data name="Norm.Reject.SchemaTooNew" xml:space="preserve"><value>This backup was written by a newer version of LIVORA</value></data>
+  <data name="Norm.Reject.ImpossibleProvenance" xml:space="preserve"><value>A manually entered day cannot claim another source</value></data>
+  <data name="Norm.Reject.UntouchableState" xml:space="preserve"><value>“Never asked” cannot be saved as a decision</value></data>
+  <data name="Auth.Cloud.NotAvailable" xml:space="preserve"><value>No account server exists yet, so sign-in is not available. Everything stays on this device.</value></data>
+  <data name="Sync.Reason.NoBackend" xml:space="preserve"><value>No sync backend is configured — changes stay on this device</value></data>
+  <data name="Passcode.Locked" xml:space="preserve"><value>Too many attempts. Try again in a minute.</value></data>
+  <data name="Passcode.Set" xml:space="preserve"><value>Passcode set. It protects this app on this device only.</value></data>
+  <data name="Passcode.Removed" xml:space="preserve"><value>Passcode removed. Nothing was uploaded.</value></data>
+  <data name="Ai.Headline.Provider" xml:space="preserve"><value>Today's insight</value></data>
+  <data name="Ai.Body.Provider" xml:space="preserve"><value>{0}</value></data>
+  <data name="Ai.SourceBadge.Rules" xml:space="preserve"><value>From your routines</value></data>
+  <data name="Ai.SourceBadge.Validated" xml:space="preserve"><value>AI wording · checked locally</value></data>
+  <data name="Ai.SourceBadge.Fallback" xml:space="preserve"><value>AI unavailable — rules only</value></data>
+  <data name="Ai.Settings.Title" xml:space="preserve"><value>AI insights</value></data>
+  <data name="Ai.Settings.Enable" xml:space="preserve"><value>Let AI rephrase your insights</value></data>
+  <data name="Ai.Settings.InsecureWarning" xml:space="preserve"><value>Warning: the built-in AI gateway uses plain HTTP — your derived state leaves this device unencrypted. Off by default.</value></data>
+  <data name="Ai.Settings.KeySource" xml:space="preserve"><value>Key: {0}</value></data>
+  <data name="Ai.Consent.Explain" xml:space="preserve"><value>LIVORA sends only your computed metric deltas and goal titles to the AI — never notes, history, or your name.</value></data>
+  <data name="Norm.Reject.Sleep" xml:space="preserve"><value>Sleep amount is not valid</value></data>
+  <data name="Norm.Reject.Bedtime" xml:space="preserve"><value>Bedtime is not valid</value></data>
+  <data name="Norm.Reject.Wake" xml:space="preserve"><value>Wake time is not valid</value></data>
+  <data name="Norm.Reject.Steps" xml:space="preserve"><value>Step count is not valid</value></data>
+  <data name="Norm.Reject.Active" xml:space="preserve"><value>Active minutes are not valid</value></data>
+  <data name="Norm.Reject.Bpm" xml:space="preserve"><value>Heart rate is not valid</value></data>
+  <data name="Norm.Reject.Hrv" xml:space="preserve"><value>Heart-rate variability is not valid</value></data>
+  <data name="Norm.Reject.Quality" xml:space="preserve"><value>Sleep quality is not valid</value></data>
+  <data name="Norm.Reject.Consistency" xml:space="preserve"><value>Sleep consistency is not valid</value></data>
+  <data name="Norm.Reject.Recovery" xml:space="preserve"><value>Recovery score is not valid</value></data>
+  <data name="Norm.Reject.Ratio" xml:space="preserve"><value>This value must be between 0 and 1</value></data>
+  <data name="Norm.Reject.Negative" xml:space="preserve"><value>Negative values are not allowed</value></data>
+  <data name="Norm.Reject.TimeReversed" xml:space="preserve"><value>The end time is before the start time</value></data>
+  <data name="Norm.Reject.Unit" xml:space="preserve"><value>Unknown measurement unit</value></data>
+  <data name="Norm.Reject.Distance" xml:space="preserve"><value>Distance is not valid</value></data>
+  <data name="Norm.Reject.Energy" xml:space="preserve"><value>Energy is not valid</value></data>
+  <data name="Norm.Warn.StepsHigh" xml:space="preserve"><value>This step count looks unusually high</value></data>
+  <data name="Norm.Warn.SleepHigh" xml:space="preserve"><value>This sleep length looks unusually high</value></data>
+  <data name="Norm.Warn.RhrHigh" xml:space="preserve"><value>This resting heart rate looks unusually high</value></data>
+  <data name="Norm.Warn.HrvHigh" xml:space="preserve"><value>This HRV reading looks unusually high</value></data>
+  <data name="Activity.Reject.Duration" xml:space="preserve"><value>Workout duration is not valid</value></data>
+  <data name="Activity.Reject.Unit" xml:space="preserve"><value>Workout measurement unit is unknown</value></data>
+  <data name="pattern.observed.late-sleep" xml:space="preserve"><value>Late nights recur</value></data>
+  <data name="pattern.evidence.late-nights" xml:space="preserve"><value>{0} of the last {1} nights, more than {2} minutes past your usual bedtime</value></data>
+  <data name="pattern.observed.weekday-dip" xml:space="preserve"><value>One weekday is quieter</value></data>
+  <data name="pattern.evidence.weekday-dip" xml:space="preserve"><value>Weekday {0}: about {1}% below your other days (seen on {2} of them)</value></data>
+  <data name="pattern.observed.poor-sleep-focus" xml:space="preserve"><value>Poor sleep and lower focus show up together</value></data>
+  <data name="pattern.evidence.poor-sleep-focus" xml:space="preserve"><value>After {0}% of {1} short-sleep nights, the next day's focus sat below your own average ({2} of {1})</value></data>
+  <data name="pattern.observed.habit-window" xml:space="preserve"><value>Habit misses cluster</value></data>
+  <data name="pattern.evidence.habit-window" xml:space="preserve"><value>Missed {1} of {2} times on weekday {0} ({3}% of that day)</value></data>
+  <data name="pattern.observed.workout-trend" xml:space="preserve"><value>Your active days are moving</value></data>
+  <data name="pattern.evidence.workout-trend" xml:space="preserve"><value>Across {0} weeks: {1} days with 30+ active minutes</value></data>
+  <data name="pattern.observed.goal-stagnant" xml:space="preserve"><value>A goal has been still</value></data>
+  <data name="pattern.evidence.goal-stagnant" xml:space="preserve"><value>No change in progress for {0} days with {1} days left before the deadline</value></data>
+  <data name="pattern.observed.recovery-activity" xml:space="preserve"><value>Recovery and previous-day activity track together</value></data>
+  <data name="pattern.evidence.recovery-activity" xml:space="preserve"><value>Association r = {0} across {1} day pairs (co-occurrence only)</value></data>
+  <data name="State.Confidence.Basis" xml:space="preserve"><value>based on {0} complete fields · {1} baseline confidence · {2} days old</value></data>
+  <data name="State.Baseline.Gated.Short" xml:space="preserve"><value>Not enough clean history yet ({0} days seen — {1} needed)</value></data>
+  <data name="State.Baseline.WindowUsed" xml:space="preserve"><value>{0}-day window · {1} clean samples</value></data>
+  <data name="Pattern.Insufficient.Note" xml:space="preserve"><value>Still learning — {0} of 7 patterns have enough data</value></data>
+  <data name="Plan.Change.ShrinkExercise" xml:space="preserve"><value>Shortened a {0}-minute training block to {1} minutes</value></data>
+  <data name="Plan.Change.AddRecovery" xml:space="preserve"><value>Added {0} minutes of recovery time</value></data>
+  <data name="Plan.Evidence.RecoveryBelowBaseline" xml:space="preserve"><value>your recovery is {0}% below your usual level</value></data>
+  <data name="Plan.Change.ShiftFocusEarlier" xml:space="preserve"><value>Moved your earliest focus block {0} minutes earlier</value></data>
+  <data name="Plan.Change.AddWindDown" xml:space="preserve"><value>Added a {0}-minute evening wind-down</value></data>
+  <data name="Plan.Evidence.SleepBelowBaseline" xml:space="preserve"><value>last night's sleep was {0}% below your usual</value></data>
+  <data name="Plan.Change.KeptStale" xml:space="preserve"><value>Kept your standard plan — your data is {0} days old</value></data>
+  <data name="Plan.Evidence.StaleData" xml:space="preserve"><value>your sleep data hasn't refreshed for {0} days</value></data>
+  <data name="Plan.Change.ProtectDeadlineItem" xml:space="preserve"><value>Protected a deadline-linked block at a {0}-minute floor</value></data>
+  <data name="Plan.Evidence.DeadlineRisk" xml:space="preserve"><value>your goal is due in {0} days at {1}% progress</value></data>
+  <data name="Plan.Change.RecoveryAware" xml:space="preserve"><value>Planned with yesterday's high activity in mind</value></data>
+  <data name="Plan.Evidence.HighActivityYesterday" xml:space="preserve"><value>yesterday you were {0}% more active than usual</value></data>
+  <data name="Sync.Reason.TransportNotConfigured" xml:space="preserve"><value>No sync backend is configured yet — your changes stay pending on this device.</value></data>
+  <data name="Sync.Reason.ConflictsAwaitDecision" xml:space="preserve"><value>{0} change(s) differ from the other copy and wait for your decision.</value></data>
+  <data name="Sync.Status.PendingCount" xml:space="preserve"><value>{0} change(s) waiting to sync</value></data>
+  <data name="Sync.Status.ConflictCount" xml:space="preserve"><value>{0} change(s) need your decision</value></data>
+  <data name="Sync.Status.Dropped" xml:space="preserve"><value>{0} queued change record(s) left the sync buffer (your data is safe on this device)</value></data>
+  <data name="Sync.Action.KeepLocal" xml:space="preserve"><value>Keep my version</value></data>
+  <data name="Sync.Action.KeepRemote" xml:space="preserve"><value>Use the other version</value></data>
+  <data name="Migration.Failed.goals.2" xml:space="preserve"><value>The goals data upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.habits.2" xml:space="preserve"><value>The habits data upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.bootcamps.2" xml:space="preserve"><value>The bootcamp data upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.profile.2" xml:space="preserve"><value>The profile upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.history.2" xml:space="preserve"><value>The history upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.manual.2" xml:space="preserve"><value>The manual-entry upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.settings.2" xml:space="preserve"><value>The settings upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.consents.2" xml:space="preserve"><value>The consent records upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Migration.Failed.reminders.2" xml:space="preserve"><value>The reminders upgrade failed at step 2. Your data is unchanged; the upgrade will be retried.</value></data>
+  <data name="Error.Catalog.UnknownKind" xml:space="preserve"><value>Unknown data kind.</value></data>
+  <data name="Error.Catalog.InvalidJson" xml:space="preserve"><value>The text is not valid JSON.</value></data>
+  <data name="Error.Catalog.MissingKinds" xml:space="preserve"><value>The backup has no kinds section.</value></data>
+  <data name="Error.Catalog.MissingIdentity" xml:space="preserve"><value>The record has no identity (Id or Date).</value></data>
+  <data name="Error.Catalog.SchemaVersionTooNew" xml:space="preserve"><value>This backup was made by a newer version of the app.</value></data>
+  <data name="Error.Catalog.Missing.goals.Id" xml:space="preserve"><value>A goal needs an id.</value></data>
+  <data name="Error.Catalog.Missing.goals.Name" xml:space="preserve"><value>A goal needs a name.</value></data>
+  <data name="Error.Catalog.Missing.habits.Id" xml:space="preserve"><value>A habit needs an id.</value></data>
+  <data name="Error.Catalog.Missing.habits.Name" xml:space="preserve"><value>A habit needs a name.</value></data>
+  <data name="Error.Catalog.Missing.bootcamps.Id" xml:space="preserve"><value>A bootcamp needs an id.</value></data>
+  <data name="Error.Catalog.Missing.reminders.Id" xml:space="preserve"><value>A reminder needs an id.</value></data>
+  <data name="Error.Catalog.Missing.reminders.Kind" xml:space="preserve"><value>A reminder needs a kind.</value></data>
+  <data name="Error.Catalog.Missing.reminders.TextKey" xml:space="preserve"><value>A reminder needs its text key.</value></data>
+  <data name="Error.Catalog.Missing.history.Date" xml:space="preserve"><value>A history record needs a date.</value></data>
+  <data name="Error.Catalog.Missing.manual.Date" xml:space="preserve"><value>A manual entry needs a date.</value></data>
+  <data name="Error.Catalog.Range.goals.TargetValue" xml:space="preserve"><value>A goal target must be between 0 and 1,000,000.</value></data>
+  <data name="Error.Catalog.Range.goals.ProgressValue" xml:space="preserve"><value>A goal's progress must be between 0 and 1,000,000.</value></data>
+  <data name="Error.Catalog.Range.habits.TimesPerWeek" xml:space="preserve"><value>A habit must be set between 1 and 7 times per week.</value></data>
+  <data name="Error.Catalog.Range.bootcamps.DurationDays" xml:space="preserve"><value>A bootcamp length must be between 1 and 3650 days.</value></data>
+  <data name="Error.Catalog.Range.bootcamps.CurrentDay" xml:space="preserve"><value>A bootcamp's current day must be between 0 and 3650.</value></data>
+  <data name="Error.Catalog.Range.history.SleepMinutes" xml:space="preserve"><value>Sleep minutes must be between 0 and 1440.</value></data>
+  <data name="Error.Catalog.Range.history.Steps" xml:space="preserve"><value>Steps must be between 0 and 1,000,000.</value></data>
+  <data name="Error.Catalog.Range.history.ActiveMinutes" xml:space="preserve"><value>Active minutes must be between 0 and 1440.</value></data>
+  <data name="Error.Catalog.Range.history.Completeness" xml:space="preserve"><value>Completeness must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.history.SleepQuality" xml:space="preserve"><value>Sleep quality must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.history.Stress" xml:space="preserve"><value>Stress must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.history.Mood" xml:space="preserve"><value>Mood must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.history.Energy" xml:space="preserve"><value>Energy must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.manual.SleepMinutes" xml:space="preserve"><value>Sleep minutes must be between 0 and 1440.</value></data>
+  <data name="Error.Catalog.Range.manual.Steps" xml:space="preserve"><value>Steps must be between 0 and 1,000,000.</value></data>
+  <data name="Error.Catalog.Range.manual.SleepQuality" xml:space="preserve"><value>Sleep quality must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.manual.Stress" xml:space="preserve"><value>Stress must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.manual.Mood" xml:space="preserve"><value>Mood must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.Range.manual.Energy" xml:space="preserve"><value>Energy must be between 0 and 1.</value></data>
+  <data name="Error.Catalog.BadDate.history" xml:space="preserve"><value>The history date is not readable.</value></data>
+  <data name="Error.Catalog.BadDate.manual" xml:space="preserve"><value>The manual entry date is not readable.</value></data>
+  <data name="Error.Catalog.Shape.goals" xml:space="preserve"><value>A goal record must be a JSON object.</value></data>
+  <data name="Data.Wipe.Done" xml:space="preserve"><value>All local data was erased on {0}.</value></data>
+  <data name="Data.Store.CorruptQuarantined" xml:space="preserve"><value>An unreadable data file was preserved for inspection; the app continued with a clean copy.</value></data>
+  <data name="AiSettings.Title" xml:space="preserve"><value>AI assistant</value></data>
+  <data name="AiSettings.Status.Header" xml:space="preserve"><value>Gateway status</value></data>
+  <data name="AiSettings.AdvancedNote" xml:space="preserve"><value>This screen talks to the real gateway settings. Changes take effect immediately and only after the service confirms them.</value></data>
+  <data name="AiSettings.Status.Configured" xml:space="preserve"><value>Configured</value></data>
+  <data name="AiSettings.Status.NotConfigured" xml:space="preserve"><value>Not configured</value></data>
+  <data name="AiSettings.Status.VerifiedAt" xml:space="preserve"><value>Verified reachable at {0}, {1}</value></data>
+  <data name="AiSettings.Status.NotVerified" xml:space="preserve"><value>Not verified — this install has never seen a successful check</value></data>
+  <data name="AiSettings.KeySource.BuiltIn" xml:space="preserve"><value>Built-in (obfuscated)</value></data>
+  <data name="AiSettings.KeySource.User" xml:space="preserve"><value>Your own key</value></data>
+  <data name="AiSettings.KeySource.None" xml:space="preserve"><value>No key</value></data>
+  <data name="AiSettings.Enable" xml:space="preserve"><value>Use AI answers</value></data>
+  <data name="AiSettings.EnableNote" xml:space="preserve"><value>When off, every insight stays rule-based. AI also needs your processing consent below.</value></data>
+  <data name="AiSettings.TestConnection" xml:space="preserve"><value>Test connection</value></data>
+  <data name="AiSettings.TestUnavailableNote" xml:space="preserve"><value>No connection tester is registered in this build — the live probe has not been merged yet.</value></data>
+  <data name="AiSettings.Test.Ok" xml:space="preserve"><value>The gateway answered this check. Verification is now recorded.</value></data>
+  <data name="AiSettings.Test.Fail" xml:space="preserve"><value>The gateway did not answer this check. Nothing was verified.</value></data>
+  <data name="AiSettings.Key.Header" xml:space="preserve"><value>Your own API key</value></data>
+  <data name="AiSettings.Key.Note" xml:space="preserve"><value>Optional. A key you enter here replaces the built-in one and is stored encrypted on this device only. Save an empty box? Use “Back to built-in” instead.</value></data>
+  <data name="AiSettings.Key.Placeholder" xml:space="preserve"><value>Paste your key</value></data>
+  <data name="AiSettings.Key.Clear" xml:space="preserve"><value>Back to built-in</value></data>
+  <data name="AiSettings.Key.Saved" xml:space="preserve"><value>Your key was saved for this device.</value></data>
+  <data name="AiSettings.Key.Cleared" xml:space="preserve"><value>Back to the built-in key.</value></data>
+  <data name="AiSettings.Key.Empty" xml:space="preserve"><value>Type a key first — or use “Back to built-in” to clear your override.</value></data>
+  <data name="AiSettings.Status.InsecureChip" xml:space="preserve"><value>Insecure</value></data>
+  <data name="AiSettings.Insecure.Title" xml:space="preserve"><value>This connection is not encrypted</value></data>
+  <data name="AiSettings.Insecure.Body" xml:space="preserve"><value>The gateway is reachable over plain HTTP: anything sent could be read on the network. Keep AI off unless you accept that risk, and never send data you would not want exposed.</value></data>
+  <data name="AiSettings.Consent.Header" xml:space="preserve"><value>Consent</value></data>
+  <data name="AiSettings.Consent.Note" xml:space="preserve"><value>Every category starts as never-asked, which behaves like denied. Flipping a switch records your explicit answer; a “never asked” label disappears once you do.</value></data>
+  <data name="AiSettings.Consent.NeverAsked" xml:space="preserve"><value>Never asked — treated as denied</value></data>
+  <data name="AiSettings.Consent.AiProcessing" xml:space="preserve"><value>AI processing</value></data>
+  <data name="AiSettings.Consent.AiProcessingNote" xml:space="preserve"><value>Send a minimal summary of your state to the AI gateway for interpretation. The raw key never travels from this device beyond the gateway call itself.</value></data>
+  <data name="AiSettings.Consent.HealthData" xml:space="preserve"><value>Health data</value></data>
+  <data name="AiSettings.Consent.HealthDataNote" xml:space="preserve"><value>Let features read your sleep and recovery history. Stays on this device; AI only ever receives the minimal derived summary above, and only with that consent too.</value></data>
+  <data name="AiSettings.Consent.ActivityData" xml:space="preserve"><value>Activity data</value></data>
+  <data name="AiSettings.Consent.ActivityDataNote" xml:space="preserve"><value>Let features read steps and workouts. Stays on this device.</value></data>
+  <data name="AiSettings.Consent.Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="AiSettings.Consent.NotificationsNote" xml:space="preserve"><value>Allow LIVORA to remind you locally. The system permission prompt is separate and is only asked for on the Reminders screen.</value></data>
+  <data name="AiSettings.Cloud.Header" xml:space="preserve"><value>Cloud account</value></data>
+  <data name="AiSettings.Cloud.Configured" xml:space="preserve"><value>Backend configured</value></data>
+  <data name="AiSettings.Cloud.NotConfigured" xml:space="preserve"><value>Not configured</value></data>
+  <data name="AiSettings.Cloud.Note" xml:space="preserve"><value>This card reports the account backend's real state. There is no sign-in form because there is nothing to sign in to yet — your data lives on this device.</value></data>
+  <data name="AiSettings.Failed" xml:space="preserve"><value>That did not go through. Nothing was changed.</value></data>
+  <data name="DataStudio.Title" xml:space="preserve"><value>Data Studio</value></data>
+  <data name="DataStudio.AdvancedBanner" xml:space="preserve"><value>Advanced: this screen edits the raw JSON your app actually stores. Wrong shapes can break trends and plans. If you were not told to be here, go back.</value></data>
+  <data name="DataStudio.Warning.Title" xml:space="preserve"><value>You are editing stored data directly</value></data>
+  <data name="DataStudio.Warning.Body" xml:space="preserve"><value>Changes here are not validated by the normal UI — the store's own rules are the last line of defense. Export a backup first if the data matters to you.</value></data>
+  <data name="DataStudio.Entity.Header" xml:space="preserve"><value>Single entity</value></data>
+  <data name="DataStudio.Kind" xml:space="preserve"><value>Entity kind</value></data>
+  <data name="DataStudio.EntityId" xml:space="preserve"><value>Entity ID</value></data>
+  <data name="DataStudio.EntityId.Placeholder" xml:space="preserve"><value>the entity's id</value></data>
+  <data name="DataStudio.Load" xml:space="preserve"><value>Load</value></data>
+  <data name="DataStudio.Apply" xml:space="preserve"><value>Apply JSON</value></data>
+  <data name="DataStudio.NoKinds" xml:space="preserve"><value>The data catalog returned no kinds yet.</value></data>
+  <data name="DataStudio.NothingLoaded" xml:space="preserve"><value>Nothing loaded yet. Pick a kind, type an id, then press Load.</value></data>
+  <data name="DataStudio.Errors.Header" xml:space="preserve"><value>The store rejected this JSON:</value></data>
+  <data name="DataStudio.ImportOk" xml:space="preserve"><value>Accepted and stored</value></data>
+  <data name="DataStudio.Failed" xml:space="preserve"><value>The operation failed. Nothing was changed.</value></data>
+  <data name="DataStudio.ConfirmDelete.Title" xml:space="preserve"><value>Delete this entity?</value></data>
+  <data name="DataStudio.ConfirmDelete.Body" xml:space="preserve"><value>{0} “{1}” will be removed from local storage. This cannot be undone.</value></data>
+  <data name="DataStudio.ExportAll.Header" xml:space="preserve"><value>Export everything</value></data>
+  <data name="DataStudio.ExportAll.Note" xml:space="preserve"><value>Writes the whole local store as one JSON file into this app's data folder and shows the real path. No cloud, no network.</value></data>
+  <data name="DataStudio.ExportAll.Action" xml:space="preserve"><value>Export all to file</value></data>
+  <data name="DataStudio.ImportAll.Header" xml:space="preserve"><value>Import from file</value></data>
+  <data name="DataStudio.ImportAll.Note" xml:space="preserve"><value>Reads a full-export JSON file from a path on this device and replaces or merges your store according to the switch below.</value></data>
+  <data name="DataStudio.ImportAll.Action" xml:space="preserve"><value>Import from path</value></data>
+  <data name="DataStudio.Merge" xml:space="preserve"><value>Merge into existing data (off = replace everything)</value></data>
+  <data name="DataStudio.Path" xml:space="preserve"><value>Backup file path</value></data>
+  <data name="DataStudio.Path.Placeholder" xml:space="preserve"><value>C:\folder\livora_export.json</value></data>
+  <data name="DataStudio.PathMissing" xml:space="preserve"><value>That file could not be read. Check the path — this build takes a full path typed here, not a folder picker.</value></data>
+  <data name="Lock.Title" xml:space="preserve"><value>App lock</value></data>
+  <data name="Lock.PinNote" xml:space="preserve"><value>A 4-digit code protects this app on the device. It is stored only as a hash here and never sent anywhere.</value></data>
+  <data name="Lock.Set.Label" xml:space="preserve"><value>Choose a 4-digit code</value></data>
+  <data name="Lock.Retype.Label" xml:space="preserve"><value>Re-enter the same code</value></data>
+  <data name="Lock.Verify.Label" xml:space="preserve"><value>Enter your code</value></data>
+  <data name="Lock.Set" xml:space="preserve"><value>Set code</value></data>
+  <data name="Lock.Confirm" xml:space="preserve"><value>Confirm code</value></data>
+  <data name="Lock.Unlock" xml:space="preserve"><value>Unlock</value></data>
+  <data name="Lock.Wrong" xml:space="preserve"><value>That code didn't work.</value></data>
+  <data name="Lock.Mismatch" xml:space="preserve"><value>The two entries didn't match. Choose your code again.</value></data>
+  <data name="Lock.SetDone" xml:space="preserve"><value>Code set. The app will ask for it next launch.</value></data>
+  <data name="Lock.SetFailed" xml:space="preserve"><value>The code could not be saved on this device.</value></data>
+  <data name="Lock.Removed" xml:space="preserve"><value>The code was removed from this device.</value></data>
+  <data name="Lock.Remove" xml:space="preserve"><value>Remove code</value></data>
+  <data name="Lock.LockNow" xml:space="preserve"><value>Lock now</value></data>
+  <data name="Settings.AiEntry" xml:space="preserve"><value>AI assistant &amp; consent</value></data>
+  <data name="Settings.AiEntryNote" xml:space="preserve"><value>Gateway status, your key, data consent</value></data>
+  <data name="Settings.DataStudioEntry" xml:space="preserve"><value>Data Studio</value></data>
+  <data name="Settings.DataStudioEntryNote" xml:space="preserve"><value>Advanced: raw entity editing, backup and restore</value></data>
+  <data name="Settings.LockEntry" xml:space="preserve"><value>App lock</value></data>
+  <data name="Settings.LockEntryNote" xml:space="preserve"><value>4-digit passcode, lock now, remove</value></data>
 </root>

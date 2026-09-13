@@ -43,6 +43,33 @@ public partial class App : Microsoft.Maui.Controls.Application, INavigateToMainA
         ConfigureDesktopWindow(window);
         WireThemeSync();
         // WAVE3-APP-END
+
+        // WAVE3C-LOCK-GATE (lane 07 proposal, applied at integration): the passcode gate.
+        // IsLocked is per-session state on the service — first navigation after Set has
+        // IsLocked=true until a verify succeeds. NOT a lockout timer and NOT a fake wall:
+        // with no ILocalPasscodeService registered (or no passcode set) this is a measured
+        // no-op and the app behaves exactly as before. No PIN material is ever logged.
+        var passcode = ServiceHelper.TryGet<LIVORA.Application.Abstractions.ILocalPasscodeService>();
+        if (passcode is { IsSet: true, IsLocked: true })
+        {
+            window.Page!.Appearing += async (_, _) =>
+            {
+                if (window.Page.Navigation.ModalStack.Count > 0) return;   // gate already up
+                try
+                {
+                    var gate = ServiceHelper.Get<LIVORA.Presentation.Views.LockPage>();
+                    gate.UnlockedByPasscode += async () =>
+                    {
+                        try { await window.Page.Navigation.PopModalAsync(); } catch { }
+                    };
+                    await window.Page.Navigation.PushModalAsync(gate);
+                }
+                catch { /* an unresolvable gate page must not brick the window: Settings -> App
+                           lock remains the manual route, and the log carries no PIN material. */ }
+            };
+        }
+        // WAVE3C-LOCK-GATE-END
+
         return window;
     }
 

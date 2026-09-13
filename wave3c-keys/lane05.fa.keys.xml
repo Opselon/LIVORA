@@ -1,0 +1,14 @@
+<root>
+  <data name="Plan.Change.ShrinkExercise" xml:space="preserve"><value>بازهٔ تمرین {0} دقیقه‌ای به {1} دقیقه کوتاه شد</value></data>
+  <data name="Plan.Change.AddRecovery" xml:space="preserve"><value>{0} دقیقه زمان ریکاوری به برنامه اضافه شد</value></data>
+  <data name="Plan.Evidence.RecoveryBelowBaseline" xml:space="preserve"><value>ریکاوری شما {0}٪ پایین‌تر از حالت عادی‌تان است</value></data>
+  <data name="Plan.Change.ShiftFocusEarlier" xml:space="preserve"><value>نخستین بازهٔ تمرکز شما {0} دقیقه جلوتر رفت</value></data>
+  <data name="Plan.Change.AddWindDown" xml:space="preserve"><value>{0} دقیقه آرامش‌بخشیِ عصرگاهی به برنامه اضافه شد</value></data>
+  <data name="Plan.Evidence.SleepBelowBaseline" xml:space="preserve"><value>خواب دیشب شما {0}٪ کمتر از حدِ همیشگی بوده است</value></data>
+  <data name="Plan.Change.KeptStale" xml:space="preserve"><value>برنامهٔ استاندارد نگه داشته شد؛ داده‌هایتان {0} روز قدیمی است</value></data>
+  <data name="Plan.Evidence.StaleData" xml:space="preserve"><value>داده‌های خواب شما از {0} روز پیش به‌روز نشده است</value></data>
+  <data name="Plan.Change.ProtectDeadlineItem" xml:space="preserve"><value>بازهٔ وابسته به هدفِ در شرفِ حضور، در کفِ {0} دقیقه محافظت شد</value></data>
+  <data name="Plan.Evidence.DeadlineRisk" xml:space="preserve"><value>به مهلت هدفتان {0} روز مانده و {1}٪ پیشرفت کرده است</value></data>
+  <data name="Plan.Change.RecoveryAware" xml:space="preserve"><value>برنامه با احتساب فعالیت زیادِ دیروز چیده شد</value></data>
+  <data name="Plan.Evidence.HighActivityYesterday" xml:space="preserve"><value>دیروز {0}٪ بیشتر از حالت عادی فعال بوده‌اید</value></data>
+</root>

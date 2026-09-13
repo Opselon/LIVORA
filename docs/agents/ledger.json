@@ -24,13 +24,6 @@
     "brace_xaml_scan": "clean",
     "hollow_di_scan": "clean"
    }
-  },
-  {
-   "pr": 5,
-   "head_sha": "9a59b9ff46e886ae772761edf71fba04d9153dc5",
-   "state": "MERGED",
-   "run": "34783219813",
-   "override": "coordinator YELLOW override"
   }
  ],
  "verified_master_sha": "5918dd4e44997e049c10ae5f866460f0d9d8e646"

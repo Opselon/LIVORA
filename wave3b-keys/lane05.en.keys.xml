@@ -1,0 +1,7 @@
+<!-- lane05 (Wave 3b): PERSONAL STATE & BASELINE ENGINEER.
+     No localization keys. Every string this lane emits is a MACHINE TAG
+     ('window14:insufficient_samples', 'fallback:30->14', 'completeness:0.42'), never display
+     prose — per protocol §0.6 the UI labels for windowed baselines belong to lane 13.
+     Existing keys like Health.BaselineNote / Today.Confidence already cover the 28-day engine
+     and were NOT duplicated. Empty <data> set is the honest content of this file. -->
+<resources />

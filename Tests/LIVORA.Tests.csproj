@@ -28,6 +28,24 @@
 		<Compile Include="$(MSBuildThisFileDirectory)..\Resources\Localization\AppResources.cs" LinkBase="Resources" />
 		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Localization\*.cs" LinkBase="Infrastructure" />
 		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Persistence\DemoDataSeeder.cs" LinkBase="Infrastructure" />
+		<!-- WAVE3B lane02: Health Connect foundation is MAUI-free (Android code behind #if ANDROID). -->
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\HealthProviders\HealthConnectProvider.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\HealthProviders\HealthConnectAndroidBridge.cs" LinkBase="Infrastructure" />
+		<!-- WAVE3C lanes 01/02/06: security stack, real AI orchestration, durable storage (MAUI-free; crypt32 behind #if WINDOWS). Merged once, deduped. -->
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Security\IPlatformSecureBox.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Security\SecureStorageService.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Security\ConsentStore.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Security\CloudAuthService.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Security\LocalPasscodeService.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Security\NoopSyncTransport.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Security\Gateway\GatewayKeyStore.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Security\Gateway\GatewayConfigService.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Persistence\LocalJsonStore.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Persistence\LocalDataCatalog.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\IntelligenceProviders\Wave3c\*.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Persistence\Wave3b\*.cs" LinkBase="Infrastructure" />
+		<!-- WAVE3C: lane suites live under Tests/Wave3c/<area>/ (outside the legacy Tests/Tests glob). -->
+		<Compile Include="$(MSBuildThisFileDirectory)Wave3c\**\*.cs" LinkBase="Wave3c" />
 		<EmbeddedResource Include="$(MSBuildThisFileDirectory)..\Resources\Localization\AppResources.resx">
 			<ManifestResourceName>LIVORA.Resources.Localization.AppResources</ManifestResourceName>
 		</EmbeddedResource>

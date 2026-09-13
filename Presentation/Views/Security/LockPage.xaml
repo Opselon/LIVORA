@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.LockPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:LockViewModel"
+    views:BaseContentPage.MaxContentWidth="480"
+    views:BaseContentPage.IsLoading="{Binding IsBusy}">
+
+    <!-- Wave 3c lane 07 — device passcode screen. Used BOTH as the pushed settings page and
+         (through the startup-gate APPEND) as a modal while the session is locked. The PIN entry
+         is IsPassword + numeric: nothing echoes, nothing suggests the code. The failure line is
+         one generic string with no counters or timing words (no timing oracle in the UI).
+         NOTE: comments must be XML comments — C-style brace comments break MAUIX2002 (fa9450f). -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <comp:NotConverter x:Key="Not"/>
+            <Style x:Key="HintLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="4"/>
+            </Style>
+            <Style x:Key="MessageLabel" TargetType="Label" BasedOn="{StaticResource LBody}">
+                <Setter Property="FontSize" Value="13.5"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="3"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Negative}, Dark={StaticResource NegativeDark}}"/>
+                <Style.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding MessageIsError}" Value="False">
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}" MaximumWidthRequest="420"
+                             HorizontalOptions="Center">
+
+            <Border Style="{StaticResource Card}" x:Name="HeaderCard">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Label Grid.Column="0" Text="{Binding Title}" Style="{StaticResource LDisplay}"
+                           LineBreakMode="WordWrap" MaxLines="2" VerticalOptions="Center"
+                           SemanticProperties.HeadingLevel="Level1"/>
+                    <!-- Back exists only when the session is unlocked (settings entry). A locked
+                         session has no exit: the code IS the door. -->
+                    <Button Grid.Column="1" Text="{Binding BackText}" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding BackCommand}" Padding="14,8" FontSize="13"
+                            MinimumHeightRequest="44" VerticalOptions="Center"
+                            IsVisible="{Binding SessionLocked, Converter={StaticResource Not}}"
+                            SemanticProperties.Description="{Binding BackText}"/>
+                </Grid>
+            </Border>
+
+            <!-- Honest unavailable state when the passcode service is not registered -->
+            <Border Style="{StaticResource Card}" x:Name="UnavailableCard"
+                    IsVisible="{Binding HasService, Converter={StaticResource Not}}">
+                <Label Text="{Binding NotAvailable}" Style="{StaticResource HintLabel}" MaxLines="3"/>
+            </Border>
+
+            <Border Style="{StaticResource Card}" x:Name="PinCard"
+                    IsVisible="{Binding HasService}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{localize:Tr Lock.PinNote}" Style="{StaticResource HintLabel}"
+                           MaxLines="3"/>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{Binding PinLabel}" Style="{StaticResource LSubheading}"
+                               FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <!-- 4 digits, hidden input, numeric keyboard; MaxLength guards the
+                             contract even if the keyboard ignores the hint -->
+                        <Entry Text="{Binding Pin}" Style="{StaticResource InputField}"
+                               IsPassword="True" Keyboard="Numeric" MaxLength="4"
+                               MinimumHeightRequest="48"
+                               SemanticProperties.Description="{Binding PinLabel}"/>
+                    </VerticalStackLayout>
+
+                    <!-- One message slot: red for failures, secondary-neutral for plain facts
+                         like "removed" (a DataTrigger on MessageIsError swaps the tone). A wrong
+                         PIN always shows the same generic string (Lock.Wrong) — no counters, no
+                         timing words, no oracle in the wording. -->
+                    <Label Text="{Binding MessageText}" Style="{StaticResource MessageLabel}"
+                           IsVisible="{Binding HasMessage}"
+                           SemanticProperties.HeadingLevel="Level3"/>
+
+                    <Button Text="{Binding SubmitLabel}" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SubmitCommand}" MinimumHeightRequest="48"
+                            FontSize="15" IsEnabled="{Binding IsNotBusy}"
+                            SemanticProperties.Description="{Binding SubmitLabel}"/>
+
+                    <Button Text="{Binding CancelLabel}" Style="{StaticResource GhostButton}"
+                            Command="{Binding CancelStepCommand}" MinimumHeightRequest="44"
+                            FontSize="13" HorizontalOptions="Start"
+                            IsVisible="{Binding CancelVisible}"
+                            SemanticProperties.Description="{Binding CancelLabel}"/>
+
+                    <BoxView HeightRequest="1" Color="{StaticResource Hairline}"
+                             IsVisible="{Binding RemoveVisible}"/>
+
+                    <!-- Setup / maintenance actions (only meaningful with a real service) -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
+                          IsVisible="{Binding RemoveVisible}">
+                        <Button Grid.Column="0" Text="{Binding LockNowLabel}"
+                                Style="{StaticResource SecondaryButton}" Command="{Binding LockNowCommand}"
+                                MinimumHeightRequest="44" FontSize="13"
+                                IsEnabled="{Binding IsNotBusy}"
+                                SemanticProperties.Description="{Binding LockNowLabel}"/>
+                        <Button Grid.Column="1" Text="{Binding RemoveLabel}"
+                                Style="{StaticResource GhostButton}" Command="{Binding RemoveCommand}"
+                                MinimumHeightRequest="44" FontSize="13"
+                                TextColor="{StaticResource Negative}" IsEnabled="{Binding IsNotBusy}"
+                                SemanticProperties.Description="{Binding RemoveLabel}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <BoxView HeightRequest="12" Color="Transparent"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

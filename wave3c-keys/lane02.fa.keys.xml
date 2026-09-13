@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wave 3c lane 02 keys (FA). Idiomatic Persian with ZWNJ; merged into AppResources.fa.resx by the orchestrator. -->
+<root>
+  <data name="Ai.Headline.Provider" xml:space="preserve"><value>جمع‌بندی امروز</value></data>
+  <data name="Ai.Body.Provider" xml:space="preserve"><value>{0}</value></data>
+  <data name="Ai.SourceBadge.Rules" xml:space="preserve"><value>بر پایهٔ روال شما</value></data>
+  <data name="Ai.SourceBadge.Validated" xml:space="preserve"><value>نگارش هوش مصنوعی · بررسی‌شده در دستگاه</value></data>
+  <data name="Ai.SourceBadge.Fallback" xml:space="preserve"><value>هوش مصنوعی در دسترس نبود — فقط قواعد</value></data>
+  <data name="Ai.Settings.Title" xml:space="preserve"><value>جمع‌بندی هوشمند</value></data>
+  <data name="Ai.Settings.Enable" xml:space="preserve"><value>بازنویسی جمع‌بندی‌ها با هوش مصنوعی</value></data>
+  <data name="Ai.Settings.InsecureWarning" xml:space="preserve"><value>هشدار: درگاه هوش مصنوعیِ داخلی از HTTP ساده استفاده می‌کند — داده‌های مشتق‌شدهٔ شما بدون رمزنگاری از این دستگاه خارج می‌شود. به‌طور پیش‌فرض خاموش است.</value></data>
+  <data name="Ai.Settings.KeySource" xml:space="preserve"><value>کلید: {0}</value></data>
+  <data name="Ai.Consent.Explain" xml:space="preserve"><value>لِیورا تنها اختلاف‌های محاسبه‌شدهٔ شاخص‌ها و عنوان هدف‌ها را به هوش مصنوعی می‌فرستد — نه یادداشت‌ها، نه تاریخچه، نه نام شما.</value></data>
+</root>

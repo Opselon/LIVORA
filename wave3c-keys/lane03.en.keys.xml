@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- WAVE3C lane03: normalization reject keys (hard physical walls). -->
+  <data name="Norm.Reject.Sleep"><value>Sleep amount is not valid</value></data>
+  <data name="Norm.Reject.Bedtime"><value>Bedtime is not valid</value></data>
+  <data name="Norm.Reject.Wake"><value>Wake time is not valid</value></data>
+  <data name="Norm.Reject.Steps"><value>Step count is not valid</value></data>
+  <data name="Norm.Reject.Active"><value>Active minutes are not valid</value></data>
+  <data name="Norm.Reject.Bpm"><value>Heart rate is not valid</value></data>
+  <data name="Norm.Reject.Hrv"><value>Heart-rate variability is not valid</value></data>
+  <data name="Norm.Reject.Quality"><value>Sleep quality is not valid</value></data>
+  <data name="Norm.Reject.Consistency"><value>Sleep consistency is not valid</value></data>
+  <data name="Norm.Reject.Recovery"><value>Recovery score is not valid</value></data>
+  <data name="Norm.Reject.Ratio"><value>This value must be between 0 and 1</value></data>
+  <data name="Norm.Reject.NotFinite"><value>The recorded value is not a valid number</value></data>
+  <data name="Norm.Reject.Negative"><value>Negative values are not allowed</value></data>
+  <data name="Norm.Reject.TimeReversed"><value>The end time is before the start time</value></data>
+  <data name="Norm.Reject.Unit"><value>Unknown measurement unit</value></data>
+  <data name="Norm.Reject.Distance"><value>Distance is not valid</value></data>
+  <data name="Norm.Reject.Energy"><value>Energy is not valid</value></data>
+  <!-- WAVE3C lane03: plausibility warnings (legal but doubtful — the value stays, the badge shows). -->
+  <data name="Norm.Warn.StepsHigh"><value>This step count looks unusually high</value></data>
+  <data name="Norm.Warn.SleepHigh"><value>This sleep length looks unusually high</value></data>
+  <data name="Norm.Warn.RhrHigh"><value>This resting heart rate looks unusually high</value></data>
+  <data name="Norm.Warn.HrvHigh"><value>This HRV reading looks unusually high</value></data>
+  <!-- WAVE3C lane03: workout engine rejects. -->
+  <data name="Activity.Reject.Duration"><value>Workout duration is not valid</value></data>
+  <data name="Activity.Reject.Unit"><value>Workout measurement unit is unknown</value></data>
+</root>

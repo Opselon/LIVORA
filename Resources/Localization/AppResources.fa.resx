@@ -802,4 +802,253 @@
   <data name="WeekProgress.ProgramDone" xml:space="preserve"><value>روز انجام شد</value></data>
   <data name="Health.DataSource.ManualOverlay" xml:space="preserve"><value>ورودی‌های خودت</value></data>
 
+
+
+  <!-- ===== Wave3b/3c lane key fragments (merged by the integration lane; originals win on conflict) ===== -->
+  <data name="Health.Provider.HealthConnect" xml:space="preserve"><value>هلث‌کانکت (Health Connect)</value></data>
+  <data name="Health.Cap.Provider.Connected" xml:space="preserve"><value>متصل است · داده‌ها خوانده می‌شوند</value></data>
+  <data name="Health.Cap.Provider.NotInstalled" xml:space="preserve"><value>برنامهٔ Health Connect روی این دستگاه نصب نیست</value></data>
+  <data name="Health.Cap.Provider.NeedsPermission" xml:space="preserve"><value>برای خواندن داده‌هایت، اجازهٔ دسترسی به سلامت را بده</value></data>
+  <data name="Health.Cap.Provider.Unavailable" xml:space="preserve"><value>روی این دستگاه در دسترس نیست</value></data>
+  <data name="Health.Cap.Status.Available" xml:space="preserve"><value>در دسترس</value></data>
+  <data name="Health.Cap.Status.NeedsPermission" xml:space="preserve"><value>برای {0} باید اجازه بدهی</value></data>
+  <data name="Health.Cap.Status.NoData" xml:space="preserve"><value>برای این بازه هیچ رکورد {0} وجود ندارد</value></data>
+  <data name="Health.Cap.Status.Unsupported" xml:space="preserve"><value>{0} هنوز با این اتصال پشتیبانی نمی‌شود</value></data>
+  <data name="Health.Cap.Permission.Granted" xml:space="preserve"><value>اجازه داده شد</value></data>
+  <data name="Health.Cap.Permission.Denied" xml:space="preserve"><value>اجازه داده نشد</value></data>
+  <data name="Health.Cap.Permission.NotAsked" xml:space="preserve"><value>هنوز پرسیده نشده است</value></data>
+  <data name="Health.Cap.Permission.AskLimit" xml:space="preserve"><value>در این نشست دوباره نمی‌پرسد ({0} بار تلاش شد)</value></data>
+  <data name="Health.Cap.Permission.Unavailable" xml:space="preserve"><value>در این نسخه در دسترس نیست</value></data>
+  <data name="Norm.Reject.MalformedJson" xml:space="preserve"><value>فایل JSON معتبری نیست</value></data>
+  <data name="Norm.Reject.NotObject" xml:space="preserve"><value>این ورودی یک شیی نیست</value></data>
+  <data name="Norm.Reject.TooLarge" xml:space="preserve"><value>این ورودی از یک مگابایت بزرگ‌تر است و خوانده نشد</value></data>
+  <data name="Norm.Reject.Empty" xml:space="preserve"><value>چیزی وارد نشده است</value></data>
+  <data name="Norm.Reject.UnknownKind" xml:space="preserve"><value>نوع داده شناخته‌شده نیست</value></data>
+  <data name="Norm.Reject.NotFound" xml:space="preserve"><value>هیچ ورودی ذخیره‌شده‌ای با این شناسه پیدا نشد</value></data>
+  <data name="Norm.Reject.StoreCorrupt" xml:space="preserve"><value>فایل ذخیره‌شده قابل خواندن نیست و دست‌نخورده ماند</value></data>
+  <data name="Norm.Reject.UnknownField" xml:space="preserve"><value>این فیلد در طرح‌بند نیست و رد شد</value></data>
+  <data name="Norm.Reject.MissingField" xml:space="preserve"><value>یکی از فیلدهای لازم وجود ندارد</value></data>
+  <data name="Norm.Reject.MissingId" xml:space="preserve"><value>این ورودی شناسه ندارد</value></data>
+  <data name="Norm.Reject.DuplicateId" xml:space="preserve"><value>دو ورودی شناسهٔ یکسان دارند</value></data>
+  <data name="Norm.Reject.Type" xml:space="preserve"><value>نوع این فیلد درست نیست</value></data>
+  <data name="Norm.Reject.NotFinite" xml:space="preserve"><value>مقدار ثبت‌شده عدد معتبری نیست</value></data>
+  <data name="Norm.Reject.Range" xml:space="preserve"><value>این مقدار خارج از بازهٔ ممکن است</value></data>
+  <data name="Norm.Reject.StringTooLong" xml:space="preserve"><value>این متن از حد مجاز فیلد بلندتر است</value></data>
+  <data name="Norm.Reject.UnknownEnum" xml:space="preserve"><value>این گزینه را برنامه نمی‌شناسد</value></data>
+  <data name="Norm.Reject.DateInverted" xml:space="preserve"><value>تاریخ‌ها وارونه‌اند یا خارج از بازهٔ پشتیبانی‌شده‌اند</value></data>
+  <data name="Norm.Reject.SchemaTooNew" xml:space="preserve"><value>این نسخهٔ پشتیبان را نسخهٔ تازه‌ترِ لی‌ورا نوشته است</value></data>
+  <data name="Norm.Reject.ImpossibleProvenance" xml:space="preserve"><value>روزِ دست‌ورود نمی‌تواند منبع دیگری ادعا کند</value></data>
+  <data name="Norm.Reject.UntouchableState" xml:space="preserve"><value>«پرسیده‌نشده» را نمی‌توان به‌عنوان تصمیم ذخیره کرد</value></data>
+  <data name="Auth.Cloud.NotAvailable" xml:space="preserve"><value>سرور حساب هنوز وجود ندارد، بنابراین ورود ممکن نیست. همه‌چیز روی همین دستگاه می‌ماند.</value></data>
+  <data name="Sync.Reason.NoBackend" xml:space="preserve"><value>سمت سروری برای همگام‌سازی پیکربندی نشده — تغییرها روی همین دستگاه می‌ماند</value></data>
+  <data name="Passcode.Locked" xml:space="preserve"><value>تلاش‌های بیش از حد. یک دقیقه دیگر دوباره بیازمایید.</value></data>
+  <data name="Passcode.Set" xml:space="preserve"><value>رمز عبور تنظیم شد. فقط همین برنامه را روی همین دستگاه قفل می‌کند.</value></data>
+  <data name="Passcode.Removed" xml:space="preserve"><value>رمز عبور حذف شد. چیزی بارگذاری نشد.</value></data>
+  <data name="Ai.Headline.Provider" xml:space="preserve"><value>جمع‌بندی امروز</value></data>
+  <data name="Ai.Body.Provider" xml:space="preserve"><value>{0}</value></data>
+  <data name="Ai.SourceBadge.Rules" xml:space="preserve"><value>بر پایهٔ روال شما</value></data>
+  <data name="Ai.SourceBadge.Validated" xml:space="preserve"><value>نگارش هوش مصنوعی · بررسی‌شده در دستگاه</value></data>
+  <data name="Ai.SourceBadge.Fallback" xml:space="preserve"><value>هوش مصنوعی در دسترس نبود — فقط قواعد</value></data>
+  <data name="Ai.Settings.Title" xml:space="preserve"><value>جمع‌بندی هوشمند</value></data>
+  <data name="Ai.Settings.Enable" xml:space="preserve"><value>بازنویسی جمع‌بندی‌ها با هوش مصنوعی</value></data>
+  <data name="Ai.Settings.InsecureWarning" xml:space="preserve"><value>هشدار: درگاه هوش مصنوعیِ داخلی از HTTP ساده استفاده می‌کند — داده‌های مشتق‌شدهٔ شما بدون رمزنگاری از این دستگاه خارج می‌شود. به‌طور پیش‌فرض خاموش است.</value></data>
+  <data name="Ai.Settings.KeySource" xml:space="preserve"><value>کلید: {0}</value></data>
+  <data name="Ai.Consent.Explain" xml:space="preserve"><value>لِیورا تنها اختلاف‌های محاسبه‌شدهٔ شاخص‌ها و عنوان هدف‌ها را به هوش مصنوعی می‌فرستد — نه یادداشت‌ها، نه تاریخچه، نه نام شما.</value></data>
+  <data name="Norm.Reject.Sleep" xml:space="preserve"><value>میزان خواب معتبر نیست</value></data>
+  <data name="Norm.Reject.Bedtime" xml:space="preserve"><value>ساعت خواب معتبر نیست</value></data>
+  <data name="Norm.Reject.Wake" xml:space="preserve"><value>ساعت بیدار شدن معتبر نیست</value></data>
+  <data name="Norm.Reject.Steps" xml:space="preserve"><value>تعداد قدم‌ها معتبر نیست</value></data>
+  <data name="Norm.Reject.Active" xml:space="preserve"><value>دقایق فعالیت معتبر نیست</value></data>
+  <data name="Norm.Reject.Bpm" xml:space="preserve"><value>ضربان قلب معتبر نیست</value></data>
+  <data name="Norm.Reject.Hrv" xml:space="preserve"><value>تغییرپذیری ضربان قلب معتبر نیست</value></data>
+  <data name="Norm.Reject.Quality" xml:space="preserve"><value>کیفیت خواب معتبر نیست</value></data>
+  <data name="Norm.Reject.Consistency" xml:space="preserve"><value>نظم خواب معتبر نیست</value></data>
+  <data name="Norm.Reject.Recovery" xml:space="preserve"><value>امتیاز بازیابی معتبر نیست</value></data>
+  <data name="Norm.Reject.Ratio" xml:space="preserve"><value>این مقدار باید بین ۰ تا ۱ باشد</value></data>
+  <data name="Norm.Reject.Negative" xml:space="preserve"><value>مقدار منفی مجاز نیست</value></data>
+  <data name="Norm.Reject.TimeReversed" xml:space="preserve"><value>پایان بازه زودتر از شروع آن است</value></data>
+  <data name="Norm.Reject.Unit" xml:space="preserve"><value>یکای اندازه‌گیری شناخته‌شده نیست</value></data>
+  <data name="Norm.Reject.Distance" xml:space="preserve"><value>مسافت معتبر نیست</value></data>
+  <data name="Norm.Reject.Energy" xml:space="preserve"><value>انرژی معتبر نیست</value></data>
+  <data name="Norm.Warn.StepsHigh" xml:space="preserve"><value>تعداد قدم‌ها غیرعادی به نظر می‌رسد</value></data>
+  <data name="Norm.Warn.SleepHigh" xml:space="preserve"><value>مدت خواب غیرعادی به نظر می‌رسد</value></data>
+  <data name="Norm.Warn.RhrHigh" xml:space="preserve"><value>ضربان قلب هنگام استراحت غیرعادی به نظر می‌رسد</value></data>
+  <data name="Norm.Warn.HrvHigh" xml:space="preserve"><value>تغییرپذیری ضربان قلب غیرعادی به نظر می‌رسد</value></data>
+  <data name="Activity.Reject.Duration" xml:space="preserve"><value>مدت فعالیت معتبر نیست</value></data>
+  <data name="Activity.Reject.Unit" xml:space="preserve"><value>یکای اندازه‌گیری فعالیت شناخته‌شده نیست</value></data>
+  <data name="pattern.observed.late-sleep" xml:space="preserve"><value>شب‌های دیرهنگام تکرار می‌شوند</value></data>
+  <data name="pattern.evidence.late-nights" xml:space="preserve"><value>{0} شب از {1} شب اخیر، بیش از {2} دیرتر از ساعت خواب همیشگی شما</value></data>
+  <data name="pattern.observed.weekday-dip" xml:space="preserve"><value>یکی از روزهای هفته کم‌تحرک‌تر است</value></data>
+  <data name="pattern.evidence.weekday-dip" xml:space="preserve"><value>روز {0}: حدود {1}٪ پایین‌تر از روزهای دیگر شما (در {2} روز مشاهده شد)</value></data>
+  <data name="pattern.observed.poor-sleep-focus" xml:space="preserve"><value>کم‌خوابی و تمرکز پایین، کنار هم دیده می‌شوند</value></data>
+  <data name="pattern.evidence.poor-sleep-focus" xml:space="preserve"><value>پس از {0}٪ از {1} شبِ کم‌خواب، تمرکز روز بعد پایین‌تر از میانگین خودتان بود ({2} مورد از {1})</value></data>
+  <data name="pattern.observed.habit-window" xml:space="preserve"><value>انجام‌ندادنِ عادت در یک روزِ هفته جمع می‌شود</value></data>
+  <data name="pattern.evidence.habit-window" xml:space="preserve"><value>{1} بار از {2} بارِ برنامه‌ریزی‌شده در روز {0} انجام نشد ({3}٪ از آن روزها)</value></data>
+  <data name="pattern.observed.workout-trend" xml:space="preserve"><value>روزهای فعال شما در حال تغییر است</value></data>
+  <data name="pattern.evidence.workout-trend" xml:space="preserve"><value>در طول {0} هفته: {1} روز با بیش از ۳۰ دقیقه فعالیت</value></data>
+  <data name="pattern.observed.goal-stagnant" xml:space="preserve"><value>یک هدف ثابت مانده است</value></data>
+  <data name="pattern.evidence.goal-stagnant" xml:space="preserve"><value>هیچ تغییری در پیشرفت طی {0} روز، با {1} روز تا ددلاین</value></data>
+  <data name="pattern.observed.recovery-activity" xml:space="preserve"><value>بازیابی و فعالیت روزِ قبل با هم حرکت می‌کنند</value></data>
+  <data name="pattern.evidence.recovery-activity" xml:space="preserve"><value>همبستگی r = {0} در {1} جفت‌روز (فقط هم‌رخدادی)</value></data>
+  <data name="State.Confidence.Basis" xml:space="preserve"><value>بر پایهٔ {0} فیلد کامل · اطمینانِ خط‌مبنای {1} · قدیمی {2} روز</value></data>
+  <data name="State.Baseline.Gated.Short" xml:space="preserve"><value>تاریخچهٔ تمیزِ کافی هنوز نیست ({0} روز دیده شد — به {1} روز نیاز است)</value></data>
+  <data name="State.Baseline.WindowUsed" xml:space="preserve"><value>بازهٔ {0} روزه · {1} نمونهٔ تمیز</value></data>
+  <data name="Pattern.Insufficient.Note" xml:space="preserve"><value>هنوز در حال یادگیری — {0} از ۷ الگو دادهٔ کافی دارد</value></data>
+  <data name="Plan.Change.ShrinkExercise" xml:space="preserve"><value>بازهٔ تمرین {0} دقیقه‌ای به {1} دقیقه کوتاه شد</value></data>
+  <data name="Plan.Change.AddRecovery" xml:space="preserve"><value>{0} دقیقه زمان ریکاوری به برنامه اضافه شد</value></data>
+  <data name="Plan.Evidence.RecoveryBelowBaseline" xml:space="preserve"><value>ریکاوری شما {0}٪ پایین‌تر از حالت عادی‌تان است</value></data>
+  <data name="Plan.Change.ShiftFocusEarlier" xml:space="preserve"><value>نخستین بازهٔ تمرکز شما {0} دقیقه جلوتر رفت</value></data>
+  <data name="Plan.Change.AddWindDown" xml:space="preserve"><value>{0} دقیقه آرامش‌بخشیِ عصرگاهی به برنامه اضافه شد</value></data>
+  <data name="Plan.Evidence.SleepBelowBaseline" xml:space="preserve"><value>خواب دیشب شما {0}٪ کمتر از حدِ همیشگی بوده است</value></data>
+  <data name="Plan.Change.KeptStale" xml:space="preserve"><value>برنامهٔ استاندارد نگه داشته شد؛ داده‌هایتان {0} روز قدیمی است</value></data>
+  <data name="Plan.Evidence.StaleData" xml:space="preserve"><value>داده‌های خواب شما از {0} روز پیش به‌روز نشده است</value></data>
+  <data name="Plan.Change.ProtectDeadlineItem" xml:space="preserve"><value>بازهٔ وابسته به هدفِ در شرفِ حضور، در کفِ {0} دقیقه محافظت شد</value></data>
+  <data name="Plan.Evidence.DeadlineRisk" xml:space="preserve"><value>به مهلت هدفتان {0} روز مانده و {1}٪ پیشرفت کرده است</value></data>
+  <data name="Plan.Change.RecoveryAware" xml:space="preserve"><value>برنامه با احتساب فعالیت زیادِ دیروز چیده شد</value></data>
+  <data name="Plan.Evidence.HighActivityYesterday" xml:space="preserve"><value>دیروز {0}٪ بیشتر از حالت عادی فعال بوده‌اید</value></data>
+  <data name="Sync.Reason.TransportNotConfigured" xml:space="preserve"><value>هنوز سرویس همگام‌سازی تنظیم نشده است؛ تغییرات شما روی همین دستگاه در انتظار می‌ماند.</value></data>
+  <data name="Sync.Reason.ConflictsAwaitDecision" xml:space="preserve"><value>{0} تغییر با نسخهٔ دیگر تفاوت دارد و در انتظار تصمیم شماست.</value></data>
+  <data name="Sync.Status.PendingCount" xml:space="preserve"><value>{0} تغییر در انتظار همگام‌سازی</value></data>
+  <data name="Sync.Status.ConflictCount" xml:space="preserve"><value>{0} تغییر نیاز به تصمیم شما دارد</value></data>
+  <data name="Sync.Status.Dropped" xml:space="preserve"><value>{0} رکوردِ صف همگام‌سازی از حافظهٔ موقت بیرون رفت (داده‌های شما روی این دستگاه سالم است)</value></data>
+  <data name="Sync.Action.KeepLocal" xml:space="preserve"><value>نسخهٔ من را نگه دار</value></data>
+  <data name="Sync.Action.KeepRemote" xml:space="preserve"><value>نسخهٔ دیگر را بردار</value></data>
+  <data name="Migration.Failed.goals.2" xml:space="preserve"><value>به‌روزرسانی دادهٔ هدف‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.habits.2" xml:space="preserve"><value>به‌روزرسانی دادهٔ عادت‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.bootcamps.2" xml:space="preserve"><value>به‌روزرسانی دادهٔ دوره‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.profile.2" xml:space="preserve"><value>به‌روزرسانی مشخصات در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.history.2" xml:space="preserve"><value>به‌روزرسانی تاریخچه در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.manual.2" xml:space="preserve"><value>به‌روزرسانی ورودی‌های دستی در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.settings.2" xml:space="preserve"><value>به‌روزرسانی تنظیمات در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.consents.2" xml:space="preserve"><value>به‌روزرسانی رضایت‌نامه‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.reminders.2" xml:space="preserve"><value>به‌روزرسانی یادآور‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Error.Catalog.UnknownKind" xml:space="preserve"><value>نوع داده شناخته نیست.</value></data>
+  <data name="Error.Catalog.InvalidJson" xml:space="preserve"><value>متن، JSON معتبر نیست.</value></data>
+  <data name="Error.Catalog.MissingKinds" xml:space="preserve"><value>فایل پشتیبان بخش kinds را ندارد.</value></data>
+  <data name="Error.Catalog.MissingIdentity" xml:space="preserve"><value>این رکورد شناسه ندارد (Id یا Date).</value></data>
+  <data name="Error.Catalog.SchemaVersionTooNew" xml:space="preserve"><value>این فایل پشتیبان با نسخهٔ جدیدتری از برنامه ساخته شده است.</value></data>
+  <data name="Error.Catalog.Missing.goals.Id" xml:space="preserve"><value>هر هدف به یک شناسه نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.goals.Name" xml:space="preserve"><value>هر هدف به یک نام نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.habits.Id" xml:space="preserve"><value>هر عادت به یک شناسه نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.habits.Name" xml:space="preserve"><value>هر عادت به یک نام نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.bootcamps.Id" xml:space="preserve"><value>هر دوره به یک شناسه نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.reminders.Id" xml:space="preserve"><value>هر یادآور به یک شناسه نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.reminders.Kind" xml:space="preserve"><value>هر یادآور به یک نوع نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.reminders.TextKey" xml:space="preserve"><value>هر یادآور به کلید متن خود نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.history.Date" xml:space="preserve"><value>هر رکورد تاریخچه به یک تاریخ نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.manual.Date" xml:space="preserve"><value>هر ورودی دستی به یک تاریخ نیاز دارد.</value></data>
+  <data name="Error.Catalog.Range.goals.TargetValue" xml:space="preserve"><value>مقدار هدف باید بین ۰ تا ۱٬۰۰۰٬۰۰۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.goals.ProgressValue" xml:space="preserve"><value>پیشرفت هدف باید بین ۰ تا ۱٬۰۰۰٬۰۰۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.habits.TimesPerWeek" xml:space="preserve"><value>تعداد تکرار عادت در هفته باید بین ۱ تا ۷ باشد.</value></data>
+  <data name="Error.Catalog.Range.bootcamps.DurationDays" xml:space="preserve"><value>طول دوره باید بین ۱ تا ۳۶۵۰ روز باشد.</value></data>
+  <data name="Error.Catalog.Range.bootcamps.CurrentDay" xml:space="preserve"><value>روز جاری دوره باید بین ۰ تا ۳۶۵۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.SleepMinutes" xml:space="preserve"><value>دقیقهٔ خواب باید بین ۰ تا ۱۴۴۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Steps" xml:space="preserve"><value>تعداد گام باید بین ۰ تا ۱٬۰۰۰٬۰۰۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.ActiveMinutes" xml:space="preserve"><value>دقیقهٔ فعالیت باید بین ۰ تا ۱۴۴۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Completeness" xml:space="preserve"><value>درصد کامل بودن باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.SleepQuality" xml:space="preserve"><value>کیفیت خواب باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Stress" xml:space="preserve"><value>مقدار استرس باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Mood" xml:space="preserve"><value>مقدار خلق باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Energy" xml:space="preserve"><value>مقدار انرژی باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.SleepMinutes" xml:space="preserve"><value>دقیقهٔ خواب باید بین ۰ تا ۱۴۴۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.Steps" xml:space="preserve"><value>تعداد گام باید بین ۰ تا ۱٬۰۰۰٬۰۰۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.SleepQuality" xml:space="preserve"><value>کیفیت خواب باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.Stress" xml:space="preserve"><value>مقدار استرس باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.Mood" xml:space="preserve"><value>مقدار خلق باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.Energy" xml:space="preserve"><value>مقدار انرژی باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.BadDate.history" xml:space="preserve"><value>تاریخ رکورد تاریخچه خوانا نیست.</value></data>
+  <data name="Error.Catalog.BadDate.manual" xml:space="preserve"><value>تاریخ ورودی دستی خوانا نیست.</value></data>
+  <data name="Error.Catalog.Shape.goals" xml:space="preserve"><value>رکورد هدف باید یک شیء JSON باشد.</value></data>
+  <data name="Data.Wipe.Done" xml:space="preserve"><value>همهٔ داده‌های محلی در {0} پاک شد.</value></data>
+  <data name="Data.Store.CorruptQuarantined" xml:space="preserve"><value>یک فایل دادهٔ ناخوانا برای بررسی نگه داشته شد؛ برنامه با نسخهٔ سالم به کار ادامه داد.</value></data>
+  <data name="AiSettings.Title" xml:space="preserve"><value>دستیار هوش مصنوعی</value></data>
+  <data name="AiSettings.Status.Header" xml:space="preserve"><value>وضعیت درگاه</value></data>
+  <data name="AiSettings.AdvancedNote" xml:space="preserve"><value>این صفحه با تنظیماتِ واقعیِ درگاه کار می‌کند. تغییرها بی‌درنگ مؤثرند، فقط وقتی سرویس تأییدشان کند.</value></data>
+  <data name="AiSettings.Status.Configured" xml:space="preserve"><value>پیکربندی‌شده</value></data>
+  <data name="AiSettings.Status.NotConfigured" xml:space="preserve"><value>پیکربندی‌نشده</value></data>
+  <data name="AiSettings.Status.VerifiedAt" xml:space="preserve"><value>آخرین بررسیِ موفق: {0}، ساعت {1}</value></data>
+  <data name="AiSettings.Status.NotVerified" xml:space="preserve"><value>تأییدنشده — این نصب هرگز پاسخِ موفقی از درگاه نگرفته است</value></data>
+  <data name="AiSettings.KeySource.BuiltIn" xml:space="preserve"><value>کلیدِ داخلی (مبهم‌شده)</value></data>
+  <data name="AiSettings.KeySource.User" xml:space="preserve"><value>کلیدِ خودتان</value></data>
+  <data name="AiSettings.KeySource.None" xml:space="preserve"><value>بدون کلید</value></data>
+  <data name="AiSettings.Enable" xml:space="preserve"><value>پاسخ‌های هوش مصنوعی</value></data>
+  <data name="AiSettings.EnableNote" xml:space="preserve"><value>اگر خاموش باشد، همهٔ تحلیل‌ها فقط با قواعدِ داخلی ساخته می‌شوند. هوش مصنوعی به رضایتِ پردازشِ پایینِ این صفحه هم نیاز دارد.</value></data>
+  <data name="AiSettings.TestConnection" xml:space="preserve"><value>آزمونِ اتصال</value></data>
+  <data name="AiSettings.TestUnavailableNote" xml:space="preserve"><value>در این نسخه هیچ آزمونگرِ اتصالی ثبت نشده — بررسیِ زنده هنوز به این نسخه نرسیده است.</value></data>
+  <data name="AiSettings.Test.Ok" xml:space="preserve"><value>درگاه به این آزمون پاسخ داد و تأیید ثبت شد.</value></data>
+  <data name="AiSettings.Test.Fail" xml:space="preserve"><value>درگاه به این آزمون پاسخ نداد. چیزی تأیید نشد.</value></data>
+  <data name="AiSettings.Key.Header" xml:space="preserve"><value>کلیدِ APIِ خودتان</value></data>
+  <data name="AiSettings.Key.Note" xml:space="preserve"><value>اختیاری. کلیدی که اینجا وارد کنید جای کلیدِ داخلی را می‌گیرد و فقط روی همین دستگاه به‌صورت رمزنگاری‌شده ذخیره می‌شود. برای پاک‌کردن، «بازگشت به کلیدِ داخلی» را بزنید.</value></data>
+  <data name="AiSettings.Key.Placeholder" xml:space="preserve"><value>کلید را اینجا بچسبانید</value></data>
+  <data name="AiSettings.Key.Clear" xml:space="preserve"><value>بازگشت به کلیدِ داخلی</value></data>
+  <data name="AiSettings.Key.Saved" xml:space="preserve"><value>کلیدِ شما روی این دستگاه ذخیره شد.</value></data>
+  <data name="AiSettings.Key.Cleared" xml:space="preserve"><value>کلیدِ داخلی دوباره فعال شد.</value></data>
+  <data name="AiSettings.Key.Empty" xml:space="preserve"><value>اول کلید را بنویسید — یا برای پاک‌کردن، «بازگشت به کلیدِ داخلی» را بزنید.</value></data>
+  <data name="AiSettings.Status.InsecureChip" xml:space="preserve"><value>ناامن</value></data>
+  <data name="AiSettings.Insecure.Title" xml:space="preserve"><value>این اتصال رمزنگاری نمی‌شود</value></data>
+  <data name="AiSettings.Insecure.Body" xml:space="preserve"><value>درگاه با HTTPِ ساده در دسترس است: هرچه بفرستید ممکن است در شبکه خوانده شود. تا این خطر را نپذیره‌اید، هوش مصنوعی را خاموش بگذارید و داده‌ای که نمی‌خواهید فاش شود نفرستید.</value></data>
+  <data name="AiSettings.Consent.Header" xml:space="preserve"><value>رضایت‌ها</value></data>
+  <data name="AiSettings.Consent.Note" xml:space="preserve"><value>هر مورد در ابتدا «پرسیده‌نشده» است و مثل «ردشده» رفتار می‌شود. با کلیدِ کنارش پاسخِ صریحِ شما ثبت می‌شود و برچسبِ «پرسیده‌نشده» می‌رود.</value></data>
+  <data name="AiSettings.Consent.NeverAsked" xml:space="preserve"><value>هرگز پرسیده نشده — ردشده حساب می‌شود</value></data>
+  <data name="AiSettings.Consent.AiProcessing" xml:space="preserve"><value>پردازش با هوش مصنوعی</value></data>
+  <data name="AiSettings.Consent.AiProcessingNote" xml:space="preserve"><value>اجازه دهید خلاصهٔ حداقلی از وضعیت شما برای تفسیر به درگاهِ هوش مصنوعی فرستاده شود. کلیدِ API هیچ‌وقت فراتر از خودِ همین فراخوانی از دستگاه بیرون نمی‌رود.</value></data>
+  <data name="AiSettings.Consent.HealthData" xml:space="preserve"><value>دادهٔ سلامت</value></data>
+  <data name="AiSettings.Consent.HealthDataNote" xml:space="preserve"><value>اجازه دهید ویژگی‌ها تاریخچهٔ خواب و ریکاوری شما را بخوانند. همه روی همین دستگاه می‌ماند؛ هوش مصنوعی هم فقط همان خلاصهٔ حداقلی را می‌گیرد، و آن هم با همین رضایت.</value></data>
+  <data name="AiSettings.Consent.ActivityData" xml:space="preserve"><value>دادهٔ فعالیت</value></data>
+  <data name="AiSettings.Consent.ActivityDataNote" xml:space="preserve"><value>اجازه دهید ویژگی‌ها قدم‌ها و تمرین‌های شما را بخوانند. همه روی همین دستگاه می‌ماند.</value></data>
+  <data name="AiSettings.Consent.Notifications" xml:space="preserve"><value>اعلان‌ها</value></data>
+  <data name="AiSettings.Consent.NotificationsNote" xml:space="preserve"><value>اجازه دهید لایورا یادآوریِ محلی بفرستد. اجازهٔ خودِ سیستم جدا است و فقط در صفحهٔ یادآوری‌ها خواسته می‌شود.</value></data>
+  <data name="AiSettings.Cloud.Header" xml:space="preserve"><value>حسابِ ابری</value></data>
+  <data name="AiSettings.Cloud.Configured" xml:space="preserve"><value>بک‌اند آماده است</value></data>
+  <data name="AiSettings.Cloud.NotConfigured" xml:space="preserve"><value>پیکربندی‌نشده</value></data>
+  <data name="AiSettings.Cloud.Note" xml:space="preserve"><value>این کارت وضعیتِ واقعیِ سرویسِ حساب را گزارش می‌دهد. فرمِ ورودی نیست، چون فعلاً سرویسی برای ورود وجود ندارد — داده‌های شما روی همین دستگاه است.</value></data>
+  <data name="AiSettings.Failed" xml:space="preserve"><value>این عمل انجام نشد. چیزی تغییر نکرد.</value></data>
+  <data name="DataStudio.Title" xml:space="preserve"><value>استودیوی داده</value></data>
+  <data name="DataStudio.AdvancedBanner" xml:space="preserve"><value>پیشرفته: این صفحه JSONِ خامِ ذخیره‌شدهٔ برنامه را ویرایش می‌کند. شکلِ غلط می‌تواند روندها و برنامه‌ها را خراب کند. اگر نگفته‌اند اینجا بیایید، برگردید.</value></data>
+  <data name="DataStudio.Warning.Title" xml:space="preserve"><value>در حال ویرایشِ مستقیمِ دادهٔ ذخیره‌شده هستید</value></data>
+  <data name="DataStudio.Warning.Body" xml:space="preserve"><value>تغییرهای اینجا را رابطِ عادی اعتبارسنجی نمی‌کند — قواعدِ خودِ حافظه آخرین خطِ دفاع‌اند. اگر این داده برایتان مهم است، اول پشتیبان بگیرید.</value></data>
+  <data name="DataStudio.Entity.Header" xml:space="preserve"><value>یک موجودیت</value></data>
+  <data name="DataStudio.Kind" xml:space="preserve"><value>نوعِ موجودیت</value></data>
+  <data name="DataStudio.EntityId" xml:space="preserve"><value>شناسهٔ موجودیت</value></data>
+  <data name="DataStudio.EntityId.Placeholder" xml:space="preserve"><value>شناسهٔ موجودیت</value></data>
+  <data name="DataStudio.Load" xml:space="preserve"><value>بارگذاری</value></data>
+  <data name="DataStudio.Apply" xml:space="preserve"><value>اعمالِ JSON</value></data>
+  <data name="DataStudio.NoKinds" xml:space="preserve"><value>فهرستِ داده هنوز نوعی برنگردانده است.</value></data>
+  <data name="DataStudio.NothingLoaded" xml:space="preserve"><value>هنوز چیزی بارگذاری نشده. نوع را انتخاب کنید، شناسه را بنویسید و «بارگذاری» را بزنید.</value></data>
+  <data name="DataStudio.Errors.Header" xml:space="preserve"><value>حافظه این JSON را نپذیرفت:</value></data>
+  <data name="DataStudio.ImportOk" xml:space="preserve"><value>پذیرفته و ذخیره شد</value></data>
+  <data name="DataStudio.Failed" xml:space="preserve"><value>عملیات شکست خورد. چیزی تغییر نکرد.</value></data>
+  <data name="DataStudio.ConfirmDelete.Title" xml:space="preserve"><value>این موجودیت حذف شود؟</value></data>
+  <data name="DataStudio.ConfirmDelete.Body" xml:space="preserve"><value>«{1}» از نوعِ {0} برای همیشه از حافظهٔ محلی حذف می‌شود و قابل بازگشت نیست.</value></data>
+  <data name="DataStudio.ExportAll.Header" xml:space="preserve"><value>پشتیبانِ کامل</value></data>
+  <data name="DataStudio.ExportAll.Note" xml:space="preserve"><value>همهٔ حافظهٔ محلی را در یک فایلِ JSON در پوشهٔ دادهٔ همین برنامه می‌نویسد و مسیرِ واقعی را نشان می‌دهد. بدون ابر، بدون شبکه.</value></data>
+  <data name="DataStudio.ExportAll.Action" xml:space="preserve"><value>پشتیبان‌گیری در فایل</value></data>
+  <data name="DataStudio.ImportAll.Header" xml:space="preserve"><value>بازیابی از فایل</value></data>
+  <data name="DataStudio.ImportAll.Note" xml:space="preserve"><value>یک فایلِ JSONِ پشتیبانِ کامل را از مسیرِ داده‌شده روی همین دستگاه می‌خواند و بسته به کلیدِ پایین، همه‌چیز را جایگزین یا ادغام می‌کند.</value></data>
+  <data name="DataStudio.ImportAll.Action" xml:space="preserve"><value>بازیابی از این مسیر</value></data>
+  <data name="DataStudio.Merge" xml:space="preserve"><value>ادغام در داده‌های موجود (خاموش = جایگزینیِ همه‌چیز)</value></data>
+  <data name="DataStudio.Path" xml:space="preserve"><value>مسیرِ فایلِ پشتیبان</value></data>
+  <data name="DataStudio.Path.Placeholder" xml:space="preserve"><value>C:\folder\livora_export.json</value></data>
+  <data name="DataStudio.PathMissing" xml:space="preserve"><value>این فایل خوانده نشد. مسیر را بررسی کنید — این نسخه مسیرِ کاملِ تایپ‌شده را می‌گیرد، نه انتخابگرِ پوشه.</value></data>
+  <data name="Lock.Title" xml:space="preserve"><value>قفلِ برنامه</value></data>
+  <data name="Lock.PinNote" xml:space="preserve"><value>یک کدِ ۴ رقمی از برنامه روی همین دستگاه محافظت می‌کند. اینجا فقط هشِ آن ذخیره می‌شود و هیچ‌جا فرستاده نمی‌شود.</value></data>
+  <data name="Lock.Set.Label" xml:space="preserve"><value>کدِ ۴ رقمیِ خود را انتخاب کنید</value></data>
+  <data name="Lock.Retype.Label" xml:space="preserve"><value>همان کد را دوباره وارد کنید</value></data>
+  <data name="Lock.Verify.Label" xml:space="preserve"><value>کدِ خود را وارد کنید</value></data>
+  <data name="Lock.Set" xml:space="preserve"><value>ثبتِ کد</value></data>
+  <data name="Lock.Confirm" xml:space="preserve"><value>تأییدِ کد</value></data>
+  <data name="Lock.Unlock" xml:space="preserve"><value>باز کردن</value></data>
+  <data name="Lock.Wrong" xml:space="preserve"><value>این کد کار نکرد.</value></data>
+  <data name="Lock.Mismatch" xml:space="preserve"><value>دو ورودی با هم فرق داشتند. کد را از نو انتخاب کنید.</value></data>
+  <data name="Lock.SetDone" xml:space="preserve"><value>کد ثبت شد. بارِ بعدِ اجرا برنامه آن را می‌خواهد.</value></data>
+  <data name="Lock.SetFailed" xml:space="preserve"><value>کد روی این دستگاه ذخیره نشد.</value></data>
+  <data name="Lock.Removed" xml:space="preserve"><value>کد از این دستگاه حذف شد.</value></data>
+  <data name="Lock.Remove" xml:space="preserve"><value>حذفِ کد</value></data>
+  <data name="Lock.LockNow" xml:space="preserve"><value>همین حالا قفل کن</value></data>
+  <data name="Settings.AiEntry" xml:space="preserve"><value>دستیار هوش مصنوعی و رضایت‌ها</value></data>
+  <data name="Settings.AiEntryNote" xml:space="preserve"><value>وضعیتِ درگاه، کلیدِ شما، رضایتِ داده</value></data>
+  <data name="Settings.DataStudioEntry" xml:space="preserve"><value>استودیوی داده</value></data>
+  <data name="Settings.DataStudioEntryNote" xml:space="preserve"><value>پیشرفته: ویرایشِ خامِ موجودیت‌ها، پشتیبان و بازیابی</value></data>
+  <data name="Settings.LockEntry" xml:space="preserve"><value>قفلِ برنامه</value></data>
+  <data name="Settings.LockEntryNote" xml:space="preserve"><value>رمزِ ۴ رقمی، قفلِ فوری، حذفِ رمز</value></data>
 </root>

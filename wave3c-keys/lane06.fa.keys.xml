@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wave 3c lane 06 keys (FA). Idiomatic Persian with ZWNJ; merged into AppResources.fa.resx by the
+     orchestrator. Key set is identical to lane06.en.keys.xml. -->
+<root>
+  <data name="Sync.Reason.TransportNotConfigured" xml:space="preserve"><value>هنوز سرویس همگام‌سازی تنظیم نشده است؛ تغییرات شما روی همین دستگاه در انتظار می‌ماند.</value></data>
+  <data name="Sync.Reason.ConflictsAwaitDecision" xml:space="preserve"><value>{0} تغییر با نسخهٔ دیگر تفاوت دارد و در انتظار تصمیم شماست.</value></data>
+  <data name="Sync.Status.PendingCount" xml:space="preserve"><value>{0} تغییر در انتظار همگام‌سازی</value></data>
+  <data name="Sync.Status.ConflictCount" xml:space="preserve"><value>{0} تغییر نیاز به تصمیم شما دارد</value></data>
+  <data name="Sync.Status.Dropped" xml:space="preserve"><value>{0} رکوردِ صف همگام‌سازی از حافظهٔ موقت بیرون رفت (داده‌های شما روی این دستگاه سالم است)</value></data>
+  <data name="Sync.Action.KeepLocal" xml:space="preserve"><value>نسخهٔ من را نگه دار</value></data>
+  <data name="Sync.Action.KeepRemote" xml:space="preserve"><value>نسخهٔ دیگر را بردار</value></data>
+  <data name="Migration.Failed.goals.2" xml:space="preserve"><value>به‌روزرسانی دادهٔ هدف‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.habits.2" xml:space="preserve"><value>به‌روزرسانی دادهٔ عادت‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.bootcamps.2" xml:space="preserve"><value>به‌روزرسانی دادهٔ دوره‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.profile.2" xml:space="preserve"><value>به‌روزرسانی مشخصات در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.history.2" xml:space="preserve"><value>به‌روزرسانی تاریخچه در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.manual.2" xml:space="preserve"><value>به‌روزرسانی ورودی‌های دستی در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.settings.2" xml:space="preserve"><value>به‌روزرسانی تنظیمات در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.consents.2" xml:space="preserve"><value>به‌روزرسانی رضایت‌نامه‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Migration.Failed.reminders.2" xml:space="preserve"><value>به‌روزرسانی یادآور‌ها در گام ۲ ناموفق بود. داده‌های شما دست‌نخورده ماند و این گام دوباره تلاش می‌شود.</value></data>
+  <data name="Error.Catalog.UnknownKind" xml:space="preserve"><value>نوع داده شناخته نیست.</value></data>
+  <data name="Error.Catalog.InvalidJson" xml:space="preserve"><value>متن، JSON معتبر نیست.</value></data>
+  <data name="Error.Catalog.MissingKinds" xml:space="preserve"><value>فایل پشتیبان بخش kinds را ندارد.</value></data>
+  <data name="Error.Catalog.MissingIdentity" xml:space="preserve"><value>این رکورد شناسه ندارد (Id یا Date).</value></data>
+  <data name="Error.Catalog.SchemaVersionTooNew" xml:space="preserve"><value>این فایل پشتیبان با نسخهٔ جدیدتری از برنامه ساخته شده است.</value></data>
+  <data name="Error.Catalog.Missing.goals.Id" xml:space="preserve"><value>هر هدف به یک شناسه نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.goals.Name" xml:space="preserve"><value>هر هدف به یک نام نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.habits.Id" xml:space="preserve"><value>هر عادت به یک شناسه نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.habits.Name" xml:space="preserve"><value>هر عادت به یک نام نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.bootcamps.Id" xml:space="preserve"><value>هر دوره به یک شناسه نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.reminders.Id" xml:space="preserve"><value>هر یادآور به یک شناسه نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.reminders.Kind" xml:space="preserve"><value>هر یادآور به یک نوع نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.reminders.TextKey" xml:space="preserve"><value>هر یادآور به کلید متن خود نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.history.Date" xml:space="preserve"><value>هر رکورد تاریخچه به یک تاریخ نیاز دارد.</value></data>
+  <data name="Error.Catalog.Missing.manual.Date" xml:space="preserve"><value>هر ورودی دستی به یک تاریخ نیاز دارد.</value></data>
+  <data name="Error.Catalog.Range.goals.TargetValue" xml:space="preserve"><value>مقدار هدف باید بین ۰ تا ۱٬۰۰۰٬۰۰۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.goals.ProgressValue" xml:space="preserve"><value>پیشرفت هدف باید بین ۰ تا ۱٬۰۰۰٬۰۰۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.habits.TimesPerWeek" xml:space="preserve"><value>تعداد تکرار عادت در هفته باید بین ۱ تا ۷ باشد.</value></data>
+  <data name="Error.Catalog.Range.bootcamps.DurationDays" xml:space="preserve"><value>طول دوره باید بین ۱ تا ۳۶۵۰ روز باشد.</value></data>
+  <data name="Error.Catalog.Range.bootcamps.CurrentDay" xml:space="preserve"><value>روز جاری دوره باید بین ۰ تا ۳۶۵۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.SleepMinutes" xml:space="preserve"><value>دقیقهٔ خواب باید بین ۰ تا ۱۴۴۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Steps" xml:space="preserve"><value>تعداد گام باید بین ۰ تا ۱٬۰۰۰٬۰۰۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.ActiveMinutes" xml:space="preserve"><value>دقیقهٔ فعالیت باید بین ۰ تا ۱۴۴۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Completeness" xml:space="preserve"><value>درصد کامل بودن باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.SleepQuality" xml:space="preserve"><value>کیفیت خواب باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Stress" xml:space="preserve"><value>مقدار استرس باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Mood" xml:space="preserve"><value>مقدار خلق باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.history.Energy" xml:space="preserve"><value>مقدار انرژی باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.SleepMinutes" xml:space="preserve"><value>دقیقهٔ خواب باید بین ۰ تا ۱۴۴۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.Steps" xml:space="preserve"><value>تعداد گام باید بین ۰ تا ۱٬۰۰۰٬۰۰۰ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.SleepQuality" xml:space="preserve"><value>کیفیت خواب باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.Stress" xml:space="preserve"><value>مقدار استرس باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.Mood" xml:space="preserve"><value>مقدار خلق باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.Range.manual.Energy" xml:space="preserve"><value>مقدار انرژی باید بین ۰ تا ۱ باشد.</value></data>
+  <data name="Error.Catalog.BadDate.history" xml:space="preserve"><value>تاریخ رکورد تاریخچه خوانا نیست.</value></data>
+  <data name="Error.Catalog.BadDate.manual" xml:space="preserve"><value>تاریخ ورودی دستی خوانا نیست.</value></data>
+  <data name="Error.Catalog.Shape.goals" xml:space="preserve"><value>رکورد هدف باید یک شیء JSON باشد.</value></data>
+  <data name="Data.Wipe.Done" xml:space="preserve"><value>همهٔ داده‌های محلی در {0} پاک شد.</value></data>
+  <data name="Data.Store.CorruptQuarantined" xml:space="preserve"><value>یک فایل دادهٔ ناخوانا برای بررسی نگه داشته شد؛ برنامه با نسخهٔ سالم به کار ادامه داد.</value></data>
+</root>

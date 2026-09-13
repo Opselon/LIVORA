@@ -1,0 +1,40 @@
+<root>
+  <!-- Wave 3c lane 04 — longitudinal baselines, state confidence, behavioral patterns.
+       Engines emit KEYS + numeric args only; these are the translations.
+       HARD RULE honored throughout: pattern text describes what was OBSERVED next to the
+       user's own baseline — never causes, never diagnoses. -->
+
+  <!-- LateSleepRecurring -->
+  <data name="pattern.observed.late-sleep" xml:space="preserve"><value>Late nights recur</value></data>
+  <data name="pattern.evidence.late-nights" xml:space="preserve"><value>{0} of the last {1} nights, more than {2} minutes past your usual bedtime</value></data>
+
+  <!-- WeekdayActivityDip -->
+  <data name="pattern.observed.weekday-dip" xml:space="preserve"><value>One weekday is quieter</value></data>
+  <data name="pattern.evidence.weekday-dip" xml:space="preserve"><value>Weekday {0}: about {1}% below your other days (seen on {2} of them)</value></data>
+
+  <!-- FocusAfterPoorSleep -->
+  <data name="pattern.observed.poor-sleep-focus" xml:space="preserve"><value>Poor sleep and lower focus show up together</value></data>
+  <data name="pattern.evidence.poor-sleep-focus" xml:space="preserve"><value>After {0}% of {1} short-sleep nights, the next day's focus sat below your own average ({2} of {1})</value></data>
+
+  <!-- HabitFailureWindow -->
+  <data name="pattern.observed.habit-window" xml:space="preserve"><value>Habit misses cluster</value></data>
+  <data name="pattern.evidence.habit-window" xml:space="preserve"><value>Missed {1} of {2} times on weekday {0} ({3}% of that day)</value></data>
+
+  <!-- WorkoutConsistency -->
+  <data name="pattern.observed.workout-trend" xml:space="preserve"><value>Your active days are moving</value></data>
+  <data name="pattern.evidence.workout-trend" xml:space="preserve"><value>Across {0} weeks: {1} days with 30+ active minutes</value></data>
+
+  <!-- GoalStagnation -->
+  <data name="pattern.observed.goal-stagnant" xml:space="preserve"><value>A goal has been still</value></data>
+  <data name="pattern.evidence.goal-stagnant" xml:space="preserve"><value>No change in progress for {0} days with {1} days left before the deadline</value></data>
+
+  <!-- RecoveryActivityCoupling (association wording only — r is reported, never interpreted) -->
+  <data name="pattern.observed.recovery-activity" xml:space="preserve"><value>Recovery and previous-day activity track together</value></data>
+  <data name="pattern.evidence.recovery-activity" xml:space="preserve"><value>Association r = {0} across {1} day pairs (co-occurrence only)</value></data>
+
+  <!-- Baseline / confidence vocabulary (StateConfidenceCalculator + BaselineEngine) -->
+  <data name="State.Confidence.Basis" xml:space="preserve"><value>based on {0} complete fields · {1} baseline confidence · {2} days old</value></data>
+  <data name="State.Baseline.Gated.Short" xml:space="preserve"><value>Not enough clean history yet ({0} days seen — {1} needed)</value></data>
+  <data name="State.Baseline.WindowUsed" xml:space="preserve"><value>{0}-day window · {1} clean samples</value></data>
+  <data name="Pattern.Insufficient.Note" xml:space="preserve"><value>Still learning — {0} of 7 patterns have enough data</value></data>
+</root>

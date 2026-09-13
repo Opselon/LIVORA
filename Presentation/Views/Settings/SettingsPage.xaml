@@ -267,6 +267,76 @@
                  syntax; a brace-delimited comment here becomes literal text content of the
                  stack and fails the build with MAUIX2002. -->
 
+            <!-- WAVE3C-LANE07: entries into the wave-3c surfaces (AI settings / Data Studio /
+                 app lock). Same row vocabulary as the reminders shortcut above; navigation goes
+                 through the VM's NavigateRequested, whose NavigateSafelyAsync reports an honest
+                 alert if a route has not merged yet — these are entries, never dead buttons. -->
+            <Border Style="{StaticResource Card}" Background="{StaticResource SurfaceAltBrush}"
+                    StrokeThickness="0" Padding="14,10" MinimumHeightRequest="56"
+                    comp:TappableFeedback.Tappable="True"
+                    SemanticProperties.Description="{localize:Tr Settings.AiEntry}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenAiSettingsCommand}"/>
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="{localize:Tr Settings.AiEntry}" Style="{StaticResource LSubheading}"
+                               FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <Label Text="{localize:Tr Settings.AiEntryNote}" Style="{StaticResource HintLabel}"
+                               MaxLines="2"/>
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1" Text="›" Style="{StaticResource LMetric}"
+                           VerticalOptions="Center" HorizontalOptions="End"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                           AutomationProperties.IsInAccessibleTree="False"/>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource Card}" Background="{StaticResource SurfaceAltBrush}"
+                    StrokeThickness="0" Padding="14,10" MinimumHeightRequest="56"
+                    comp:TappableFeedback.Tappable="True"
+                    SemanticProperties.Description="{localize:Tr Settings.DataStudioEntry}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenDataStudioCommand}"/>
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="{localize:Tr Settings.DataStudioEntry}"
+                               Style="{StaticResource LSubheading}" FontSize="15"
+                               LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <Label Text="{localize:Tr Settings.DataStudioEntryNote}"
+                               Style="{StaticResource HintLabel}" MaxLines="2"/>
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1" Text="›" Style="{StaticResource LMetric}"
+                           VerticalOptions="Center" HorizontalOptions="End"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                           AutomationProperties.IsInAccessibleTree="False"/>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource Card}" Background="{StaticResource SurfaceAltBrush}"
+                    StrokeThickness="0" Padding="14,10" MinimumHeightRequest="56"
+                    comp:TappableFeedback.Tappable="True"
+                    SemanticProperties.Description="{localize:Tr Settings.LockEntry}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenLockCommand}"/>
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="{localize:Tr Settings.LockEntry}" Style="{StaticResource LSubheading}"
+                               FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <Label Text="{localize:Tr Settings.LockEntryNote}" Style="{StaticResource HintLabel}"
+                               MaxLines="2"/>
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1" Text="›" Style="{StaticResource LMetric}"
+                           VerticalOptions="Center" HorizontalOptions="End"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                           AutomationProperties.IsInAccessibleTree="False"/>
+                </Grid>
+            </Border>
+            <!-- WAVE3C-LANE07-END -->
+
             <BoxView HeightRequest="12" Color="Transparent"/>
         </VerticalStackLayout>
     </ScrollView>
