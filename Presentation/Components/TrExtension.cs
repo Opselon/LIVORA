@@ -27,7 +27,7 @@ namespace LIVORA.Presentation.Components;
 /// the argument source is read from the *target's* BindingContext at resolve time.
 /// </summary>
 [ContentProperty(nameof(Key))]
-public sealed class TrExtension : IMarkupExtension<object?>, INotifyPropertyChanged
+public sealed class TrExtension : IMarkupExtension<object>, INotifyPropertyChanged
 {
     public string? Key { get; set; }
 
@@ -51,7 +51,8 @@ public sealed class TrExtension : IMarkupExtension<object?>, INotifyPropertyChan
     private INotifyPropertyChanged? _contextSubscription;
     private Action? _languageHandler;
 
-    public object? ProvideValue(IServiceProvider serviceProvider)
+    /// <summary>Never null: an unresolvable key renders as <c>[Key]</c> (a debuggable bug, not a crash).</summary>
+    public object ProvideValue(IServiceProvider serviceProvider)
     {
         if (string.IsNullOrWhiteSpace(Key))
             return string.Empty;
@@ -78,7 +79,11 @@ public sealed class TrExtension : IMarkupExtension<object?>, INotifyPropertyChan
         return target.GetValue(targetProperty);
     }
 
-    object? IMarkupExtension<object?>.ProvideValue(IServiceProvider serviceProvider) => ProvideValue(serviceProvider);
+    // Declared non-nullable (object, not object?): the XAML source generator emits call sites
+    // typed IMarkupExtension<object>, and an object? implementation there logs CS8619 on every
+    // generated line. ProvideValue never returns null — an unresolvable key yields "[Key]".
+    object IMarkupExtension<object>.ProvideValue(IServiceProvider serviceProvider)
+        => ProvideValue(serviceProvider) ?? string.Empty;
 
     /// <summary>The string for the current language with the current argument values.</summary>
     public string Value
