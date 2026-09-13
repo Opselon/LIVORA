@@ -262,7 +262,9 @@
                 </VerticalStackLayout>
             </Border>
 
-            {/* WAVE3B-SETTINGS: lane cards merge here (AI status, privacy/consent, connections) */}
+            <!-- WAVE3B-SETTINGS: lane cards merge here (AI status, privacy/consent, connections).
+                 NOTE: must stay an XML comment — XAML has no {/* */} syntax; a brace-comment here
+                 becomes literal text content of the stack and fails the build with MAUIX2002. -->
 
             <BoxView HeightRequest="12" Color="Transparent"/>
         </VerticalStackLayout>
