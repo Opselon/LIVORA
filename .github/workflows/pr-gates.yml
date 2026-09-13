@@ -41,17 +41,18 @@ jobs:
             echo "n=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
           fi
 
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Fetch PR metadata + diff (derive from GitHub, never from agent claims)
         env:
           GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: "${{ github.repository }}"
           PR: ${{ steps.prnum.outputs.n }}
         run: |
           gh pr view "$PR" --json number,title,body,baseRefOid,headRefOid,potentialMergeCommit,mergeable,commits,author > pr.json
           gh pr diff "$PR" --patch > additions.diff
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Compute changed files + meta.json
         run: |
