@@ -180,6 +180,10 @@ public static class MauiProgram
         Routing.RegisterRoute("settings", typeof(LIVORA.Presentation.Views.SettingsPage));
         Routing.RegisterRoute("reminders", typeof(LIVORA.Presentation.Views.RemindersPage));
         Routing.RegisterRoute("review", typeof(LIVORA.Presentation.Views.Review.WeeklySummaryPage));
+        // WAVE3B-DI: Wave 3b (master) registrations — AI providers, consent, persistence metadata,
+        // normalization, patterns, activity. Merged by the orchestrator from lane APPEND blocks.
+        // WAVE3B-DI-END
+
         // WAVE3-DI-END
 
         // ---- ViewModels --------------------------------------------------------

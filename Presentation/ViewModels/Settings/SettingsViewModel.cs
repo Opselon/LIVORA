@@ -16,6 +16,9 @@ namespace LIVORA.Presentation;
 /// </summary>
 public sealed class SettingsViewModel : ObservableObject
 {
+    // WAVE3B-SETTINGS-VM: lane APPEND blocks add services/properties/commands here.
+    // WAVE3B-SETTINGS-VM-END
+
     private readonly ILocalizationService _loc;
     private readonly ISettingsService _settings;
 

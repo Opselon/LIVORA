@@ -262,6 +262,8 @@
                 </VerticalStackLayout>
             </Border>
 
+            {/* WAVE3B-SETTINGS: lane cards merge here (AI status, privacy/consent, connections) */}
+
             <BoxView HeightRequest="12" Color="Transparent"/>
         </VerticalStackLayout>
     </ScrollView>
