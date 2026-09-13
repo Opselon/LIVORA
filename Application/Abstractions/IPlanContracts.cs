@@ -1,5 +1,6 @@
 using LIVORA.Domain.Enums;
 using LIVORA.Domain.Models.Planning;
+using LIVORA.Domain.Models.State;
 
 namespace LIVORA.Application.Abstractions;
 
