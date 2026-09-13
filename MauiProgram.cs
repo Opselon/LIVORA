@@ -64,6 +64,7 @@ public static class MauiProgram
             sp.GetRequiredService<IRepository<Goal>>(),
             sp.GetRequiredService<IRepository<Habit>>(),
             sp.GetRequiredService<IRepository<Bootcamp>>(),
+            sp.GetRequiredService<ISettingsService>(),
             key => sp.GetRequiredService<ILocalizationService>()[key]));
 
         // ---- Intelligence (deterministic core + swappable interpretation) ------

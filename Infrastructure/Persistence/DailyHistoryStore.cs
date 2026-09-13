@@ -28,12 +28,16 @@ namespace LIVORA.Infrastructure.Persistence;
 public sealed class DailyHistoryStore : IHistoryRepository
 {
     private readonly JsonFileStore _store;
-    private readonly SampleHealthProvider _provider;
+    // IDataProvider, NOT the concrete SampleHealthProvider: the Wave 3 manual-entry overlay is
+    // registered as IDataProvider, and depending on the concrete type here would let history
+    // backfill bypass the overlay — baselines/trends would never see user-logged values even
+    // though every other consumer does. That is exactly the dead-end the Wave 3 audit warns about.
+    private readonly IDataProvider _provider;
     private readonly ISettingsService _settings;
     private const int BackfillDays = 24; // > 14 so baselines can reach High confidence quickly in demo
     private const int RetainedDays = 120; // cap retained history: ample for baselines + weekly reviews
 
-    public DailyHistoryStore(JsonFileStore store, SampleHealthProvider provider, ISettingsService settings)
+    public DailyHistoryStore(JsonFileStore store, IDataProvider provider, ISettingsService settings)
     {
         _store = store;
         _provider = provider;

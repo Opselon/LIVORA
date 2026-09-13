@@ -14,40 +14,51 @@ public sealed class DemoDataSeeder
     private readonly IRepository<Goal> _goals;
     private readonly IRepository<Habit> _habits;
     private readonly IRepository<Bootcamp> _bootcamps;
+    private readonly ISettingsService _settings;
     private readonly Func<string, string> _localizer; // l(key)
 
     public DemoDataSeeder(
         IRepository<Goal> goals,
         IRepository<Habit> habits,
         IRepository<Bootcamp> bootcamps,
+        ISettingsService settings,
         Func<string, string> localizer)
     {
         _goals = goals;
         _habits = habits;
         _bootcamps = bootcamps;
+        _settings = settings;
         _localizer = localizer;
     }
 
     public async Task SeedIfEmptyAsync(DateTime today)
     {
-        if (!await _goals.IsEmptyAsync()) return;
+        // Gate on the one-shot marker, NOT on emptiness: a user who deletes their own goals has an
+        // legitimately empty store, and an emptiness gate re-created the entire sample set behind
+        // their back on the next launch (goals + habits + bootcamps, each with fresh Guid ids, so the
+        // upsert-by-id repository could not collapse the duplicates — 12 bootcamps over 6 TitleKeys).
+        if (_settings.DemoDataSeeded) return;
+        if (!await _goals.IsEmptyAsync()) { _settings.DemoDataSeeded = true; return; }
 
         var l = _localizer;
         var goals = new List<Goal>
         {
             new()
             {
-                Name = l("Seed.Goal.Exercise"), Category = GoalCategory.Fitness,
+                Name = l("Seed.Goal.Exercise"), NameKey = "Seed.Goal.Exercise",
+                Category = GoalCategory.Fitness,
                 TargetValue = 4, ProgressValue = 2, Period = GoalPeriod.Week, Unit = GoalUnit.Sessions,
             },
             new()
             {
-                Name = l("Seed.Goal.Sleep"), Category = GoalCategory.Sleep,
+                Name = l("Seed.Goal.Sleep"), NameKey = "Seed.Goal.Sleep",
+                Category = GoalCategory.Sleep,
                 TargetValue = 5, ProgressValue = 3, Period = GoalPeriod.Week, Unit = GoalUnit.Sessions,
             },
             new()
             {
-                Name = l("Seed.Goal.Reading"), Category = GoalCategory.Learning,
+                Name = l("Seed.Goal.Reading"), NameKey = "Seed.Goal.Reading",
+                Category = GoalCategory.Learning,
                 TargetValue = 7, ProgressValue = 4, Period = GoalPeriod.Week, Unit = GoalUnit.Sessions,
             },
         };
@@ -57,24 +68,33 @@ public sealed class DemoDataSeeder
         {
             new()
             {
-                Name = l("Seed.Habit.MorningWalk"), Frequency = HabitFrequencyKind.Daily,
+                Name = l("Seed.Habit.MorningWalk"), NameKey = "Seed.Habit.MorningWalk",
+                Frequency = HabitFrequencyKind.Daily,
                 Completions = Enumerable.Range(0, 5).Select(i => today.AddDays(-i)).ToList(),
             },
             new()
             {
-                Name = l("Seed.Habit.Reading"), Frequency = HabitFrequencyKind.Daily,
+                Name = l("Seed.Habit.Reading"), NameKey = "Seed.Habit.Reading",
+                Frequency = HabitFrequencyKind.Daily,
                 Completions = Enumerable.Range(0, 3).Select(i => today.AddDays(-i)).ToList(),
             },
             new()
             {
-                Name = l("Seed.Habit.Stretching"), Frequency = HabitFrequencyKind.TimesPerWeek, TimesPerWeek = 4,
+                Name = l("Seed.Habit.Stretching"), NameKey = "Seed.Habit.Stretching",
+                Frequency = HabitFrequencyKind.TimesPerWeek, TimesPerWeek = 4,
                 Completions = new List<DateTime> { today.AddDays(-1), today.AddDays(-3) },
             },
         };
         foreach (var h in habits) await _habits.SaveAsync(h);
 
+        // Idempotent by TitleKey: every Bootcamp gets a fresh Guid here, so an upsert-by-id store
+        // cannot collapse a second seeding pass (a pre-Wave-3 install that already holds the
+        // catalog would otherwise end up with 12 bootcamps over 6 TitleKeys).
+        var existingTitles = (await _bootcamps.GetAllAsync()).Select(b => b.TitleKey).ToHashSet();
         foreach (var b in CreateBootcampCatalog(l))
-            await _bootcamps.SaveAsync(b);
+            if (existingTitles.Add(b.TitleKey)) await _bootcamps.SaveAsync(b);
+
+        _settings.DemoDataSeeded = true;
     }
 
     public static List<Bootcamp> CreateBootcampCatalog(Func<string, string> l)

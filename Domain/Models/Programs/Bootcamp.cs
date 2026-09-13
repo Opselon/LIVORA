@@ -18,8 +18,13 @@ public sealed class Bootcamp
     // ---- Wave 2: structured program metadata ----
     /// <summary>Goal metric this program moves (Metrics.*), for data-driven progress later.</summary>
     public string? GoalMetricKey { get; set; }
-    /// <summary>Rule keys that may adapt this program's days (deterministic, explainable).</summary>
-    public List<string> AdaptationRuleKeys { get; set; } = new() { "Rule.LowRecoveryReduce", "Rule.HighStressReduce" };
+    /// <summary>
+    /// Rule keys that may adapt this program's days (deterministic, explainable). Only keys the
+    /// RuleEngine actually emits may appear here: RuleEngine's exercise-intensity rules are
+    /// Rule.SleepDebtReduceIntensity / Rule.LowRecoveryReduce / Rule.HighStress. A phantom key
+    /// here would advertise an adaptation nothing can produce (and has no Rule.Why copy).
+    /// </summary>
+    public List<string> AdaptationRuleKeys { get; set; } = new() { "Rule.LowRecoveryReduce", "Rule.SleepDebtReduceIntensity", "Rule.HighStress" };
 
     public double CompletionFraction => DurationDays <= 0 ? 0 : Math.Clamp((double)CurrentDay / DurationDays, 0, 1);
 

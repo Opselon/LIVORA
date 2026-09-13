@@ -4,7 +4,15 @@ namespace LIVORA.Domain.Models;
 public sealed class Goal
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    /// <summary>
+    /// Display name. For user-created goals this is the literal text the user typed (never
+    /// localized — it IS the data). For seeded sample goals the literal is the English fallback
+    /// and <see cref="NameKey"/> carries the localization key, so a live EN/FA switch re-renders
+    /// sample content instead of freezing it in whichever language the app first launched in.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+    /// <summary>Optional localization key for Name (sample content only; null for user text).</summary>
+    public string? NameKey { get; set; }
     public string Description { get; set; } = string.Empty;
     public GoalCategory Category { get; set; }
     public double TargetValue { get; set; }
@@ -40,7 +48,10 @@ public sealed class Goal
 public sealed class Habit
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    /// <summary>See <see cref="Goal.Name"/> — literal user text, with <see cref="NameKey"/> for sample rows.</summary>
     public string Name { get; set; } = string.Empty;
+    /// <summary>Optional localization key for Name (sample content only; null for user text).</summary>
+    public string? NameKey { get; set; }
     public HabitFrequencyKind Frequency { get; set; } = HabitFrequencyKind.Daily;
     public int TimesPerWeek { get; set; } = 7;
     public List<DateTime> Completions { get; set; } = new();

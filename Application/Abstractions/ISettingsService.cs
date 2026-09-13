@@ -24,6 +24,14 @@ public interface ISettingsService
 
     /// <summary>Version string the "What's new" sheet has already been shown for (null = never).</summary>
     string? LastSeenVersion { get; set; }
+
+    /// <summary>
+    /// True once the first-launch sample content has been written. The seeder must gate on THIS and
+    /// not on "is the goal store empty": an empty store is a legitimate state for a user who deleted
+    /// their own goals, and gating on emptiness re-created the whole demo set (goals + duplicate
+    /// habits + duplicate bootcamps, new Guids each time) behind their back.
+    /// </summary>
+    bool DemoDataSeeded { get; set; }
 }
 
 public interface IDateTimeProvider

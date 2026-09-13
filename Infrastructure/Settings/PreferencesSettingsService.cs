@@ -17,6 +17,7 @@ public sealed class PreferencesSettingsService : ISettingsService
     private const string KeyProfileId = "profile_id";
     private const string KeyThemeMode = "theme_mode";
     private const string KeyLastSeenVersion = "last_seen_version";
+    private const string KeyDemoSeeded = "demo_data_seeded";
 
     private readonly ILogger<PreferencesSettingsService> _logger;
 
@@ -61,6 +62,13 @@ public sealed class PreferencesSettingsService : ISettingsService
             return Enum.TryParse<ThemeMode>(raw, out var m) ? m : ThemeMode.System;
         }
         set => Preferences.Default.Set(KeyThemeMode, value.ToString());
+    }
+
+    /// <summary>One-shot marker so deleted sample content is never silently re-created.</summary>
+    public bool DemoDataSeeded
+    {
+        get => Preferences.Default.Get(KeyDemoSeeded, false);
+        set => Preferences.Default.Set(KeyDemoSeeded, value);
     }
 
     /// <summary>Version the "What's new" sheet was already shown for (null = never shown).</summary>

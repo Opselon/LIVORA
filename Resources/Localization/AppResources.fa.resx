@@ -37,6 +37,7 @@
   <data name="Tab.Goals" xml:space="preserve"><value>اهداف</value></data>
   <data name="Tab.Programs" xml:space="preserve"><value>برنامه‌ها</value></data>
   <data name="Tab.Profile" xml:space="preserve"><value>پروفایل</value></data>
+  <data name="Tab.Log" xml:space="preserve"><value>ثبت</value></data>
 
   <!-- ============ Onboarding ============ -->
   <data name="Onboarding.Welcome.Title" xml:space="preserve"><value>به LIVORA خوش آمدی</value></data>

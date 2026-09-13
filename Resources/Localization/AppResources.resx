@@ -37,6 +37,7 @@
   <data name="Tab.Goals" xml:space="preserve"><value>Goals</value></data>
   <data name="Tab.Programs" xml:space="preserve"><value>Programs</value></data>
   <data name="Tab.Profile" xml:space="preserve"><value>Profile</value></data>
+  <data name="Tab.Log" xml:space="preserve"><value>Log</value></data>
 
   <!-- ============ Onboarding ============ -->
   <data name="Onboarding.Welcome.Title" xml:space="preserve"><value>Welcome to LIVORA</value></data>
@@ -289,7 +290,7 @@
   <data name="Plan.Adapted.Generic" xml:space="preserve"><value>Adjusted for today's state</value></data>
   <data name="Plan.Adapted.Reason" xml:space="preserve"><value>Today's plan changed because {0}.</value></data>
 
-  <data name="Rec.AdvanceGoal" xml:space="preserve"><value>Move a goal you care about forward — 20 focused minutes</value></data>
+  <data name="Rec.AdvanceGoal" xml:space="preserve"><value>Move "{0}" forward — 20 focused minutes</value></data>
   <data name="Rec.CompleteHabit" xml:space="preserve"><value>Do the small version of a skipped habit</value></data>
   <data name="Rec.DoProgramDay" xml:space="preserve"><value>Complete today's program day</value></data>
   <data name="Rec.ReviewWeeklySummary" xml:space="preserve"><value>Look back at your week</value></data>
