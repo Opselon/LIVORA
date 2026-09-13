@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.HabitEditorPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    xmlns:system="clr-namespace:System;assembly=netstandard"
+    x:DataType="vm:HabitEditorViewModel">
+
+    <!-- Page-local editor vocabulary (same rhythm as the goal editor so the two editors read as
+         one product). Tokens from LivoraColors.xaml only. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="FieldHint" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="11.5"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="3"/>
+            </Style>
+            <Style x:Key="MessageChip" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                <Setter Property="Stroke" Value="{StaticResource NegativeBrush}"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 14"/>
+                <Setter Property="Padding" Value="12,8"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="{StaticResource PageThickness}">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="2" Margin="0,0,0,4">
+            <Label Text="{Binding Title}" Style="{StaticResource LDisplay}"
+                   LineBreakMode="WordWrap" MaxLines="2"
+                   SemanticProperties.HeadingLevel="Level1"/>
+            <Label Text="{localize:Tr Editor.HabitSubtitle}" Style="{StaticResource LCaption}"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                   LineBreakMode="WordWrap" MaxLines="2"/>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" Padding="0,4,0,8">
+
+                <!-- Validation + status messages (reminder save results land here too, so the
+                     user always reads exactly what happened). -->
+                <comp:ItemsStackLayout ItemsSource="{Binding Messages}" Spacing="6"
+                                       IsVisible="{Binding HasMessages}">
+                    <comp:ItemsStackLayout.ItemTemplate>
+                        <DataTemplate x:DataType="system:String">
+                            <Border Style="{StaticResource MessageChip}">
+                                <Label Text="{Binding .}" Style="{StaticResource LCaption}" FontSize="13"
+                                       TextColor="{StaticResource Negative}"
+                                       LineBreakMode="WordWrap"/>
+                            </Border>
+                        </DataTemplate>
+                    </comp:ItemsStackLayout.ItemTemplate>
+                </comp:ItemsStackLayout>
+
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding NameLabel}" Style="{StaticResource FieldLabel}" FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Entry Text="{Binding Name}"
+                               MaxLength="100"
+                               Placeholder="{Binding NameHintText}"
+                               MinimumHeightRequest="44"
+                               SemanticProperties.Description="{Binding NameLabel}"/>
+                        <Label Text="{Binding NameHintText}" Style="{StaticResource FieldHint}"/>
+
+                        <BoxView Style="{StaticResource Divider}" Margin="0,6"/>
+
+                        <Label Text="{Binding FrequencyLabel}" Style="{StaticResource FieldLabel}" FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Picker ItemsSource="{Binding FrequencyOptions}" SelectedIndex="{Binding FrequencyIndex}"
+                                MinimumHeightRequest="44"
+                                SemanticProperties.Description="{Binding FrequencyLabel}"/>
+
+                        <!-- Times-per-week only when the cadence doesn't already define it -->
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowTimesPicker}">
+                            <Label Text="{Binding TimesLabel}" Style="{StaticResource FieldLabel}"
+                                   SemanticProperties.HeadingLevel="Level3"/>
+                            <Entry Text="{Binding TimesText}" Keyboard="Numeric"
+                                   MinimumHeightRequest="44"
+                                   SemanticProperties.Description="{Binding TimesLabel}"/>
+                            <Label Text="{Binding TimesHintText}" Style="{StaticResource FieldHint}"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Optional reminder. The note stays honest: scheduling depends on the platform
+                     notification grant, which the VM reports after saving (never assumes). -->
+                <Border Style="{StaticResource AccentCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="{Binding ReminderLabel}"
+                                   Style="{StaticResource LSubheading}"
+                                   VerticalOptions="Center"
+                                   LineBreakMode="WordWrap" MaxLines="2"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                            <Switch Grid.Column="1" IsToggled="{Binding ReminderEnabled}"
+                                    VerticalOptions="Center"
+                                    SemanticProperties.Description="{Binding ReminderLabel}"/>
+                        </Grid>
+                        <Label Text="{Binding ReminderNote}" Style="{StaticResource FieldHint}"
+                               MaxLines="4"/>
+                        <TimePicker Time="{Binding ReminderTime}"
+                                    IsVisible="{Binding ShowTimePicker}"
+                                    MinimumHeightRequest="44"
+                                    SemanticProperties.Description="{Binding ReminderLabel}"/>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,10,0,4">
+            <Button Grid.Column="0" Text="{Binding CancelText}"
+                    Style="{StaticResource SecondaryButton}"
+                    Command="{Binding CancelCommand}"
+                    MinimumHeightRequest="48" LineBreakMode="WordWrap"
+                    SemanticProperties.Description="{Binding CancelText}"/>
+            <Button Grid.Column="1" Text="{Binding SaveText}"
+                    Style="{StaticResource PrimaryButton}"
+                    Command="{Binding SaveCommand}"
+                    MinimumHeightRequest="48" LineBreakMode="WordWrap"
+                    SemanticProperties.Description="{Binding SaveText}"/>
+        </Grid>
+    </Grid>
+</views:BaseContentPage>

@@ -385,4 +385,288 @@
   <!-- ============ Global error safety net (App.xaml.cs) ============ -->
   <data name="ErrorDialog_Title" xml:space="preserve"><value>Something went wrong</value></data>
   <data name="ErrorDialog_Body" xml:space="preserve"><value>LIVORA hit an unexpected error. Your data is safe on this device — you can keep going.</value></data>
+  <!-- ============ Wave 3 (lane merge) ============ -->
+  <data name="Bootcamp.Calendar" xml:space="preserve"><value>Day calendar</value></data>
+  <data name="Bootcamp.Day.Adapted" xml:space="preserve"><value>Adapted</value></data>
+  <data name="Bootcamp.Day.Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="Bootcamp.Day.Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Bootcamp.Day.Upcoming" xml:space="preserve"><value>Upcoming</value></data>
+  <data name="Bootcamp.Length" xml:space="preserve"><value>{0} days</value></data>
+  <data name="Bootcamp.Minutes" xml:space="preserve"><value>{0} min</value></data>
+  <data name="Bootcamp.NotFound" xml:space="preserve"><value>That program wasn't found.</value></data>
+  <data name="Bootcamp.Overview" xml:space="preserve"><value>Overview</value></data>
+  <data name="Bootcamp.Progress.Adapted" xml:space="preserve"><value>Adapted by LIVORA</value></data>
+  <data name="Bootcamp.Progress.AdaptedDays" xml:space="preserve"><value>{0} days adapted so far</value></data>
+  <data name="Bootcamp.Progress.AllPlanned" xml:space="preserve"><value>All days planned</value></data>
+  <data name="Bootcamp.Progress.Completed" xml:space="preserve"><value>Days completed</value></data>
+  <data name="Bootcamp.Progress.CompletedDays" xml:space="preserve"><value>{0} of {1} days done</value></data>
+  <data name="Bootcamp.Progress.Finish" xml:space="preserve"><value>Expected finish</value></data>
+  <data name="Bootcamp.Progress.FinishDate" xml:space="preserve"><value>Expected finish: {0}</value></data>
+  <data name="Bootcamp.Progress.Finished" xml:space="preserve"><value>Program complete</value></data>
+  <data name="Bootcamp.Progress.MinutesLeft" xml:space="preserve"><value>Minutes left</value></data>
+  <data name="Bootcamp.Progress.NextMilestone" xml:space="preserve"><value>Next milestone: day {0} ({1})</value></data>
+  <data name="Bootcamp.Progress.NoEstimate" xml:space="preserve"><value>No finish estimate yet</value></data>
+  <data name="Bootcamp.Progress.Remaining" xml:space="preserve"><value>Left to do</value></data>
+  <data name="Bootcamp.Progress.RemainingDays" xml:space="preserve"><value>{0} days left</value></data>
+  <data name="Bootcamp.Progress.Streak" xml:space="preserve"><value>Current streak</value></data>
+  <data name="Bootcamp.Status.NotStarted" xml:space="preserve"><value>Not started yet</value></data>
+  <data name="Bootcamp.Status.InProgress" xml:space="preserve"><value>In progress</value></data>
+  <data name="Bootcamp.Status.Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="Bootcamp.SampleNote" xml:space="preserve"><value>Sample program — content is example, not medical advice.</value></data>
+  <data name="Bootcamp.Today.None" xml:space="preserve"><value>Nothing planned for today</value></data>
+  <data name="Bootcamp.Today.Preview" xml:space="preserve"><value>Preview of the first day</value></data>
+  <data name="Common.NotAvailable" xml:space="preserve"><value>Not available in this build</value></data>
+  <data name="Common.Open" xml:space="preserve"><value>Open</value></data>
+  <data name="Common.Undo" xml:space="preserve"><value>Undo</value></data>
+  <data name="Editor.ArchiveAction" xml:space="preserve"><value>Archive</value></data>
+  <data name="Editor.Confirm.Archive.Title" xml:space="preserve"><value>Archive this goal?</value></data>
+  <data name="Editor.Confirm.DeleteHabit.Body" xml:space="preserve"><value>Its check-ins stay in your daily history, but the habit itself disappears.</value></data>
+  <data name="Editor.Confirm.DeleteHabit.Title" xml:space="preserve"><value>Delete this habit?</value></data>
+  <data name="Editor.DeadlineLabel" xml:space="preserve"><value>Deadline (optional)</value></data>
+  <data name="Editor.DescriptionPlaceholder" xml:space="preserve"><value>Why this matters to you</value></data>
+  <data name="Editor.Error.DeadlinePast" xml:space="preserve"><value>The deadline can't be in the past.</value></data>
+  <data name="Editor.Error.HabitNameEmpty" xml:space="preserve"><value>Give your habit a name first.</value></data>
+  <data name="Editor.Error.MetricKey" xml:space="preserve"><value>Pick which health metric this goal measures.</value></data>
+  <data name="Editor.Error.NameEmpty" xml:space="preserve"><value>Give your goal a name first.</value></data>
+  <data name="Editor.Error.NameTooLong" xml:space="preserve"><value>The name must be {0} characters or fewer.</value></data>
+  <data name="Editor.Error.TargetNotNumeric" xml:space="preserve"><value>Enter the target as a number.</value></data>
+  <data name="Editor.Error.TargetNotWhole" xml:space="preserve"><value>The count of {0} must be a whole number.</value></data>
+  <data name="Editor.Error.TargetRange" xml:space="preserve"><value>Use a value between {0} and {1}.</value></data>
+  <data name="Editor.Error.TimesFixed" xml:space="preserve"><value>This frequency already fixes how many times a week.</value></data>
+  <data name="Editor.Error.TimesRange" xml:space="preserve"><value>Choose between {0} and {1} times per week.</value></data>
+  <data name="Editor.GoalSubtitle" xml:space="preserve"><value>Say what you want to reach. You can change it any time.</value></data>
+  <data name="Editor.HabitSubtitle" xml:space="preserve"><value>Small and repeatable beats big and rare.</value></data>
+  <data name="Editor.Hint.TimesRange" xml:space="preserve"><value>Pick a number between {0} and {1}.</value></data>
+  <data name="Editor.MeasurementLabel" xml:space="preserve"><value>How progress is measured</value></data>
+  <data name="Editor.MetricLabel" xml:space="preserve"><value>Health metric</value></data>
+  <data name="Editor.MetricNote" xml:space="preserve"><value>Metric goals are computed from health data, which is still sample data — nothing is measured from a real device yet.</value></data>
+  <data name="Editor.NameHint" xml:space="preserve"><value>Up to {0} characters</value></data>
+  <data name="Editor.NavigationFailed" xml:space="preserve"><value>The editor isn't available in this build yet.</value></data>
+  <data name="Editor.NotFound" xml:space="preserve"><value>We couldn't find that item — it may have been deleted.</value></data>
+  <data name="Editor.TargetPlaceholder" xml:space="preserve"><value>e.g. 4</value></data>
+  <data name="Editor.Undo.Archived" xml:space="preserve"><value>"{0}" archived</value></data>
+  <data name="Editor.Undo.Deleted" xml:space="preserve"><value>"{0}" deleted</value></data>
+  <data name="Editor.Warn.NameDuplicate" xml:space="preserve"><value>You already have something with this name — that's fine, just checking.</value></data>
+  <data name="Goals.Archived" xml:space="preserve"><value>Archived</value></data>
+  <data name="Goals.ArchivedEmpty" xml:space="preserve"><value>No archived goals. Anything you archive keeps its progress here.</value></data>
+  <data name="Goals.Deadline" xml:space="preserve"><value>Until {0}</value></data>
+  <data name="Goals.LogProgress" xml:space="preserve"><value>Log progress</value></data>
+  <data name="Goals.MetricNote" xml:space="preserve"><value>Progress comes from health data — sample data until a real source is connected.</value></data>
+  <data name="Goals.Restore" xml:space="preserve"><value>Restore</value></data>
+  <data name="Habits.EditHabit" xml:space="preserve"><value>Edit habit</value></data>
+  <data name="Habits.Empty" xml:space="preserve"><value>No habits yet. Add one small thing you can do today.</value></data>
+  <data name="Habits.Frequency" xml:space="preserve"><value>How often</value></data>
+  <data name="Habits.Name" xml:space="preserve"><value>Habit name</value></data>
+  <data name="Habits.NewHabit" xml:space="preserve"><value>New habit</value></data>
+  <data name="Habits.Reminder" xml:space="preserve"><value>Reminder</value></data>
+  <data name="Habits.ReminderDenied" xml:space="preserve"><value>Reminder saved, but notifications are blocked on this device — turn them on in system settings.</value></data>
+  <data name="Habits.ReminderNeedsPermission" xml:space="preserve"><value>Reminder saved. Notifications aren't allowed yet, so it may not appear.</value></data>
+  <data name="Habits.ReminderNote" xml:space="preserve"><value>LIVORA only sends a reminder if notifications are allowed on this device.</value></data>
+  <data name="Habits.ReminderUnavailable" xml:space="preserve"><value>Reminder time saved on the habit, but no notification scheduler is available in this build.</value></data>
+  <data name="Habits.ReminderUnsupported" xml:space="preserve"><value>Reminder saved, but this device can't show notifications.</value></data>
+  <data name="Habits.TimesPerWeek" xml:space="preserve"><value>Times per week</value></data>
+  <data name="Notification.Grant" xml:space="preserve"><value>Allow notifications</value></data>
+  <data name="Notification.Grant.Title" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Notification.GrantFailed" xml:space="preserve"><value>The system did not answer the notification request.</value></data>
+  <data name="Notification.GrantResult" xml:space="preserve"><value>The system answered: {0}</value></data>
+  <data name="Notification.OpenSystemSettings" xml:space="preserve"><value>Open system settings</value></data>
+  <data name="Notification.State.Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="Notification.SystemSettingsUnavailable" xml:space="preserve"><value>This platform has no in-app settings page.</value></data>
+  <data name="Onboarding.Goals.ChipHint" xml:space="preserve"><value>Tap to add or remove this focus area</value></data>
+  <data name="Onboarding.Goals.Hint" xml:space="preserve"><value>Pick one to three areas. LIVORA steers its suggestions with them.</value></data>
+  <data name="Onboarding.Name.Optional" xml:space="preserve"><value>Optional. You can add a name later in Profile.</value></data>
+  <data name="Onboarding.StepCounter" xml:space="preserve"><value>Step {0} of {1}</value></data>
+  <data name="Privacy.DeleteConfirm" xml:space="preserve"><value>This permanently deletes your profile, goals, habits, history, logs, reminders and cached data from this device. It cannot be undone.</value></data>
+  <data name="Privacy.DeleteFailed" xml:space="preserve"><value>The deletion did not finish. Your data is still on the device.</value></data>
+  <data name="Privacy.FileCount" xml:space="preserve"><value>{0} of {1} files hold data on this device</value></data>
+  <data name="Privacy.FileHeader" xml:space="preserve"><value>Stored files</value></data>
+  <data name="Privacy.Presence.StoredCount" xml:space="preserve"><value>{0} items stored</value></data>
+  <data name="Privacy.RedoNo" xml:space="preserve"><value>Keep the empty app</value></data>
+  <data name="Privacy.RedoYes" xml:space="preserve"><value>Set up again</value></data>
+  <data name="Privacy.RetainedNote" xml:space="preserve"><value>Language and theme choices live in the app's own settings store. They hold no personal data, so the wipe leaves them in place.</value></data>
+  <data name="Privacy.WipeSampleNote" xml:space="preserve"><value>Sample goals and habits return on their own at the next start — they are demo data, not your data.</value></data>
+  <data name="Profile.AddYourData" xml:space="preserve"><value>Add your data</value></data>
+  <data name="Profile.ConnectionCenterHint" xml:space="preserve"><value>What LIVORA can actually read right now — nothing more.</value></data>
+  <data name="Profile.Identity" xml:space="preserve"><value>Your profile</value></data>
+  <data name="Profile.InitialsPlaceholder" xml:space="preserve"><value>You</value></data>
+  <data name="Profile.NavUnavailable" xml:space="preserve"><value>This screen is not in this build yet.</value></data>
+  <data name="Profile.PrimaryGoalsEmpty" xml:space="preserve"><value>None selected yet.</value></data>
+  <data name="Profile.PrimaryGoalsHint" xml:space="preserve"><value>Pick up to three. They steer what LIVORA suggests.</value></data>
+  <data name="Profile.RemindersEntryNote" xml:space="preserve"><value>Times and days for wind-down, logging and habits.</value></data>
+  <data name="Profile.SettingsEntry" xml:space="preserve"><value>Settings</value></data>
+  <data name="Profile.SettingsEntryNote" xml:space="preserve"><value>Notifications, appearance, language, updates and about.</value></data>
+  <data name="Profile.Source.Manual" xml:space="preserve"><value>Your own logs</value></data>
+  <data name="Profile.Source.Updates" xml:space="preserve"><value>Update feed</value></data>
+  <data name="Profile.Status.CheckFailed" xml:space="preserve"><value>Couldn't check</value></data>
+  <data name="Profile.Status.SelfReportedCount" xml:space="preserve"><value>{0} days logged by you</value></data>
+  <data name="Profile.Status.SelfReportedNone" xml:space="preserve"><value>Nothing logged by you yet</value></data>
+  <data name="Profile.ThemeNote" xml:space="preserve"><value>Light, dark, or follow the system.</value></data>
+  <data name="Profile.ThemeUnavailable" xml:space="preserve"><value>Theme switching is not wired up in this build, so the app follows the system.</value></data>
+  <data name="Profile.Update.Prerelease" xml:space="preserve"><value>Pre-release available ({0})</value></data>
+  <data name="Profile.Update.Available" xml:space="preserve"><value>Update available</value></data>
+  <data name="Profile.Update.CheckNow" xml:space="preserve"><value>Check now</value></data>
+  <data name="Profile.Update.CheckedAt" xml:space="preserve"><value>Last checked {0}</value></data>
+  <data name="Profile.Update.CurrentIs" xml:space="preserve"><value>Installed version {0}</value></data>
+  <data name="Profile.Update.Disabled" xml:space="preserve"><value>Updates are managed elsewhere</value></data>
+  <data name="Profile.Update.Error" xml:space="preserve"><value>Couldn't read the update feed</value></data>
+  <data name="Profile.Update.Idle" xml:space="preserve"><value>Haven't checked yet</value></data>
+  <data name="Profile.Update.NewerThanFeed" xml:space="preserve"><value>This build is newer than the feed</value></data>
+  <data name="Profile.Update.NoConnection" xml:space="preserve"><value>No connection to the feed</value></data>
+  <data name="Profile.Update.NotConfigured" xml:space="preserve"><value>No release feed in this build</value></data>
+  <data name="Profile.Update.OfflineHint" xml:space="preserve"><value>You were offline — showing the last answer</value></data>
+  <data name="Profile.Update.Open" xml:space="preserve"><value>Updates</value></data>
+  <data name="Profile.Update.RateLimited" xml:space="preserve"><value>The feed asked us to wait</value></data>
+  <data name="Profile.Update.TryLater" xml:space="preserve"><value>Try again in a little while</value></data>
+  <data name="Profile.Update.UpToDate" xml:space="preserve"><value>Up to date</value></data>
+  <data name="Profile.Update.VersionFromTo" xml:space="preserve"><value>Installed {0} — newest published is {1}</value></data>
+  <data name="Profile.UpdatesEntry" xml:space="preserve"><value>App updates</value></data>
+  <data name="Profile.UpdatesEntryNote" xml:space="preserve"><value>LIVORA checks published releases over the network. Nothing is downloaded or installed automatically.</value></data>
+  <data name="Profile.VersionNote" xml:space="preserve"><value>Built by LIVORA. No account, no server.</value></data>
+  <data name="Profile.WeeklyReview" xml:space="preserve"><value>Weekly review</value></data>
+  <data name="Profile.WeeklyReviewNote" xml:space="preserve"><value>How the week went, from your logged data.</value></data>
+  <data name="Programs.Empty" xml:space="preserve"><value>No programs here yet — start one and LIVORA will track it.</value></data>
+  <data name="Programs.Empty.Filtered" xml:space="preserve"><value>Nothing matches this filter.</value></data>
+  <data name="Programs.Filter.All" xml:space="preserve"><value>All</value></data>
+  <data name="Programs.Filter.Hint" xml:space="preserve"><value>Shown by category</value></data>
+  <data name="Programs.Recommend.ForGoal" xml:space="preserve"><value>For your goal: {0}</value></data>
+  <data name="Programs.Recommend.Reason" xml:space="preserve"><value>Chosen because your plan focuses on {0}.</value></data>
+  <data name="Programs.Recommend.Starter" xml:space="preserve"><value>Beginner-friendly starter</value></data>
+  <data name="Programs.Search.Clear" xml:space="preserve"><value>Clear search</value></data>
+  <data name="Programs.Search.Placeholder" xml:space="preserve"><value>Search programs…</value></data>
+  <data name="Reminders.Grant.OpenSettings" xml:space="preserve"><value>Open system settings</value></data>
+  <data name="Reminders.Grant.Request" xml:space="preserve"><value>Allow notifications</value></data>
+  <data name="Reminders.Grant.Result.Allowed" xml:space="preserve"><value>The system confirmed notifications are allowed.</value></data>
+  <data name="Reminders.Grant.Result.Denied" xml:space="preserve"><value>The system reports notifications are blocked for this app.</value></data>
+  <data name="Reminders.Grant.Result.NotAsked" xml:space="preserve"><value>The system hasn't answered yet.</value></data>
+  <data name="Reminders.Grant.Result.SystemManaged" xml:space="preserve"><value>The system manages notifications outside the app.</value></data>
+  <data name="Reminders.Grant.Result.Unknown" xml:space="preserve"><value>The system didn't answer — what's shown may be wrong.</value></data>
+  <data name="Reminders.Grant.Result.Unsupported" xml:space="preserve"><value>This platform has no local-notification support.</value></data>
+  <data name="Reminders.HoursHint" xml:space="preserve"><value>Times follow your device clock. If the device is asleep at that minute, delivery can be late.</value></data>
+  <data name="Reminders.LoadFailed" xml:space="preserve"><value>Reminders couldn't be loaded.</value></data>
+  <data name="Reminders.Loading" xml:space="preserve"><value>Loading reminders…</value></data>
+  <data name="Reminders.OpenSettingsFailed" xml:space="preserve"><value>The system settings page couldn't be opened.</value></data>
+  <data name="Reminders.Preview.Empty" xml:space="preserve"><value>No reminder is due this moment, or a condition isn't met (sleep debt, streak at risk, open program day, nothing logged).</value></data>
+  <data name="Reminders.Preview.Empty.Title" xml:space="preserve"><value>Nothing due</value></data>
+  <data name="Reminders.Preview.Header" xml:space="preserve"><value>What would notify you right now</value></data>
+  <data name="Reminders.SaveFailed" xml:space="preserve"><value>This reminder couldn't be saved — what you see may not persist.</value></data>
+  <data name="Reminders.Schedule" xml:space="preserve"><value>Reminder schedule</value></data>
+  <data name="Reminders.Subtitle" xml:space="preserve"><value>Choose what LIVORA may nudge you about, and when.</value></data>
+  <data name="Reminders.Test.Button" xml:space="preserve"><value>Send test</value></data>
+  <data name="Reminders.Test.Failed" xml:space="preserve"><value>The system did not accept the test (state: {0}).</value></data>
+  <data name="Reminders.Test.Note" xml:space="preserve"><value>Schedules one notification for one minute from now, so you can check whether it actually arrives.</value></data>
+  <data name="Reminders.Test.Scheduled" xml:space="preserve"><value>The system accepted the test for {0}. If nothing appears, look at the notification state above.</value></data>
+  <data name="Reminders.Test.Title" xml:space="preserve"><value>Test reminder</value></data>
+  <data name="Reminders.TimeLabel" xml:space="preserve"><value>Reminder time</value></data>
+  <data name="Reminders.Title" xml:space="preserve"><value>Reminders</value></data>
+  <data name="Settings.AppearanceNote" xml:space="preserve"><value>Theme changes apply at once and are remembered.</value></data>
+  <data name="Settings.Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Settings.NotificationsNote" xml:space="preserve"><value>LIVORA only asks when you press the button; the state below is exactly what the OS answered.</value></data>
+  <data name="Settings.PrivacyEntryNote" xml:space="preserve"><value>The full file list and the delete-all control live on the Profile page.</value></data>
+  <data name="Settings.RemindersNote" xml:space="preserve"><value>Reminder times and days are set there.</value></data>
+  <data name="Settings.SampleData" xml:space="preserve"><value>Sample data</value></data>
+  <data name="Settings.SampleDataNote" xml:space="preserve"><value>The health series in this build is generated sample data, clearly marked — it is not measured from a device. What you log yourself stays marked self-reported.</value></data>
+  <data name="Settings.Title" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings.Updates" xml:space="preserve"><value>Updates</value></data>
+  <data name="Settings.UpdatesNote" xml:space="preserve"><value>A manual check only — LIVORA never installs anything by itself.</value></data>
+  <data name="Settings.WhatsNew" xml:space="preserve"><value>What's new</value></data>
+  <data name="Theme.Dark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Theme.Light" xml:space="preserve"><value>Light</value></data>
+  <data name="Theme.System" xml:space="preserve"><value>System</value></data>
+  <data name="Today.Empty.Goals" xml:space="preserve"><value>Set one target and its progress starts showing right here.</value></data>
+  <data name="Today.Empty.Goals.Cta" xml:space="preserve"><value>Go to goals</value></data>
+  <data name="Today.Empty.Goals.Title" xml:space="preserve"><value>No active goals</value></data>
+  <data name="Today.Empty.Habits" xml:space="preserve"><value>Habits are what LIVORA guards for you on hard days.</value></data>
+  <data name="Today.Empty.Habits.Cta" xml:space="preserve"><value>Add your first habit</value></data>
+  <data name="Today.Empty.Habits.Title" xml:space="preserve"><value>No habits yet</value></data>
+  <data name="Today.Empty.Plan" xml:space="preserve"><value>Today's plan builds itself once your state and goals carry data.</value></data>
+  <data name="Today.Empty.Plan.Title" xml:space="preserve"><value>No plan blocks</value></data>
+  <data name="Today.Empty.Recommendations" xml:space="preserve"><value>Everything sits near your own baseline right now — nothing needs adjusting.</value></data>
+  <data name="Today.Empty.Recommendations.Title" xml:space="preserve"><value>Nothing to recommend</value></data>
+  <data name="Today.LogNudge.Action" xml:space="preserve"><value>Log today</value></data>
+  <data name="Today.LogNudge.Body" xml:space="preserve"><value>You haven't logged today's numbers yet.</value></data>
+  <data name="Today.PullToRefresh" xml:space="preserve"><value>Pull to refresh</value></data>
+  <data name="Today.QA.Log" xml:space="preserve"><value>Check-in</value></data>
+  <data name="Today.QA.Reminders" xml:space="preserve"><value>Reminders</value></data>
+  <data name="Today.QA.Review" xml:space="preserve"><value>Weekly review</value></data>
+  <data name="Today.QA.Updates" xml:space="preserve"><value>Updates</value></data>
+  <data name="Today.QuickActions" xml:space="preserve"><value>Quick actions</value></data>
+  <data name="Today.Recommend.Benefit" xml:space="preserve"><value>Expected benefit</value></data>
+  <data name="Today.Recommend.Confidence" xml:space="preserve"><value>Confidence {0} — from the rule and data you can see.</value></data>
+  <data name="Today.Recommend.TapToExpand" xml:space="preserve"><value>Tap to see why — or hide it for a day</value></data>
+  <data name="Today.Recommend.Why" xml:space="preserve"><value>WHY</value></data>
+  <data name="Today.RouteUnavailable" xml:space="preserve"><value>“{0}” is not available in this build yet.</value></data>
+  <data name="Today.Snooze" xml:space="preserve"><value>Hide for 24 hours</value></data>
+  <data name="Today.Snoozed.ShowAgain" xml:space="preserve"><value>Show hidden recommendations</value></data>
+  <data name="Today.SnoozedHidden" xml:space="preserve"><value>{0} recommendation(s) hidden until tomorrow.</value></data>
+  <data name="Update.CheckAgain" xml:space="preserve"><value>Check again</value></data>
+  <data name="Update.Current" xml:space="preserve"><value>Installed version</value></data>
+  <data name="Update.CurrentVersion" xml:space="preserve"><value>Installed version {0}</value></data>
+  <data name="Update.Device.ThisDevice" xml:space="preserve"><value>This device</value></data>
+  <data name="Update.Download" xml:space="preserve"><value>Download for {0}</value></data>
+  <data name="Update.Download.Action" xml:space="preserve"><value>Download</value></data>
+  <data name="Update.Downloads.Empty" xml:space="preserve"><value>This release has no downloadable files yet. Open the release page to see what is offered.</value></data>
+  <data name="Update.Downloads.Title" xml:space="preserve"><value>Available downloads</value></data>
+  <data name="Update.Error.Feed" xml:space="preserve"><value>The update service isn't available right now.</value></data>
+  <data name="Update.Error.NoDownload" xml:space="preserve"><value>There is no download link to open yet.</value></data>
+  <data name="Update.Error.OpenLink" xml:space="preserve"><value>Couldn't open {0} in a browser.</value></data>
+  <data name="Update.Footer.How" xml:space="preserve"><value>LIVORA only repeats what the releases page said. It never downloads or installs anything by itself.</value></data>
+  <data name="Update.GetUpdate" xml:space="preserve"><value>Get the update</value></data>
+  <data name="Update.Headline.Error" xml:space="preserve"><value>The check didn't finish</value></data>
+  <data name="Update.Headline.Unknown" xml:space="preserve"><value>No update information yet</value></data>
+  <data name="Update.Installed" xml:space="preserve"><value>Installed</value></data>
+  <data name="Update.LastChecked" xml:space="preserve"><value>Last checked {0} at {1}</value></data>
+  <data name="Update.LatestUnknown" xml:space="preserve"><value>Not published yet</value></data>
+  <data name="Update.NeverChecked" xml:space="preserve"><value>Never checked</value></data>
+  <data name="Update.Note.Disabled" xml:space="preserve"><value>This build has no update feed to consult, so it can't look for new versions.</value></data>
+  <data name="Update.Note.FromCache" xml:space="preserve"><value>This is the answer from the last check, not a fresh one.</value></data>
+  <data name="Update.Note.OpenedBrowser" xml:space="preserve"><value>Opened in your browser.</value></data>
+  <data name="Update.Note.Prerelease" xml:space="preserve"><value>This is a pre-release: it may still change or be withdrawn.</value></data>
+  <data name="Update.Note.SourceInstall" xml:space="preserve"><value>Your build is ahead of every published release, so it was probably installed from source.</value></data>
+  <data name="Update.Notes.Empty" xml:space="preserve"><value>The publisher wrote no release notes for this version.</value></data>
+  <data name="Update.Notes.Title" xml:space="preserve"><value>What's new</value></data>
+  <data name="Update.Open" xml:space="preserve"><value>Update details</value></data>
+  <data name="Update.OpenReleasePage" xml:space="preserve"><value>Release page</value></data>
+  <data name="Update.Platform.All" xml:space="preserve"><value>Choose a file</value></data>
+  <data name="Update.Platform.Android" xml:space="preserve"><value>Android</value></data>
+  <data name="Update.Platform.MacOS" xml:space="preserve"><value>macOS</value></data>
+  <data name="Update.Platform.Unknown" xml:space="preserve"><value>Other file</value></data>
+  <data name="Update.Platform.Windows" xml:space="preserve"><value>Windows</value></data>
+  <data name="Update.Platform.iOS" xml:space="preserve"><value>iOS</value></data>
+  <data name="Update.Published" xml:space="preserve"><value>Latest published</value></data>
+  <data name="Update.PublishedVersion" xml:space="preserve"><value>{0} (published)</value></data>
+  <data name="Update.Status.Unknown" xml:space="preserve"><value>Not checked</value></data>
+  <data name="Update.Subtitle" xml:space="preserve"><value>What's installed, what's new, and where to get it</value></data>
+  <data name="Update.Title" xml:space="preserve"><value>Updates</value></data>
+  <data name="Update.VersionUnknown" xml:space="preserve"><value>unknown</value></data>
+  <data name="Update.WhatsNew.Action" xml:space="preserve"><value>See what's new</value></data>
+  <data name="Update.WhatsNew.Title" xml:space="preserve"><value>What's new in this version</value></data>
+  <data name="WeekProgress.Confidence.Early" xml:space="preserve"><value>Based on {0} days of history — still early.</value></data>
+  <data name="WeekProgress.Confidence.Solid" xml:space="preserve"><value>Based on {0} days of history.</value></data>
+  <data name="WeekProgress.Empty" xml:space="preserve"><value>No week data yet</value></data>
+  <data name="WeekProgress.Goals" xml:space="preserve"><value>Goals</value></data>
+  <data name="WeekProgress.Goals.Empty" xml:space="preserve"><value>No goals to measure</value></data>
+  <data name="WeekProgress.Habits" xml:space="preserve"><value>Habits</value></data>
+  <data name="WeekProgress.Habits.Empty" xml:space="preserve"><value>No habits logged this week</value></data>
+  <data name="WeekProgress.Insufficient" xml:space="preserve"><value>Only {0} of the {1} days LIVORA needs are logged, so there is no honest week picture yet — keep checking in.</value></data>
+  <data name="WeekProgress.NoTarget" xml:space="preserve"><value>Nothing expected this week</value></data>
+  <data name="WeekProgress.Period" xml:space="preserve"><value>{0} — {1}</value></data>
+  <data name="WeekProgress.Programs" xml:space="preserve"><value>Programs</value></data>
+  <data name="WeekProgress.Programs.Empty" xml:space="preserve"><value>No program day logged</value></data>
+  <data name="WeekProgress.Streak" xml:space="preserve"><value>Streak</value></data>
+  <data name="WeekProgress.Title" xml:space="preserve"><value>Your week in numbers</value></data>
+  <data name="WeeklySummary.BarActiveGoals" xml:space="preserve"><value>{0} active goals</value></data>
+  <data name="WeeklySummary.BarActiveHabits" xml:space="preserve"><value>{0} habits tracked</value></data>
+  <data name="WeeklySummary.BarDays" xml:space="preserve"><value>from {0} of {1} days</value></data>
+  <data name="WeeklySummary.BarHabitsDone" xml:space="preserve"><value>{0} of {1} possible completions</value></data>
+  <data name="WeeklySummary.Bars" xml:space="preserve"><value>Numbers for this window</value></data>
+  <data name="WeeklySummary.DaysCount" xml:space="preserve"><value>{0} of {1} days with data</value></data>
+  <data name="WeeklySummary.Empty.Title" xml:space="preserve"><value>Not enough history</value></data>
+  <data name="WeeklySummary.InProgress" xml:space="preserve"><value>In progress — no trend verdicts for the running week.</value></data>
+  <data name="WeeklySummary.Newer" xml:space="preserve"><value>Newer</value></data>
+  <data name="WeeklySummary.Older" xml:space="preserve"><value>Older</value></data>
+  <data name="WeeklySummary.OlderHint" xml:space="preserve"><value>Older weeks reach only as far as your history goes.</value></data>
+  <data name="WeeklySummary.Tab.LastWeek" xml:space="preserve"><value>Last week</value></data>
+  <data name="WeeklySummary.Tab.ThisWeek" xml:space="preserve"><value>This week</value></data>
+  <data name="WeeklySummary.Trends" xml:space="preserve"><value>Trends</value></data>
+
 </root>

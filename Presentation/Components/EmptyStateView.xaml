@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="LIVORA.Presentation.Components.EmptyStateView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    x:DataType="comp:EmptyStateView">
+
+    <!-- Shared inline empty / insufficient-data state (lane 09). Deliberately NOT a modal and NOT
+         an absence of UI: a section that has nothing says so in one honest line, with an optional
+         call to action. BindingContext is set to this instance in the code-behind, so every child
+         binds to a BindableProperty and updates live when the hosting page re-sets it. All text is
+         supplied by the host — this component holds zero strings of its own. -->
+    <Border Style="{StaticResource SoftCard}" Padding="18,16">
+        <VerticalStackLayout x:Name="Body" Spacing="6">
+            <BoxView
+                WidthRequest="34"
+                HeightRequest="34"
+                CornerRadius="17"
+                HorizontalOptions="Start"
+                Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}" />
+            <Label
+                Text="{Binding Title}"
+                Style="{StaticResource LSubheading}"
+                LineBreakMode="WordWrap"
+                MaxLines="2"
+                IsVisible="{Binding Title, Converter={StaticResource IsNotEmpty}}"
+                SemanticProperties.HeadingLevel="Level3" />
+            <Label
+                Text="{Binding Message}"
+                Style="{StaticResource LBodySecondary}"
+                FontSize="13.5"
+                LineBreakMode="WordWrap"
+                IsVisible="{Binding Message, Converter={StaticResource IsNotEmpty}}" />
+            <Button
+                Text="{Binding ActionText}"
+                Command="{Binding ActionCommand}"
+                Style="{StaticResource GhostButton}"
+                Margin="0,4,0,0"
+                Padding="4,8"
+                FontSize="13.5"
+                HorizontalOptions="Start"
+                IsVisible="{Binding ActionText, Converter={StaticResource IsNotEmpty}}"
+                SemanticProperties.Description="{Binding ActionText}" />
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

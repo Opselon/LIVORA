@@ -5,13 +5,23 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:LIVORA.Presentation.Views"
     xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
     xmlns:vm="clr-namespace:LIVORA.Presentation"
-    x:DataType="vm:ProfileViewModel">
+    x:DataType="vm:ProfileViewModel"
+    views:BaseContentPage.MaxContentWidth="980"
+    views:BaseContentPage.IsLoading="{Binding IsBusy}">
 
-    <!-- Page-local presentation vocabulary: field labels, chips, section headers with a rail,
-         hairline dividers. Kept in the view (no new shared-dictionary keys). -->
+    <!-- Profile is the account hub: identity, goals, schedule, language, theme, updates,
+         connection center, entries into Settings/reminders/weekly review, and a per-file
+         privacy inventory with a delete-all that really reaches the Wave 3 stores.
+
+         Page-local presentation vocabulary (chips, rails, dividers, entry rows) lives here —
+         no new keys in the shared dictionaries, which lane 05 owns. Every *Brush resource is
+         used only on Border.Background / Border.Stroke; every Color-typed property takes a
+         Color or an inline AppThemeBinding (§0.7). Alignment is Start/End so RTL mirrors. -->
     <views:BaseContentPage.Resources>
         <ResourceDictionary>
+            <comp:NotConverter x:Key="Not"/>
             <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
                 <Setter Property="FontAttributes" Value="Bold"/>
                 <Setter Property="FontSize" Value="12"/>
@@ -32,11 +42,6 @@
                 <Setter Property="VerticalTextAlignment" Value="Center"/>
                 <Setter Property="LineBreakMode" Value="WordWrap"/>
                 <Setter Property="MaxLines" Value="2"/>
-                <Setter Property="HorizontalTextAlignment" Value="End"/>
-            </Style>
-            <Style x:Key="SoonChipLabel" TargetType="Label" BasedOn="{StaticResource ChipLabel}">
-                <Setter Property="FontAttributes" Value="Bold"/>
-                <Setter Property="HorizontalTextAlignment" Value="Center"/>
             </Style>
             <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
                 <Setter Property="VerticalOptions" Value="Center"/>
@@ -53,204 +58,433 @@
                 <Setter Property="HeightRequest" Value="1"/>
                 <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
             </Style>
+            <Style x:Key="HintLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="3"/>
+            </Style>
+            <!-- Tappable entry row: one full-width 56dp target, chevron at the End. -->
+            <Style x:Key="EntryRow" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 16"/>
+                <Setter Property="Padding" Value="14,10"/>
+                <Setter Property="MinimumHeightRequest" Value="56"/>
+            </Style>
         </ResourceDictionary>
     </views:BaseContentPage.Resources>
 
     <ScrollView Padding="{StaticResource PageThickness}">
         <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
-            <Label Text="{Binding Title}" Style="{StaticResource LDisplay}"
+            <Label Text="{localize:Tr Profile.Title}" Style="{StaticResource LDisplay}"
                    LineBreakMode="WordWrap" MaxLines="2" Margin="0,0,0,2"
                    SemanticProperties.HeadingLevel="Level1"/>
 
-            <!-- Identity -->
+            <!-- ============ Identity ============ -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
                         <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
-                        <Label Grid.Column="1" Text="{Binding NameLabel}" Style="{StaticResource SectionHeader}"
-                               FontSize="17"
+                        <Label Grid.Column="1" Text="{localize:Tr Profile.Identity}"
+                               Style="{StaticResource SectionHeader}" FontSize="17"
                                SemanticProperties.HeadingLevel="Level2"/>
                     </Grid>
-                    <Entry Text="{Binding Name}" Placeholder="{Binding NameLabel}"
-                           MinimumHeightRequest="44"
-                           SemanticProperties.Description="{Binding NameLabel}"/>
-                    <Button Text="{Binding SaveText}" Style="{StaticResource PrimaryButton}"
-                            Command="{Binding SaveNameCommand}" HorizontalOptions="Start" Padding="24,10"
-                            MinimumHeightRequest="44"
-                            SemanticProperties.Description="{Binding SaveText}"/>
+
+                    <!-- Initials avatar + name. The avatar is decorative: the name carries the
+                         semantic description so a screen reader does not read letters twice. -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Border Grid.Column="0" WidthRequest="56" HeightRequest="56"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 28"
+                                Background="{StaticResource AccentSoftBrush}"
+                                AutomationProperties.IsInAccessibleTree="False">
+                            <Label Text="{Binding Initials}" Style="{StaticResource LMetric}"
+                                   FontSize="20" HorizontalOptions="Center" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource AccentDeep}, Dark={StaticResource Accent}}"/>
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{localize:Tr Profile.Name}" Style="{StaticResource FieldLabel}"/>
+                            <Label Text="{Binding Name}" Style="{StaticResource LBody}"
+                                   FontSize="17" LineBreakMode="WordWrap" MaxLines="2"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Entry Text="{Binding Name}" Placeholder="{localize:Tr Onboarding.Name.Placeholder}"
+                           SemanticProperties.Description="{localize:Tr Profile.Name}"
+                           MinimumHeightRequest="44"/>
+                    <Button Text="{localize:Tr Common.Save}" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveNameCommand}" HorizontalOptions="Start"
+                            Padding="24,10" MinimumHeightRequest="44"
+                            SemanticProperties.Description="{localize:Tr Profile.Name}"/>
 
                     <BoxView Style="{StaticResource RowDivider}" Margin="0,2"/>
 
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="{Binding FocusAreasLabel}" Style="{StaticResource FieldLabel}"/>
-                        <Label Text="{Binding FocusAreasText}" Style="{StaticResource LBody}"
-                               LineBreakMode="WordWrap"/>
+                    <!-- Primary goals: real multi-select chips (1..3 machine tags). -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{localize:Tr Profile.PrimaryGoals}" Style="{StaticResource FieldLabel}"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <Label Text="{localize:Tr Profile.PrimaryGoalsHint}" Style="{StaticResource HintLabel}"
+                               MaxLines="4"/>
+                        <comp:ItemsStackLayout ItemsSource="{Binding GoalChips}" Spacing="8">
+                            <comp:ItemsStackLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:GoalChip">
+                                    <Border Background="{Binding ChipFillBrush}"
+                                            Stroke="{Binding ChipStrokeBrush}" StrokeThickness="1.4"
+                                            StrokeShape="RoundRectangle 14" Padding="12,9"
+                                            MinimumHeightRequest="44" Opacity="{Binding ChipOpacity}"
+                                            HorizontalOptions="Start"
+                                            comp:TappableFeedback.Tappable="True"
+                                            SemanticProperties.Description="{Binding Text}"
+                                            SemanticProperties.Hint="{localize:Tr Onboarding.Goals.ChipHint}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Toggle}"/>
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                                            <BoxView Grid.Column="0" WidthRequest="9" HeightRequest="9"
+                                                     CornerRadius="5" Color="{Binding TextColor}"
+                                                     VerticalOptions="Center"/>
+                                            <Label Grid.Column="1" Text="{Binding Text}" Style="{StaticResource LBody}"
+                                                   FontSize="13.5" TextColor="{Binding TextColor}"
+                                                   VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </comp:ItemsStackLayout.ItemTemplate>
+                        </comp:ItemsStackLayout>
+                        <Label Text="{Binding FocusLimitHint}" Style="{StaticResource HintLabel}"
+                               IsVisible="{Binding HasFocusHint}" MaxLines="3"/>
                     </VerticalStackLayout>
 
                     <BoxView Style="{StaticResource RowDivider}"/>
 
                     <VerticalStackLayout Spacing="4">
-                        <Label Text="{Binding ActivityLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Label Text="{localize:Tr Profile.ActivityLevel}" Style="{StaticResource FieldLabel}"/>
                         <Picker ItemsSource="{Binding ActivityOptions}" SelectedIndex="{Binding ActivityIndex}"
                                 MinimumHeightRequest="44"
-                                SemanticProperties.Description="{Binding ActivityLabel}"/>
+                                SemanticProperties.Description="{localize:Tr Profile.ActivityLevel}"/>
                     </VerticalStackLayout>
 
                     <BoxView Style="{StaticResource RowDivider}"/>
 
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="{Binding ScheduleLabel}" Style="{StaticResource FieldLabel}"
+                        <Label Text="{localize:Tr Profile.Schedule}" Style="{StaticResource FieldLabel}"
                                SemanticProperties.HeadingLevel="Level3"/>
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                <Label Text="{Binding BedtimeLabel}" Style="{StaticResource LCaption}" FontSize="12"
-                                       LineBreakMode="WordWrap" MaxLines="2"/>
+                                <Label Text="{localize:Tr Onboarding.Bedtime}" Style="{StaticResource LCaption}"
+                                       FontSize="12" LineBreakMode="WordWrap" MaxLines="2"/>
                                 <TimePicker Time="{Binding Bedtime}" MinimumHeightRequest="44"
-                                            SemanticProperties.Description="{Binding BedtimeLabel}"/>
+                                            SemanticProperties.Description="{localize:Tr Onboarding.Bedtime}"/>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                <Label Text="{Binding WakeLabel}" Style="{StaticResource LCaption}" FontSize="12"
-                                       LineBreakMode="WordWrap" MaxLines="2"/>
+                                <Label Text="{localize:Tr Onboarding.WakeTime}" Style="{StaticResource LCaption}"
+                                       FontSize="12" LineBreakMode="WordWrap" MaxLines="2"/>
                                 <TimePicker Time="{Binding WakeTime}" MinimumHeightRequest="44"
-                                            SemanticProperties.Description="{Binding WakeLabel}"/>
+                                            SemanticProperties.Description="{localize:Tr Onboarding.WakeTime}"/>
                             </VerticalStackLayout>
                         </Grid>
+                        <Label Text="{Binding SleepWindowText}" Style="{StaticResource HintLabel}"/>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Language selector -->
+            <!-- ============ Language (live, persisted) ============ -->
             <Border Style="{StaticResource AccentCard}">
                 <VerticalStackLayout Spacing="10">
                     <VerticalStackLayout Spacing="2">
-                        <Label Text="{Binding LanguageLabel}" Style="{StaticResource LSubheading}"
+                        <Label Text="{localize:Tr Profile.Language}" Style="{StaticResource LSubheading}"
                                LineBreakMode="WordWrap" MaxLines="2"
                                SemanticProperties.HeadingLevel="Level2"/>
-                        <Label Text="{Binding LanguageNote}" Style="{StaticResource LCaption}" FontSize="12"
-                               LineBreakMode="WordWrap" MaxLines="2"/>
+                        <Label Text="{localize:Tr Profile.LanguageNote}" Style="{StaticResource HintLabel}"
+                               MaxLines="2"/>
                     </VerticalStackLayout>
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                        <Button Grid.Column="0" Text="{Binding EnglishText}" Command="{Binding SetEnglishCommand}"
-                                HeightRequest="48" MinimumHeightRequest="44"
+                        <Button Grid.Column="0" Text="{localize:Tr Onboarding.Language.English}"
+                                Command="{Binding SetEnglishCommand}" HeightRequest="48"
+                                MinimumHeightRequest="44" CornerRadius="14" FontAttributes="Bold"
                                 BackgroundColor="{Binding EnglishButtonBackground}"
-                                TextColor="{Binding EnglishButtonText}" CornerRadius="14" FontAttributes="Bold"
-                                BorderWidth="0" SemanticProperties.Description="{Binding EnglishText}"/>
-                        <Button Grid.Column="1" Text="{Binding PersianText}" Command="{Binding SetPersianCommand}"
-                                HeightRequest="48" MinimumHeightRequest="44"
+                                TextColor="{Binding EnglishButtonText}" BorderWidth="0"
+                                SemanticProperties.Description="{localize:Tr Onboarding.Language.English}"/>
+                        <Button Grid.Column="1" Text="{localize:Tr Onboarding.Language.Persian}"
+                                Command="{Binding SetPersianCommand}" HeightRequest="48"
+                                MinimumHeightRequest="44" CornerRadius="14" FontAttributes="Bold"
                                 BackgroundColor="{Binding PersianButtonBackground}"
-                                TextColor="{Binding PersianButtonText}" CornerRadius="14" FontAttributes="Bold"
-                                BorderWidth="0" SemanticProperties.Description="{Binding PersianText}"/>
+                                TextColor="{Binding PersianButtonText}" BorderWidth="0"
+                                SemanticProperties.Description="{localize:Tr Onboarding.Language.Persian}"/>
                     </Grid>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Connection center: honest statuses (mock active / not connected — never fake "connected").
-                 Dot color comes from the VM: mock=caution, not-connected=neutral-positive; wording stays honest. -->
+            <!-- ============ Theme (lane 05's service) ============ -->
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{localize:Tr Profile.Appearance}" Style="{StaticResource LSubheading}"
+                               LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Label Text="{localize:Tr Profile.ThemeNote}" Style="{StaticResource HintLabel}"
+                               IsVisible="{Binding HasThemeControl}" MaxLines="2"/>
+                        <Label Text="{Binding ThemeUnavailableNote}" Style="{StaticResource HintLabel}"
+                               IsVisible="{Binding HasThemeControl, Converter={StaticResource Not}}"
+                               MaxLines="3"/>
+                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8" IsVisible="{Binding HasThemeControl}">
+                        <Button Grid.Column="0" Text="{localize:Tr Theme.System}"
+                                Command="{Binding SetThemeSystemCommand}" HeightRequest="44"
+                                MinimumHeightRequest="44" CornerRadius="14" FontAttributes="Bold"
+                                FontSize="13" BorderWidth="0"
+                                BackgroundColor="{Binding ThemeSystemBackground}"
+                                TextColor="{Binding ThemeSystemForeground}"
+                                SemanticProperties.Description="{localize:Tr Theme.System}"/>
+                        <Button Grid.Column="1" Text="{localize:Tr Theme.Light}"
+                                Command="{Binding SetThemeLightCommand}" HeightRequest="44"
+                                MinimumHeightRequest="44" CornerRadius="14" FontAttributes="Bold"
+                                FontSize="13" BorderWidth="0"
+                                BackgroundColor="{Binding ThemeLightBackground}"
+                                TextColor="{Binding ThemeLightForeground}"
+                                SemanticProperties.Description="{localize:Tr Theme.Light}"/>
+                        <Button Grid.Column="2" Text="{localize:Tr Theme.Dark}"
+                                Command="{Binding SetThemeDarkCommand}" HeightRequest="44"
+                                MinimumHeightRequest="44" CornerRadius="14" FontAttributes="Bold"
+                                FontSize="13" BorderWidth="0"
+                                BackgroundColor="{Binding ThemeDarkBackground}"
+                                TextColor="{Binding ThemeDarkForeground}"
+                                SemanticProperties.Description="{localize:Tr Theme.Dark}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============ Updates (lane 01's banner + route) ============ -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="10">
                     <Grid ColumnDefinitions="4,*,Auto" ColumnSpacing="10">
                         <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
-                        <Label Grid.Column="1" Text="{Binding ConnectionCenterTitle}" Style="{StaticResource SectionHeader}"
+                        <Label Grid.Column="1" Text="{localize:Tr Profile.UpdatesEntry}"
+                               Style="{StaticResource SectionHeader}" FontSize="17"
                                SemanticProperties.HeadingLevel="Level2"/>
                         <Border Grid.Column="2" Style="{StaticResource ChipNeutral}">
-                            <Label Text="{Binding DataSourcesLabel}" Style="{StaticResource ChipLabel}"/>
+                            <Label Text="{Binding VersionLabel}" Style="{StaticResource ChipLabel}"/>
                         </Border>
                     </Grid>
-                    <comp:ItemsStackLayout ItemsSource="{Binding ConnectionCenter}" Spacing="0">
-                        <comp:ItemsStackLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:DataSourceRow">
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" MinimumHeightRequest="48">
-                                    <BoxView Grid.Column="0" WidthRequest="10" HeightRequest="10" CornerRadius="5"
-                                             Color="{Binding DotColor}" VerticalOptions="Center"/>
-                                    <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource LBody}"
-                                           VerticalOptions="Center"
-                                           LineBreakMode="WordWrap" MaxLines="2"
-                                           SemanticProperties.HeadingLevel="Level3"/>
-                                    <Border Grid.Column="2" Style="{StaticResource ChipNeutral}" VerticalOptions="Center">
-                                        <Label Text="{Binding Status}" Style="{StaticResource ChipLabel}"/>
-                                    </Border>
-                                </Grid>
-                            </DataTemplate>
-                        </comp:ItemsStackLayout.ItemTemplate>
-                    </comp:ItemsStackLayout>
-                    <Label Text="{Binding SourcesNote}" Style="{StaticResource LCaption}" FontSize="12"
-                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}" LineBreakMode="WordWrap"/>
+
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="{Binding Banner.Headline}" Style="{StaticResource LSubheading}"
+                               FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <Label Text="{Binding Banner.Detail}" Style="{StaticResource LCaption}"
+                               FontSize="12.5" LineBreakMode="WordWrap" MaxLines="3"
+                               IsVisible="{Binding Banner.HasAnswer}"/>
+                        <Label Text="{Binding Banner.CheckedAtText}" Style="{StaticResource HintLabel}"
+                               MaxLines="2"/>
+                        <Label Text="{localize:Tr Profile.UpdatesEntryNote}" Style="{StaticResource HintLabel}"
+                               MaxLines="3"/>
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" HorizontalOptions="Start">
+                        <Button Grid.Column="0" Text="{Binding Banner.CheckNowText}"
+                                Style="{StaticResource SecondaryButton}" Command="{Binding Banner.CheckNowCommand}"
+                                FontSize="13" Padding="16,8" MinimumHeightRequest="44"
+                                IsVisible="{Binding Banner.IsFeedConfigured}"
+                                SemanticProperties.Description="{localize:Tr Profile.Update.CheckNow}"/>
+                        <Button Grid.Column="1" Text="{Binding Banner.ActionText}"
+                                Style="{StaticResource GhostButton}" Command="{Binding OpenUpdatesCommand}"
+                                FontSize="13" Padding="16,8" MinimumHeightRequest="44"
+                                IsVisible="{Binding Banner.IsFeedConfigured}"
+                                SemanticProperties.Description="{localize:Tr Profile.UpdatesEntry}"/>
+                        <Label Grid.Column="0" Grid.ColumnSpan="2"
+                               Text="{localize:Tr Profile.Update.NotConfigured}"
+                               Style="{StaticResource HintLabel}" MaxLines="3"
+                               IsVisible="{Binding Banner.IsFeedConfigured, Converter={StaticResource Not}}"/>
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Privacy & data -->
+            <!-- ============ Connection center (honest statuses) ============ -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="10">
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="{Binding PrivacyTitle}" Style="{StaticResource SectionHeader}"
-                               HorizontalOptions="Start"
+                    <Grid ColumnDefinitions="4,*,Auto" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                        <Label Grid.Column="1" Text="{localize:Tr Profile.ConnectionCenter}"
+                               Style="{StaticResource SectionHeader}"
                                SemanticProperties.HeadingLevel="Level2"/>
-                        <Label Text="{Binding PrivacyNote}" Style="{StaticResource LCaption}" FontSize="12"
-                               LineBreakMode="WordWrap" MaxLines="3"/>
-                    </VerticalStackLayout>
-                    <comp:ItemsStackLayout ItemsSource="{Binding PrivacyRows}" Spacing="0">
+                        <Border Grid.Column="2" Style="{StaticResource ChipNeutral}">
+                            <Label Text="{localize:Tr Profile.DataSource.Sample}" Style="{StaticResource ChipLabel}"/>
+                        </Border>
+                    </Grid>
+                    <Label Text="{localize:Tr Profile.ConnectionCenterHint}" Style="{StaticResource HintLabel}"
+                           MaxLines="3"/>
+                    <comp:ItemsStackLayout ItemsSource="{Binding ConnectionCenter}" Spacing="0">
                         <comp:ItemsStackLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:PrivacyRowViewModel">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" MinimumHeightRequest="48"
+                            <DataTemplate x:DataType="vm:ConnectionRow">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10"
+                                      MinimumHeightRequest="52"
                                       SemanticProperties.Description="{Binding Name}">
-                                    <Label Grid.Column="0" Text="{Binding Name}" Style="{StaticResource LBody}"
-                                           FontSize="13.5" VerticalOptions="Center"
-                                           LineBreakMode="WordWrap" MaxLines="2"/>
-                                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" VerticalOptions="Center">
-                                        <Label Text="{Binding OriginText}" Style="{StaticResource ChipLabel}" FontSize="11"/>
-                                    </Border>
+                                    <BoxView Grid.Column="0" WidthRequest="10" HeightRequest="10" CornerRadius="5"
+                                             Color="{Binding DotColor}" VerticalOptions="Center"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="{Binding Name}" Style="{StaticResource LBody}"
+                                               FontSize="14" LineBreakMode="WordWrap" MaxLines="2"
+                                               SemanticProperties.HeadingLevel="Level3"/>
+                                        <Label Text="{Binding Status}" Style="{StaticResource HintLabel}"
+                                               FontSize="11.5" MaxLines="2"/>
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="2" Text="{Binding ActionText}"
+                                            Style="{StaticResource GhostButton}" Command="{Binding Action}"
+                                            FontSize="12.5" Padding="10,6" MinimumHeightRequest="44"
+                                            IsVisible="{Binding HasAction}"
+                                            SemanticProperties.Description="{Binding ActionText}"/>
                                 </Grid>
                             </DataTemplate>
                         </comp:ItemsStackLayout.ItemTemplate>
                     </comp:ItemsStackLayout>
-                    <Button Text="{Binding DeleteAllText}" Style="{StaticResource SecondaryButton}"
+                    <Label Text="{localize:Tr Profile.SourcesNote}" Style="{StaticResource HintLabel}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============ Entries: Settings / Reminders / Weekly review ============ -->
+            <VerticalStackLayout Spacing="8">
+                <Border Style="{StaticResource EntryRow}"
+                        comp:TappableFeedback.Tappable="True"
+                        SemanticProperties.Description="{localize:Tr Profile.SettingsEntry}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{localize:Tr Profile.SettingsEntry}" Style="{StaticResource LSubheading}"
+                                   FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                            <Label Text="{localize:Tr Profile.SettingsEntryNote}" Style="{StaticResource HintLabel}"
+                                   MaxLines="2"/>
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="›" Style="{StaticResource LMetric}"
+                               VerticalOptions="Center" HorizontalOptions="End"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                               AutomationProperties.IsInAccessibleTree="False"/>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource EntryRow}"
+                        comp:TappableFeedback.Tappable="True"
+                        SemanticProperties.Description="{localize:Tr Profile.Notifications}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenRemindersCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{localize:Tr Profile.Notifications}" Style="{StaticResource LSubheading}"
+                                   FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                            <Label Text="{Binding RemindersEntryNote}" Style="{StaticResource HintLabel}"
+                                   MaxLines="2"/>
+                        </VerticalStackLayout>
+                        <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                            <BoxView WidthRequest="9" HeightRequest="9" CornerRadius="5"
+                                     Color="{Binding ReminderGrantColor}" VerticalOptions="Center"/>
+                            <Border Style="{StaticResource ChipNeutral}">
+                                <Label Text="{Binding ReminderGrantText}" Style="{StaticResource ChipLabel}"/>
+                            </Border>
+                        </HorizontalStackLayout>
+                        <Label Grid.Column="2" Text="›" Style="{StaticResource LMetric}"
+                               VerticalOptions="Center" HorizontalOptions="End"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                               AutomationProperties.IsInAccessibleTree="False"/>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource EntryRow}"
+                        comp:TappableFeedback.Tappable="True"
+                        SemanticProperties.Description="{localize:Tr Profile.WeeklyReview}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenWeeklyReviewCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{localize:Tr Profile.WeeklyReview}" Style="{StaticResource LSubheading}"
+                                   FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                            <Label Text="{localize:Tr Profile.WeeklyReviewNote}" Style="{StaticResource HintLabel}"
+                                   MaxLines="2"/>
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="›" Style="{StaticResource LMetric}"
+                               VerticalOptions="Center" HorizontalOptions="End"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                               AutomationProperties.IsInAccessibleTree="False"/>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- ============ Data & privacy: per-file inventory ============ -->
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="4,*,Auto" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                        <Label Grid.Column="1" Text="{localize:Tr Privacy.Title}"
+                               Style="{StaticResource SectionHeader}" FontSize="17"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Border Grid.Column="2" Style="{StaticResource ChipNeutral}">
+                            <Label Text="{localize:Tr Privacy.Location.Device}" Style="{StaticResource ChipLabel}"/>
+                        </Border>
+                    </Grid>
+                    <Label Text="{localize:Tr Privacy.Note}" Style="{StaticResource HintLabel}"/>
+                    <Label Text="{localize:Tr Privacy.FileHeader}" Style="{StaticResource FieldLabel}"/>
+                    <Label Text="{Binding PrivacyFileCount}" Style="{StaticResource HintLabel}" MaxLines="2"/>
+
+                    <comp:ItemsStackLayout ItemsSource="{Binding PrivacyRows}" Spacing="2">
+                        <comp:ItemsStackLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PrivacyRowViewModel">
+                                <Grid RowDefinitions="Auto,Auto" ColumnSpacing="8"
+                                      MinimumHeightRequest="48" Padding="0,4"
+                                      SemanticProperties.Description="{Binding Name}">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}"
+                                           Style="{StaticResource LBody}" FontSize="13.5"
+                                           LineBreakMode="WordWrap" MaxLines="2"/>
+                                    <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="6"
+                                                           Margin="0,2,0,0">
+                                        <Border Style="{StaticResource ChipNeutral}" Padding="7,3">
+                                            <Label Text="{Binding OriginText}" Style="{StaticResource ChipLabel}"
+                                                   FontSize="10.5"/>
+                                        </Border>
+                                        <Border Style="{StaticResource ChipNeutral}" Padding="7,3"
+                                                IsVisible="{Binding ShowPresence}">
+                                            <Label Text="{Binding PresenceText}"
+                                                   Style="{StaticResource ChipLabel}" FontSize="10.5"/>
+                                        </Border>
+                                        <Label Text="{Binding FileNameHint}" Style="{StaticResource HintLabel}"
+                                               FontSize="10.5" MaxLines="1" LineBreakMode="CharacterWrap"
+                                               VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </comp:ItemsStackLayout.ItemTemplate>
+                    </comp:ItemsStackLayout>
+
+                    <Label Text="{localize:Tr Privacy.RetainedNote}" Style="{StaticResource HintLabel}"
+                           MaxLines="4"/>
+
+                    <Button Text="{localize:Tr Privacy.DeleteAll}" Style="{StaticResource SecondaryButton}"
                             BorderColor="{StaticResource Negative}" TextColor="{StaticResource Negative}"
                             Command="{Binding DeleteAllDataCommand}" FontSize="13" Padding="16,8"
                             MinimumHeightRequest="44" HorizontalOptions="Start"
-                            SemanticProperties.Description="{Binding DeleteAllText}"/>
+                            IsEnabled="{Binding IsNotBusy}"
+                            SemanticProperties.Description="{localize:Tr Privacy.DeleteConfirm}"/>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Future sections, honestly labeled: the "soon" chip carries the honest status -->
-            <Border Style="{StaticResource SoftCard}">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                    <VerticalStackLayout Grid.Column="0" Spacing="3">
-                        <Label Text="{Binding NotificationsLabel}" Style="{StaticResource LSubheading}"
-                               LineBreakMode="WordWrap" MaxLines="2"
-                               SemanticProperties.HeadingLevel="Level2"/>
-                        <Label Text="{Binding NotificationsSoon}" Style="{StaticResource LCaption}" FontSize="12"
-                               LineBreakMode="WordWrap" MaxLines="2"/>
-                    </VerticalStackLayout>
-                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" VerticalOptions="Center" HorizontalOptions="End">
-                        <Label Text="{Binding SoonBadge}" Style="{StaticResource SoonChipLabel}"/>
-                    </Border>
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource SoftCard}">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                    <VerticalStackLayout Grid.Column="0" Spacing="3">
-                        <Label Text="{Binding AppearanceLabel}" Style="{StaticResource LSubheading}"
-                               LineBreakMode="WordWrap" MaxLines="2"
-                               SemanticProperties.HeadingLevel="Level2"/>
-                        <Label Text="{Binding AppearanceSoon}" Style="{StaticResource LCaption}" FontSize="12"
-                               LineBreakMode="WordWrap" MaxLines="2"/>
-                    </VerticalStackLayout>
-                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" VerticalOptions="Center" HorizontalOptions="End">
-                        <Label Text="{Binding SoonBadge}" Style="{StaticResource SoonChipLabel}"/>
-                    </Border>
-                </Grid>
-            </Border>
-
+            <!-- ============ About ============ -->
             <Border Style="{StaticResource Card}" Padding="18,14">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                    <Label Grid.Column="0" Text="{Binding AboutLabel}" Style="{StaticResource LSubheading}"
-                           VerticalOptions="Center"
-                           LineBreakMode="WordWrap" MaxLines="2"
-                           SemanticProperties.HeadingLevel="Level2"/>
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="{localize:Tr Profile.About}" Style="{StaticResource LSubheading}"
+                               FontSize="15" LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Label Text="{localize:Tr Settings.SampleDataNote}" Style="{StaticResource HintLabel}"
+                               MaxLines="4"/>
+                    </VerticalStackLayout>
                     <Label Grid.Column="1" Text="{Binding VersionLabel}" Style="{StaticResource LCaption}"
                            VerticalOptions="Center" HorizontalOptions="End"
-                           LineBreakMode="TailTruncation" MaxLines="1" HorizontalTextAlignment="End"/>
+                           LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End"/>
                 </Grid>
             </Border>
 

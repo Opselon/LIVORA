@@ -5,15 +5,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:LIVORA.Presentation.Views"
     xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
     xmlns:vm="clr-namespace:LIVORA.Presentation"
     x:DataType="vm:GoalsViewModel"
     x:Name="GoalsPageRef">
 
-    <!-- Page-local presentation vocabulary (status chip / progress label) — kept in the view,
-         tokens from LivoraColors.xaml. -->
+    <!-- Page-local presentation vocabulary (chips, segment buttons, undo banner, field rhythm) —
+         kept in the view, tokens from LivoraColors.xaml only. Brush keys go on Border.Background /
+         Border.Stroke; Color-typed properties use inline AppThemeBinding. -->
     <views:BaseContentPage.Resources>
         <ResourceDictionary>
-            <comp:NotConverter x:Key="Not"/>
             <Style x:Key="StatusChip" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
                 <Setter Property="StrokeThickness" Value="0"/>
@@ -22,48 +23,101 @@
                 <Setter Property="VerticalOptions" Value="Center"/>
                 <Setter Property="HorizontalOptions" Value="End"/>
             </Style>
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+                <Setter Property="Padding" Value="9,4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
         </ResourceDictionary>
     </views:BaseContentPage.Resources>
 
     <ScrollView Padding="{StaticResource PageThickness}">
         <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
-            <!-- Header: title + new-goal CTA. Start/End alignment mirrors correctly in RTL. -->
+            <!-- Header: title + the one action that creates real content (goal or habit,
+                 depending on the active segment). Start/End alignment mirrors correctly in RTL. -->
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,2">
-                <Label Grid.Column="0" Text="{Binding Title}"
+                <Label Grid.Column="0" Text="{localize:Tr Goals.Title}"
                        Style="{StaticResource LDisplay}"
                        VerticalOptions="Center"
                        LineBreakMode="WordWrap" MaxLines="2"
                        SemanticProperties.HeadingLevel="Level1"/>
                 <Button Grid.Column="1"
-                        Text="{Binding NewGoalText}"
+                        Text="{Binding NewActionText}"
                         Style="{StaticResource PrimaryButton}"
-                        Command="{Binding NewGoalCommand}"
+                        Command="{Binding NewItemCommand}"
                         MinimumHeightRequest="44"
                         VerticalOptions="Center"
-                        SemanticProperties.Description="{Binding NewGoalText}"/>
+                        SemanticProperties.Description="{Binding NewActionText}"/>
             </Grid>
 
-            <!-- Empty state: centered, quiet, with the CTA restated so the page is never a dead
-                 end; suppressed while loading — the skeleton below is the honest state then -->
-            <VerticalStackLayout Spacing="12" Padding="8,28"
-                                 IsVisible="{Binding IsBusy, Converter={StaticResource Not}}">
-                <VerticalStackLayout Spacing="12" IsVisible="{Binding IsEmpty}">
-                    <BoxView WidthRequest="56" HeightRequest="56" CornerRadius="28"
-                             Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"
-                             HorizontalOptions="Center"/>
-                    <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
-                           HorizontalTextAlignment="Center"
-                           LineBreakMode="WordWrap"
-                           SemanticProperties.HeadingLevel="Level2"/>
-                    <Button Text="{Binding NewGoalText}" Style="{StaticResource SecondaryButton}"
-                            Command="{Binding NewGoalCommand}" HorizontalOptions="Center"
-                            MinimumHeightRequest="44"
-                            SemanticProperties.Description="{Binding NewGoalText}"/>
-                </VerticalStackLayout>
+            <!-- Segmented filter Goals / Habits / Archived. Grid columns mirror in RTL; the
+                 visual active state comes from the VM so a language switch keeps it correct. -->
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="{Binding SegmentGoalsText}"
+                        Command="{Binding SelectSegmentCommand}" CommandParameter="0"
+                        HeightRequest="44" MinimumHeightRequest="44" CornerRadius="14"
+                        FontAttributes="Bold" BorderWidth="0"
+                        BackgroundColor="{Binding SegGoalsBackground}"
+                        TextColor="{Binding SegGoalsText}"
+                        SemanticProperties.Description="{Binding SegmentGoalsText}"/>
+                <Button Grid.Column="1" Text="{Binding SegmentHabitsText}"
+                        Command="{Binding SelectSegmentCommand}" CommandParameter="1"
+                        HeightRequest="44" MinimumHeightRequest="44" CornerRadius="14"
+                        FontAttributes="Bold" BorderWidth="0"
+                        BackgroundColor="{Binding SegHabitsBackground}"
+                        TextColor="{Binding SegHabitsText}"
+                        SemanticProperties.Description="{Binding SegmentHabitsText}"/>
+                <Button Grid.Column="2" Text="{Binding SegmentArchivedText}"
+                        Command="{Binding SelectSegmentCommand}" CommandParameter="2"
+                        HeightRequest="44" MinimumHeightRequest="44" CornerRadius="14"
+                        FontAttributes="Bold" BorderWidth="0"
+                        BackgroundColor="{Binding SegArchivedBackground}"
+                        TextColor="{Binding SegArchivedText}"
+                        SemanticProperties.Description="{Binding SegmentArchivedText}"/>
+            </Grid>
+
+            <!-- Undo after archive/delete: one line + its own button, cleared once acted on. -->
+            <Border Style="{StaticResource AccentCard}" IsVisible="{Binding UndoVisible}" Padding="14,10">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Label Grid.Column="0" Text="{Binding UndoMessage}"
+                           Style="{StaticResource LBody}" FontSize="13.5"
+                           VerticalOptions="Center"
+                           LineBreakMode="WordWrap" MaxLines="3"/>
+                    <Button Grid.Column="1" Text="{Binding UndoText}"
+                            Style="{StaticResource GhostButton}"
+                            TextColor="{StaticResource Accent}"
+                            Command="{Binding UndoCommand}"
+                            MinimumHeightRequest="44" VerticalOptions="Center"
+                            SemanticProperties.Description="{Binding UndoText}"/>
+                </Grid>
+            </Border>
+
+            <!-- Empty state: centered, quiet, CTA restated so the page is never a dead end;
+                 suppressed while loading — the skeleton below is the honest state then. -->
+            <VerticalStackLayout Spacing="12" Padding="8,28" IsVisible="{Binding ShowEmpty}">
+                <BoxView WidthRequest="56" HeightRequest="56" CornerRadius="28"
+                         Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"
+                         HorizontalOptions="Center"/>
+                <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="WordWrap"/>
+                <Button Text="{Binding NewActionText}" Style="{StaticResource SecondaryButton}"
+                        Command="{Binding NewItemCommand}" HorizontalOptions="Center"
+                        MinimumHeightRequest="44"
+                        SemanticProperties.Description="{Binding NewActionText}"/>
             </VerticalStackLayout>
 
-            <!-- Loading language (existing IsBusy only): three grey card ghosts -->
+            <!-- Loading language: three grey card ghosts -->
             <VerticalStackLayout Spacing="10" IsVisible="{Binding IsBusy}">
                 <Border Style="{StaticResource SoftCard}" Padding="{StaticResource CardPadding}">
                     <VerticalStackLayout Spacing="8">
@@ -83,18 +137,18 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- Goals list: hidden while loading so the skeleton is the only story -->
+            <!-- ================= GOALS ================= -->
             <comp:ItemsStackLayout ItemsSource="{Binding Goals}" Spacing="10"
-                                   IsVisible="{Binding IsBusy, Converter={StaticResource Not}}">
+                                   IsVisible="{Binding ShowGoals}">
                 <comp:ItemsStackLayout.ItemTemplate>
                     <DataTemplate x:DataType="vm:GoalItemViewModel">
                         <Border Style="{StaticResource Card}"
                                 comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.985"
-                                SemanticProperties.Description="{Binding Goal.Name}">
+                                SemanticProperties.Description="{Binding NameText}">
                             <VerticalStackLayout Spacing="10">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                        <Label Text="{Binding Goal.Name}"
+                                        <Label Text="{Binding NameText}"
                                                Style="{StaticResource LSubheading}"
                                                LineBreakMode="WordWrap" MaxLines="2"
                                                SemanticProperties.HeadingLevel="Level2"/>
@@ -122,28 +176,162 @@
                                            LineBreakMode="TailTruncation" MaxLines="1"/>
                                 </Grid>
 
-                                <!-- Action row: two equal columns so long Persian/English labels
-                                     wrap instead of clipping at 360dp; Start-anchored, mirrors in RTL. -->
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <!-- Optional context rows appear only when the goal really has them -->
+                                <Label Text="{Binding DeadlineText}" Style="{StaticResource LCaption}" FontSize="12"
+                                       IsVisible="{Binding HasDeadline}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                       LineBreakMode="WordWrap" MaxLines="2"/>
+                                <Label Text="{Binding BindingContext.MetricPendingNote, Source={x:Reference GoalsPageRef}}"
+                                       Style="{StaticResource LCaption}" FontSize="12"
+                                       IsVisible="{Binding IsMetricMeasured}"
+                                       TextColor="{StaticResource Caution}"
+                                       LineBreakMode="WordWrap" MaxLines="3"/>
+
+                                <!-- Action row: equal columns so long Persian labels wrap instead of
+                                     clipping at 360dp; Start-anchored, mirrors in RTL. -->
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
                                     <Button Grid.Column="0"
-                                            Text="{Binding BindingContext.AddProgressText, Source={x:Reference GoalsPageRef}}"
+                                            Text="{Binding BindingContext.LogProgressText, Source={x:Reference GoalsPageRef}}"
                                             Style="{StaticResource SecondaryButton}"
-                                            Padding="16,8" FontSize="13"
+                                            Padding="10,8" FontSize="12.5"
                                             MinimumHeightRequest="44"
                                             LineBreakMode="WordWrap"
-                                            SemanticProperties.Description="{Binding BindingContext.AddProgressText, Source={x:Reference GoalsPageRef}}"
-                                            Command="{Binding BindingContext.EditGoalCommand, Source={x:Reference GoalsPageRef}}"
+                                            IsVisible="{Binding CanLogProgress}"
+                                            SemanticProperties.Description="{Binding BindingContext.LogProgressText, Source={x:Reference GoalsPageRef}}"
+                                            Command="{Binding BindingContext.LogProgressCommand, Source={x:Reference GoalsPageRef}}"
                                             CommandParameter="{Binding .}"/>
                                     <Button Grid.Column="1"
-                                            Text="{Binding BindingContext.DeleteText, Source={x:Reference GoalsPageRef}}"
+                                            Text="{localize:Tr Common.Edit}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="10,8" FontSize="12.5"
+                                            MinimumHeightRequest="44"
+                                            LineBreakMode="WordWrap"
+                                            SemanticProperties.Description="{localize:Tr Goals.EditGoal}"
+                                            Command="{Binding BindingContext.OpenGoalEditorCommand, Source={x:Reference GoalsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                    <Button Grid.Column="2"
+                                            Text="{Binding ArchiveOrDeleteText}"
                                             Style="{StaticResource SecondaryButton}"
                                             BorderColor="{StaticResource Negative}"
                                             TextColor="{StaticResource Negative}"
-                                            Padding="16,8" FontSize="13"
+                                            Padding="10,8" FontSize="12.5"
                                             MinimumHeightRequest="44"
                                             LineBreakMode="WordWrap"
-                                            SemanticProperties.Description="{Binding BindingContext.DeleteText, Source={x:Reference GoalsPageRef}}"
-                                            Command="{Binding BindingContext.DeleteGoalCommand, Source={x:Reference GoalsPageRef}}"
+                                            Command="{Binding BindingContext.ArchiveGoalCommand, Source={x:Reference GoalsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </comp:ItemsStackLayout.ItemTemplate>
+            </comp:ItemsStackLayout>
+
+            <!-- ================= HABITS (today toggle + streak + weekly progress) ============ -->
+            <comp:ItemsStackLayout ItemsSource="{Binding Habits}" Spacing="10"
+                                   IsVisible="{Binding ShowHabits}">
+                <comp:ItemsStackLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:HabitItemViewModel">
+                        <Border Style="{StaticResource Card}"
+                                comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.985"
+                                SemanticProperties.Description="{Binding Name}">
+                            <VerticalStackLayout Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="{Binding Name}" Style="{StaticResource LSubheading}"
+                                               LineBreakMode="WordWrap" MaxLines="2"
+                                               SemanticProperties.HeadingLevel="Level2"/>
+                                        <Label Text="{Binding FrequencyText}" Style="{StaticResource LCaption}"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                               LineBreakMode="WordWrap" MaxLines="2"/>
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Text="{Binding ToggleText}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,8" FontSize="12.5"
+                                            MinimumHeightRequest="44"
+                                            VerticalOptions="Center"
+                                            LineBreakMode="WordWrap"
+                                            SemanticProperties.Description="{Binding ToggleText}"
+                                            Command="{Binding BindingContext.ToggleHabitCommand, Source={x:Reference GoalsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+
+                                <HorizontalStackLayout Spacing="8">
+                                    <Border Style="{StaticResource ChipNeutral}" IsVisible="{Binding HasStreak}">
+                                        <Label Text="{Binding StreakText}" Style="{StaticResource ChipLabel}"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource Positive}"/>
+                                    </Border>
+                                    <Border Style="{StaticResource ChipNeutral}" IsVisible="{Binding HasWeekProgress}">
+                                        <Label Text="{Binding WeekText}" Style="{StaticResource ChipLabel}"/>
+                                    </Border>
+                                </HorizontalStackLayout>
+
+                                <ProgressBar Progress="{Binding WeekFraction}"
+                                             ProgressColor="{StaticResource MetricRecovery}"
+                                             Style="{StaticResource ProgressTrack}"
+                                             SemanticProperties.Description="{Binding WeekText}"/>
+
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                    <Button Grid.Column="0" Text="{localize:Tr Common.Edit}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="10,8" FontSize="12.5"
+                                            MinimumHeightRequest="44"
+                                            LineBreakMode="WordWrap"
+                                            SemanticProperties.Description="{localize:Tr Habits.EditHabit}"
+                                            Command="{Binding BindingContext.EditHabitCommand, Source={x:Reference GoalsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                    <Button Grid.Column="1" Text="{localize:Tr Common.Delete}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            BorderColor="{StaticResource Negative}"
+                                            TextColor="{StaticResource Negative}"
+                                            Padding="10,8" FontSize="12.5"
+                                            MinimumHeightRequest="44"
+                                            LineBreakMode="WordWrap"
+                                            SemanticProperties.Description="{localize:Tr Common.Delete}"
+                                            Command="{Binding BindingContext.DeleteHabitCommand, Source={x:Reference GoalsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </comp:ItemsStackLayout.ItemTemplate>
+            </comp:ItemsStackLayout>
+
+            <!-- ================= ARCHIVED (restorable, never silently destroyed) ============ -->
+            <comp:ItemsStackLayout ItemsSource="{Binding ArchivedGoals}" Spacing="10"
+                                   IsVisible="{Binding ShowArchived}">
+                <comp:ItemsStackLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:GoalItemViewModel">
+                        <Border Style="{StaticResource SoftCard}" Padding="16,12">
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <Label Grid.Column="0" Text="{Binding NameText}"
+                                           Style="{StaticResource LBody}" FontAttributes="Bold"
+                                           VerticalOptions="Center"
+                                           LineBreakMode="WordWrap" MaxLines="2"
+                                           SemanticProperties.HeadingLevel="Level2"/>
+                                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}">
+                                        <Label Text="{Binding StatusText}" Style="{StaticResource ChipLabel}"/>
+                                    </Border>
+                                </Grid>
+                                <Label Text="{Binding ProgressText}" Style="{StaticResource LCaption}" FontSize="12"
+                                       LineBreakMode="TailTruncation" MaxLines="1"/>
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                    <Button Grid.Column="0" Text="{localize:Tr Goals.Restore}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="10,8" FontSize="12.5"
+                                            MinimumHeightRequest="44"
+                                            LineBreakMode="WordWrap"
+                                            SemanticProperties.Description="{localize:Tr Goals.Restore}"
+                                            Command="{Binding BindingContext.RestoreGoalCommand, Source={x:Reference GoalsPageRef}}"
+                                            CommandParameter="{Binding .}"/>
+                                    <Button Grid.Column="1" Text="{localize:Tr Common.Edit}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="10,8" FontSize="12.5"
+                                            MinimumHeightRequest="44"
+                                            LineBreakMode="WordWrap"
+                                            SemanticProperties.Description="{localize:Tr Goals.EditGoal}"
+                                            Command="{Binding BindingContext.OpenGoalEditorCommand, Source={x:Reference GoalsPageRef}}"
                                             CommandParameter="{Binding .}"/>
                                 </Grid>
                             </VerticalStackLayout>

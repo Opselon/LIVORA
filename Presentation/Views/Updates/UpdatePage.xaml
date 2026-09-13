@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.UpdatePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:UpdateViewModel">
+
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <comp:NotConverter x:Key="Not"/>
+
+            <Style x:Key="StatusChip" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 12"/>
+                <Setter Property="Padding" Value="10,5"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="HorizontalOptions" Value="End"/>
+            </Style>
+            <Style x:Key="StatusChipLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="MetaLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="4"/>
+            </Style>
+            <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="VersionValue" TargetType="Label" BasedOn="{StaticResource LMetric}">
+                <Setter Property="FontSize" Value="18"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="FontSize" Value="17"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+            <Style x:Key="RowDivider" TargetType="BoxView">
+                <Setter Property="HeightRequest" Value="1"/>
+                <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+            </Style>
+            <Style x:Key="DownloadRow" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                <Setter Property="Stroke" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 14"/>
+                <Setter Property="Padding" Value="12,10"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="{Binding PageTitle}" Style="{StaticResource LDisplay}"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level1"/>
+                    <Label Text="{localize:Tr Update.Subtitle}" Style="{StaticResource LCaption}" FontSize="12"
+                           LineBreakMode="WordWrap" MaxLines="3"/>
+                </VerticalStackLayout>
+                <Border Grid.Column="1" Style="{StaticResource StatusChip}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                        <BoxView Grid.Column="0" WidthRequest="9" HeightRequest="9" CornerRadius="5"
+                                 Color="{Binding StatusColorKey, Converter={StaticResource ColorByKey}}"
+                                 VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="{Binding StatusText}" Style="{StaticResource StatusChipLabel}"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{Binding HeadlineText}" Style="{StaticResource LSubheading}"
+                           LineBreakMode="WordWrap" MaxLines="3"
+                           SemanticProperties.HeadingLevel="Level2"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="3">
+                            <Label Text="{localize:Tr Update.Installed}" Style="{StaticResource FieldLabel}"/>
+                            <Label Text="{Binding InstalledText}" Style="{StaticResource VersionValue}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="3">
+                            <Label Text="{localize:Tr Update.Published}" Style="{StaticResource FieldLabel}"/>
+                            <Label Text="{Binding PublishedText}" Style="{StaticResource VersionValue}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <BoxView Style="{StaticResource RowDivider}"/>
+
+                    <Label Text="{Binding DetailText}" Style="{StaticResource MetaLabel}"
+                           IsVisible="{Binding HasDetail}"/>
+                    <Label Text="{Binding LastCheckedText}" Style="{StaticResource MetaLabel}"/>
+                    <Label Text="{localize:Tr Update.Note.Disabled}" Style="{StaticResource MetaLabel}"
+                           IsVisible="{Binding FeedUnavailable}"/>
+                    <Label Text="{localize:Tr Update.Note.Prerelease}" Style="{StaticResource MetaLabel}"
+                           IsVisible="{Binding IsPrereleaseChannel}"/>
+                    <Label Text="{localize:Tr Update.Note.SourceInstall}" Style="{StaticResource MetaLabel}"
+                           IsVisible="{Binding IsSourceInstall}"/>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Button Grid.Column="0" Text="{localize:Tr Update.CheckAgain}"
+                                Style="{StaticResource SecondaryButton}" FontSize="14" Padding="16,10"
+                                Command="{Binding CheckAgainCommand}"
+                                MinimumHeightRequest="48"/>
+                        <ActivityIndicator Grid.Column="1" IsRunning="{Binding IsBusy}"
+                                           IsVisible="{Binding IsBusy}"
+                                           HorizontalOptions="Start" VerticalOptions="Center"
+                                           Color="{StaticResource Accent}"/>
+                        <Button Grid.Column="2" Text="{localize:Tr Update.OpenReleasePage}"
+                                Style="{StaticResource GhostButton}" FontSize="14"
+                                Command="{Binding OpenReleasePageCommand}"
+                                IsVisible="{Binding HasReleaseUrl}"
+                                MinimumHeightRequest="48"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource AccentCard}" IsVisible="{Binding HasPrimaryDownload}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{localize:Tr Update.GetUpdate}" Style="{StaticResource FieldLabel}"/>
+                    <Button Text="{Binding PrimaryDownloadText}" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding PrimaryDownloadCommand}"
+                            MinimumHeightRequest="50"/>
+                    <Label Text="{Binding PrimaryDownloadFile}" Style="{StaticResource MetaLabel}"
+                           IsVisible="{Binding HasPrimaryDownloadFile}"
+                           LineBreakMode="CharacterWrap" MaxLines="2"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="4,*,Auto" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                        <Label Grid.Column="1" Text="{localize:Tr Update.Notes.Title}"
+                               Style="{StaticResource SectionHeader}"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Border Grid.Column="2" Style="{StaticResource StatusChip}"
+                                IsVisible="{Binding ShowWhatsNewChip}">
+                            <Label Text="{localize:Tr Update.WhatsNew.Title}" Style="{StaticResource StatusChipLabel}"/>
+                        </Border>
+                    </Grid>
+
+                    <comp:ItemsStackLayout ItemsSource="{Binding Notes}" Spacing="6"
+                                           IsVisible="{Binding HasNotes}">
+                        <comp:ItemsStackLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:UpdateNoteRow">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                    <Label Grid.Column="0" Text="{Binding Glyph}" Style="{StaticResource LBody}"
+                                           FontSize="13" VerticalOptions="Start"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                           IsVisible="{Binding IsBullet}"/>
+                                    <Label Grid.Column="1" Text="{Binding Text}" Style="{StaticResource LBody}"
+                                           FontSize="14" LineBreakMode="WordWrap"/>
+                                </Grid>
+                            </DataTemplate>
+                        </comp:ItemsStackLayout.ItemTemplate>
+                    </comp:ItemsStackLayout>
+
+                    <Label Text="{localize:Tr Update.Notes.Empty}" Style="{StaticResource MetaLabel}"
+                           IsVisible="{Binding HasNotes, Converter={StaticResource Not}}"/>
+
+                    <Button Text="{localize:Tr Common.Done}" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding CloseCommand}" IsVisible="{Binding IsWhatsNew}"
+                            MinimumHeightRequest="48"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource Card}" IsVisible="{Binding HasDownloads}">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="4,*,Auto" ColumnSpacing="10">
+                        <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                        <Label Grid.Column="1" Text="{localize:Tr Update.Downloads.Title}"
+                               Style="{StaticResource SectionHeader}"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Border Grid.Column="2" Style="{StaticResource StatusChip}">
+                            <Label Text="{Binding DeviceText}" Style="{StaticResource StatusChipLabel}"/>
+                        </Border>
+                    </Grid>
+
+                    <comp:ItemsStackLayout ItemsSource="{Binding Downloads}" Spacing="8">
+                        <comp:ItemsStackLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:UpdateDownloadRow">
+                                <Border Style="{StaticResource DownloadRow}">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"
+                                          MinimumHeightRequest="48">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="3">
+                                            <Label Text="{Binding Label}" Style="{StaticResource LBody}"
+                                                   FontAttributes="Bold" FontSize="14"
+                                                   LineBreakMode="WordWrap" MaxLines="2"/>
+                                            <Label Text="{Binding FileName}" Style="{StaticResource MetaLabel}"
+                                                   LineBreakMode="CharacterWrap" MaxLines="3"/>
+                                            <Border Style="{StaticResource StatusChip}" Padding="8,3"
+                                                    HorizontalOptions="Start"
+                                                    IsVisible="{Binding IsForThisDevice}">
+                                                <Label Text="{localize:Tr Update.Device.ThisDevice}"
+                                                       Style="{StaticResource StatusChipLabel}" FontSize="11"/>
+                                            </Border>
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Text="{localize:Tr Update.Download.Action}"
+                                                Style="{StaticResource SecondaryButton}"
+                                                FontSize="13" Padding="14,8" MinimumHeightRequest="44"
+                                                VerticalOptions="Center"
+                                                Command="{Binding Command}"
+                                                SemanticProperties.Description="{Binding Label}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </comp:ItemsStackLayout.ItemTemplate>
+                    </comp:ItemsStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{localize:Tr Update.Downloads.Empty}" Style="{StaticResource MetaLabel}"
+                   IsVisible="{Binding HasDownloads, Converter={StaticResource Not}}"/>
+
+            <Label Text="{localize:Tr Update.Footer.How}" Style="{StaticResource MetaLabel}"
+                   FontSize="11.5" MaxLines="6"/>
+
+            <BoxView HeightRequest="12" Color="Transparent"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

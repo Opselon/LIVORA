@@ -4,7 +4,7 @@ using LIVORA.Presentation;
 using LIVORA.Presentation.Views;
 
 namespace LIVORA;
-public partial class App : Microsoft.Maui.Controls.Application
+public partial class App : Microsoft.Maui.Controls.Application, INavigateToMainApp
 {
     // One in-flight error dialog for the whole app: burst protection so a storm of
     // unhandled exceptions can never stack alerts or re-enter the handler (no rethrow loops).
@@ -22,9 +22,6 @@ public partial class App : Microsoft.Maui.Controls.Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        // WAVE3-APP: window/theme bootstrap hook (lane 04 supplies the block: Windows default
-        // size, IThemeService.Apply, RequestedThemeChanged). Applied once by the orchestrator.
-        // WAVE3-APP-END
         var loc = ServiceHelper.Get<ILocalizationService>();
         var settings = ServiceHelper.Get<ISettingsService>();
 
@@ -33,7 +30,97 @@ public partial class App : Microsoft.Maui.Controls.Application
         // The Shell itself (tabs/flyout chrome) needs the direction set at creation —
         // child pages set their own in BaseContentPage.
         page.FlowDirection = loc.IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
-        return new Window(page);
+        var window = new Window(page);
+        // The Window is the inheritance root of the whole visual tree (verified headless against
+        // Microsoft.Maui.Controls 10.0.101: Window is a flow-direction source and the change
+        // propagates down through Shell/pages to labels). Setting the page alone is NOT enough for
+        // the native tab strip — see ApplyFlowDirection's doc-comment for the guarantee map.
+        window.FlowDirection = page.FlowDirection;
+
+        // WAVE3-APP: window/theme bootstrap hook (lane 04's block, applied once by the
+        // orchestrator). Needs the window instance, hence it sits after the page/window
+        // creation above rather than at the top of the method.
+        ConfigureDesktopWindow(window);
+        WireThemeSync();
+        // WAVE3-APP-END
+        return window;
+    }
+
+    /// <summary>
+    /// Desktop-first window behaviour on Windows: a usable minimum (never a fixed size — the user
+    /// still owns the window) so the responsive layouts have room to show their Wide buckets.
+    /// Other platforms get this via their native window management; MAUI's Window sizing knobs are
+    /// only honoured on the Windows head today.
+    /// </summary>
+    private static void ConfigureDesktopWindow(Window window)
+    {
+#if WINDOWS
+        window.MinimumWidth = 1100;
+        window.MinimumHeight = 800;
+#endif
+    }
+
+    /// <summary>
+    /// Keeps the persisted theme mode authoritative across OS light/dark flips. The frozen
+    /// IThemeService contract (Wave 3) exposes <see cref="IThemeService.Apply"/> as its only
+    /// inbound seam, so "notify" means "re-apply": the implementation re-reads the mode, pushes
+    /// UserAppTheme, and raises ThemeChanged for whoever watches it. Null-safe via TryGet — the
+    /// registration lives behind another lane's DI marker and the app must still run without it.
+    /// </summary>
+    private static void WireThemeSync()
+    {
+        ServiceHelper.TryGet<IThemeService>()?.Apply();
+
+        if (_themeSyncWired) return;
+        _themeSyncWired = true;
+        Microsoft.Maui.Controls.Application.Current!.RequestedThemeChanged += (_, _) =>
+        {
+            try { ServiceHelper.TryGet<IThemeService>()?.Apply(); }
+            catch (Exception ex) { Debug.WriteLine($"[LIVORA.theme] re-apply failed: {ex.Message}"); }
+        };
+    }
+
+    private static bool _themeSyncWired;
+
+    // ---- INavigateToMainApp (lane 04): the app owns window plumbing, VMs do not ----------
+
+    void INavigateToMainApp.NavigateToMainApp()
+    {
+        if (Current?.Windows.FirstOrDefault() is not { } window) return;
+        var shell = new AppShell();
+        // Direction first, before the chrome builds: a fresh Shell created in the right
+        // direction is the only path that is guaranteed correct on every platform (some native
+        // tab strips mirror at creation time but not mid-flight).
+        shell.FlowDirection = CurrentFlowDirection;
+        window.FlowDirection = CurrentFlowDirection;
+        window.Page = shell;
+    }
+
+    void INavigateToMainApp.ReapplyDirection() => ApplyFlowDirection();
+
+    /// <summary>
+    /// DI adapter: the container holds this while the real implementation is the running
+    /// <c>Application</c> instance itself, which does not exist at registration time. Register at
+    /// the WAVE3-DI marker (lane 04's APPEND block).
+    /// </summary>
+    public sealed class MainAppNavigator : INavigateToMainApp
+    {
+        private static INavigateToMainApp Target =>
+            Microsoft.Maui.Controls.Application.Current as INavigateToMainApp
+            ?? throw new InvalidOperationException("App is not running yet.");
+
+        public void NavigateToMainApp() => Target.NavigateToMainApp();
+        public void ReapplyDirection() => Target.ReapplyDirection();
+    }
+
+    private static FlowDirection CurrentFlowDirection
+    {
+        get
+        {
+            var loc = ServiceHelper.TryGet<ILocalizationService>();
+            return loc is not null && loc.IsRightToLeft
+                ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+        }
     }
 
     private static void OnDomainUnhandledException(object? sender, UnhandledExceptionEventArgs e)
@@ -96,22 +183,33 @@ public partial class App : Microsoft.Maui.Controls.Application
     }
 
     /// <summary>
-    /// Applies the active language's flow direction to the running app (Shell + all open pages).
-    /// Called once at startup and again whenever the language changes — no restart required.
+    /// WHAT GUARANTEES WHAT:
+    ///   • First launch: <see cref="CreateWindow"/> sets FlowDirection on the root page at
+    ///     creation — this is the one path every platform definitely honors, because the Shell
+    ///     chrome is built with the direction already in place.
+    ///   • Live language switch: this method pushes the direction onto every Window *and* its
+    ///     Page. Verified headless against Microsoft.Maui.Controls 10.0.101 (net10.0 ref):
+    ///     Window is itself a flow-direction source and the property change propagates down the
+    ///     logical tree (Shell → sections → pages → labels), so content mirrors for sure.
+    ///   • Native tab-bar chrome: mirroring the physical order of the strip relies on each
+    ///     platform renderer reacting to that change (Android honors supportsRtl=true in the
+    ///     manifest; WinUI's NavigationView maps FlowDirection on the realized platform view).
+    ///     NOT verified on-device from this workspace — if some platform's strip keeps its LTR
+    ///     order until rebuild, the INavigateToMainApp path (fresh Shell created in the right
+    ///     direction) and the next cold start correct it. No fake claim here.
+    ///   • Called before any window exists (MauiProgram startup): iterates an empty Windows
+    ///     collection — a deliberate no-op; see first bullet for what covers that case.
     /// </summary>
     public static void ApplyFlowDirection()
     {
-        var loc = ServiceHelper.Get<ILocalizationService>();
-        var flow = loc.IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
-
-        if (Microsoft.Maui.Controls.Application.Current?.Windows is { } windows)
+        if (Microsoft.Maui.Controls.Application.Current?.Windows is not { } windows) return;
+        var flow = CurrentFlowDirection;
+        foreach (var w in windows)
         {
-            foreach (var w in windows)
-            {
-                if (w.Page is not null) w.Page.FlowDirection = flow;
-            }
+            // Window first: its flow is the inheritance root for everything below it, including
+            // the Shell chrome that is NOT the Page.
+            w.FlowDirection = flow;
+            if (w.Page is not null) w.Page.FlowDirection = flow;
         }
-        // Defensive: also set the static default so newly opened pages inherit it.
-        Microsoft.Maui.Controls.Application.Current?.Resources["AppFlowDirection"] = flow;
     }
 }

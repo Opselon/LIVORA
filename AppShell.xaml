@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Wave 3: six tabs — Today · Health · Log · Goals · Programs · Profile.
+  The Log tab's content type is injected at runtime by AppShell.xaml.cs (see LogTabContent):
+  a static XAML reference to another lane's page would break lane-isolated builds, so the
+  shell degrades to five visible tabs instead of failing to compile.
+  Titles are NOT set here: they live in the localization service and are re-resolved on every
+  language switch by AppShell.RefreshTitles (Shell chrome sits outside the binding tree).
+  Tab-bar colors are plain Colors via AppThemeBinding — never *Brush tokens (rule §0.7).
+-->
 <Shell
     x:Class="LIVORA.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:LIVORA.Presentation.Views"
     Title="LIVORA"
-    FlyoutBehavior="Disabled">
+    FlyoutBehavior="Disabled"
+    TabBarBackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+    TabBarTitleColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+    TabBarUnselectedColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}">
 
     <TabBar x:Name="MainTabBar">
         <ShellContent

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+             x:Class="LIVORA.Presentation.Components.StatChip">
+
+    <!-- StatChip (lane 05): one compact value+label pill for dashboards/filters.
+         Everything visual is driven from code-behind against §2 tokens (tones, brushes,
+         themed text colors) — the XAML only defines structure, so no brush ever lands on a
+         Color-typed property (§0.7) and the runtime font walk still owns FontFamily. -->
+    <comp:PressableBorder x:Name="Root"
+                          StrokeShape="RoundRectangle 14"
+                          StrokeThickness="0"
+                          Padding="10,6"
+                          VerticalOptions="Center"
+                          HorizontalOptions="Start">
+        <HorizontalStackLayout Spacing="6">
+            <Image x:Name="Icon"
+                   WidthRequest="15" HeightRequest="15"
+                   VerticalOptions="Center"
+                   IsVisible="False"
+                   AutomationProperties.IsInAccessibleTree="False"/>
+            <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                <Label x:Name="ValueLabel"
+                       Style="{StaticResource LMetric}"
+                       FontSize="14"
+                       LineBreakMode="TailTruncation"
+                       MaxLines="1"
+                       VerticalTextAlignment="Center"/>
+                <Label x:Name="TextLabel"
+                       Style="{StaticResource ChipLabel}"
+                       FontSize="11"
+                       LineBreakMode="TailTruncation"
+                       MaxLines="1"
+                       VerticalTextAlignment="Center"/>
+            </VerticalStackLayout>
+        </HorizontalStackLayout>
+    </comp:PressableBorder>
+</ContentView>

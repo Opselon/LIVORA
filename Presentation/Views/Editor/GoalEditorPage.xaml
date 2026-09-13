@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.GoalEditorPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    xmlns:system="clr-namespace:System;assembly=netstandard"
+    x:DataType="vm:GoalEditorViewModel">
+
+    <!-- Page-local editor vocabulary: field label + hint + message chip. Tokens from
+         LivoraColors.xaml only; brushes only on Border.Background/Stroke. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="FieldHint" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="11.5"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="3"/>
+            </Style>
+            <Style x:Key="MessageChip" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                <Setter Property="Stroke" Value="{StaticResource NegativeBrush}"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 14"/>
+                <Setter Property="Padding" Value="12,8"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="{StaticResource PageThickness}">
+
+        <!-- Header: new vs edit title (VM-resolved: it depends on the loaded goal) -->
+        <VerticalStackLayout Grid.Row="0" Spacing="2" Margin="0,0,0,4">
+            <Label Text="{Binding Title}" Style="{StaticResource LDisplay}"
+                   LineBreakMode="WordWrap" MaxLines="2"
+                   SemanticProperties.HeadingLevel="Level1"/>
+            <Label Text="{localize:Tr Editor.GoalSubtitle}" Style="{StaticResource LCaption}"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                   LineBreakMode="WordWrap" MaxLines="2"/>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" Padding="0,4,0,8">
+
+                <!-- Validation messages: every problem speaks the user's language, wrapped,
+                     never truncated. Shown while any issue exists (warnings included). -->
+                <comp:ItemsStackLayout ItemsSource="{Binding Messages}" Spacing="6"
+                                       IsVisible="{Binding HasMessages}">
+                    <comp:ItemsStackLayout.ItemTemplate>
+                        <DataTemplate x:DataType="system:String">
+                            <Border Style="{StaticResource MessageChip}">
+                                <Label Text="{Binding .}" Style="{StaticResource LCaption}" FontSize="13"
+                                       TextColor="{StaticResource Negative}"
+                                       LineBreakMode="WordWrap"/>
+                            </Border>
+                        </DataTemplate>
+                    </comp:ItemsStackLayout.ItemTemplate>
+                </comp:ItemsStackLayout>
+
+                <!-- Identity: name + description -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding NameLabel}" Style="{StaticResource FieldLabel}" FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Entry Text="{Binding Name}"
+                               MaxLength="100"
+                               Placeholder="{Binding NameHintText}"
+                               MinimumHeightRequest="44"
+                               SemanticProperties.Description="{Binding NameLabel}"/>
+                        <Label Text="{Binding NameHintText}" Style="{StaticResource FieldHint}"/>
+
+                        <BoxView Style="{StaticResource Divider}" Margin="0,6"/>
+
+                        <Label Text="{Binding DescriptionLabel}" Style="{StaticResource FieldLabel}" FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Editor Text="{Binding Description}"
+                                Placeholder="{Binding DescriptionPlaceholder}"
+                                AutoSize="Disabled" HeightRequest="84"
+                                SemanticProperties.Description="{Binding DescriptionLabel}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- What is being aimed at: category + measurable target -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding CategoryLabel}" Style="{StaticResource FieldLabel}" FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Picker ItemsSource="{Binding CategoryOptions}" SelectedIndex="{Binding CategoryIndex}"
+                                MinimumHeightRequest="44"
+                                SemanticProperties.Description="{Binding CategoryLabel}"/>
+
+                        <BoxView Style="{StaticResource Divider}" Margin="0,6"/>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding TargetLabel}" Style="{StaticResource FieldLabel}"
+                                       SemanticProperties.HeadingLevel="Level3"/>
+                                <Entry Text="{Binding TargetText}" Keyboard="Numeric"
+                                       Placeholder="{Binding TargetPlaceholder}"
+                                       MinimumHeightRequest="44"
+                                       SemanticProperties.Description="{Binding TargetLabel}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="{Binding UnitLabel}" Style="{StaticResource FieldLabel}"
+                                       SemanticProperties.HeadingLevel="Level3"/>
+                                <Picker ItemsSource="{Binding UnitOptions}" SelectedIndex="{Binding UnitIndex}"
+                                        MinimumHeightRequest="44"
+                                        SemanticProperties.Description="{Binding UnitLabel}"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Label Text="{Binding UnitHintText}" Style="{StaticResource FieldHint}"/>
+
+                        <BoxView Style="{StaticResource Divider}" Margin="0,6"/>
+
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding PeriodLabel}" Style="{StaticResource FieldLabel}"
+                                   SemanticProperties.HeadingLevel="Level3"/>
+                            <Picker ItemsSource="{Binding PeriodOptions}" SelectedIndex="{Binding PeriodIndex}"
+                                    MinimumHeightRequest="44"
+                                    SemanticProperties.Description="{Binding PeriodLabel}"/>
+                            <Label Text="{Binding PeriodSuffixText}" Style="{StaticResource FieldHint}"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Optional deadline (honest: only future dates make sense as a deadline) -->
+                <Border Style="{StaticResource SoftCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="{Binding DeadlineLabel}"
+                                   Style="{StaticResource LSubheading}"
+                                   VerticalOptions="Center"
+                                   LineBreakMode="WordWrap" MaxLines="2"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                            <Switch Grid.Column="1" IsToggled="{Binding HasDeadline}"
+                                    VerticalOptions="Center"
+                                    SemanticProperties.Description="{Binding DeadlineLabel}"/>
+                        </Grid>
+                        <DatePicker Date="{Binding Deadline}"
+                                    MinimumDate="{Binding MinimumDeadlineDate}"
+                                    IsVisible="{Binding ShowDeadlinePicker}"
+                                    MinimumHeightRequest="44"
+                                    SemanticProperties.Description="{Binding DeadlineLabel}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- How progress is measured. Metric modes say honestly that they read health
+                     data — which today is sample data (Editor.MetricNote). -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding MeasurementLabel}" Style="{StaticResource FieldLabel}" FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
+                        <Picker ItemsSource="{Binding MeasurementOptions}" SelectedIndex="{Binding MeasurementIndex}"
+                                MinimumHeightRequest="44"
+                                SemanticProperties.Description="{Binding MeasurementLabel}"/>
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowMetricPicker}">
+                            <Label Text="{Binding MetricLabel}" Style="{StaticResource FieldLabel}"
+                                   SemanticProperties.HeadingLevel="Level3"/>
+                            <Picker ItemsSource="{Binding MetricOptions}" SelectedIndex="{Binding MetricIndex}"
+                                    MinimumHeightRequest="44"
+                                    SemanticProperties.Description="{Binding MetricLabel}"/>
+                        </VerticalStackLayout>
+                        <Label Text="{Binding MetricNote}" Style="{StaticResource FieldHint}"
+                               IsVisible="{Binding ShowMetricPicker}"/>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Sticky action row: equal columns so Persian labels wrap instead of clipping.
+             Archive only offered when the goal exists and has logged progress (rule-driven). -->
+        <VerticalStackLayout Grid.Row="2" Spacing="8" Margin="0,10,0,4">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="{Binding CancelText}"
+                        Style="{StaticResource SecondaryButton}"
+                        Command="{Binding CancelCommand}"
+                        MinimumHeightRequest="48" LineBreakMode="WordWrap"
+                        SemanticProperties.Description="{Binding CancelText}"/>
+                <Button Grid.Column="1" Text="{Binding SaveText}"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding SaveCommand}"
+                        MinimumHeightRequest="48" LineBreakMode="WordWrap"
+                        SemanticProperties.Description="{Binding SaveText}"/>
+            </Grid>
+            <Button Text="{Binding ArchiveText}"
+                    Style="{StaticResource SecondaryButton}"
+                    BorderColor="{StaticResource Negative}" TextColor="{StaticResource Negative}"
+                    Command="{Binding ArchiveCommand}"
+                    IsVisible="{Binding ShowArchive}"
+                    MinimumHeightRequest="44" FontSize="13" Padding="16,8"
+                    LineBreakMode="WordWrap"
+                    SemanticProperties.Description="{Binding ArchiveText}"/>
+        </VerticalStackLayout>
+    </Grid>
+</views:BaseContentPage>

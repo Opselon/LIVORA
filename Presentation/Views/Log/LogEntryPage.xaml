@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.LogEntryPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:log="clr-namespace:LIVORA.Presentation.Views.Log"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:LogEntryViewModel">
+
+    <!-- Pushed one-day check-in (route log-entry?date=...). Same editor view, same
+         LogEntryViewModel type the Log tab embeds — only the chrome differs. -->
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <!-- Same readable measure on desktop as the Log tab (see LogPage). -->
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}" MaximumWidthRequest="760"
+                             HorizontalOptions="Center">
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding CheckInTitle}" Style="{StaticResource LCaption}" FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                           LineBreakMode="WordWrap" MaxLines="2"/>
+                    <Label Text="{Binding SelectedDateText}" Style="{StaticResource LDisplay}"
+                           FontSize="26" LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level1"/>
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="{Binding CloseText}" Style="{StaticResource GhostButton}"
+                        Command="{Binding CloseCommand}" VerticalOptions="Center"
+                        MinimumHeightRequest="44"
+                        SemanticProperties.Description="{Binding CloseText}"/>
+            </Grid>
+
+            <log:CheckInView x:Name="Editor"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

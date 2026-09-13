@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.BootcampDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:BootcampDetailViewModel">
+
+    <!-- Page-local presentation vocabulary (chips/rails/legend) — in-view only, no new shared
+         keys. Every color/brush is a §2 token; *Brush keys appear only on Border.Background /
+         Border.Stroke. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <views:BrushByKeyConverter x:Key="BrushByKey"/>
+            <comp:NotConverter x:Key="Not"/>
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+                <Setter Property="Padding" Value="9,4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="ChipTint" TargetType="Border" BasedOn="{StaticResource ChipNeutral}">
+                <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+            <Style x:Key="StatValue" TargetType="Label" BasedOn="{StaticResource LMetric}">
+                <Setter Property="TextColor" Value="{StaticResource Accent}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="StatCaption" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+
+            <!-- Back row -->
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="{localize:Tr Common.Back}" Style="{StaticResource GhostButton}"
+                        Padding="10,8" MinimumHeightRequest="44" FontSize="13"
+                        SemanticProperties.Description="{localize:Tr Common.Back}"
+                        Command="{Binding BackCommand}"/>
+                <Border Grid.Column="2" Style="{StaticResource ChipNeutral}" HorizontalOptions="End">
+                    <Label Text="{localize:Tr Bootcamp.SampleNote}" Style="{StaticResource ChipLabel}"/>
+                </Border>
+            </Grid>
+
+            <!-- Program not found (bad route parameter): honest empty state, no fake header -->
+            <VerticalStackLayout Spacing="10" Padding="8,28" IsVisible="{Binding HasProgram, Converter={StaticResource Not}}">
+                <BoxView WidthRequest="56" HeightRequest="56" CornerRadius="28"
+                         Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"
+                         HorizontalOptions="Center"/>
+                <Label Text="{Binding NotFoundText}" Style="{StaticResource LBodySecondary}"
+                       HorizontalTextAlignment="Center" LineBreakMode="WordWrap"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasProgram}">
+
+                <!-- Header -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding TitleText}" Style="{StaticResource LDisplay}"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level1"/>
+                    <Label Text="{Binding DescriptionText}" Style="{StaticResource LBodySecondary}"
+                           LineBreakMode="WordWrap"/>
+                    <FlexLayout Wrap="Wrap" AlignItems="Center" Margin="0,6,0,0">
+                        <Border Style="{StaticResource ChipNeutral}" Margin="0,0,8,0">
+                            <Label Text="{Binding CategoryText}" Style="{StaticResource ChipLabel}"/>
+                        </Border>
+                        <Border Style="{StaticResource ChipTint}" Margin="0,0,8,0">
+                            <Label Text="{Binding DifficultyText}" Style="{StaticResource ChipLabel}"/>
+                        </Border>
+                        <Border Style="{StaticResource ChipNeutral}">
+                            <Label Text="{Binding DurationText}" Style="{StaticResource ChipLabel}"/>
+                        </Border>
+                    </FlexLayout>
+                    <Label Text="{Binding CreatorText}" Style="{StaticResource LCaption}" FontSize="11"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                           LineBreakMode="TailTruncation" MaxLines="1"/>
+                </VerticalStackLayout>
+
+                <!-- Progress: fraction of days actually completed (Days[].IsCompleted), status,
+                     streak, remaining, finish estimate (honest when evidence is thin). -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                            <Label Grid.Column="1" Text="{Binding OverviewLabel}" Style="{StaticResource SectionHeader}"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="{Binding StatusText}" Style="{StaticResource LBody}"
+                                   VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                            <Label Grid.Column="1" Text="{Binding ProgressPercentText}" Style="{StaticResource LMetric}"
+                                   TextColor="{StaticResource Accent}" HorizontalOptions="End"
+                                   SemanticProperties.Description="{Binding CompletedText}"/>
+                        </Grid>
+                        <ProgressBar Progress="{Binding ProgressFraction}" Style="{StaticResource ProgressTrack}"
+                                     SemanticProperties.Description="{Binding ProgressPercentText}"/>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto">
+                            <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="2" Padding="0,0,0,10">
+                                <Label Text="{Binding CompletedLabel}" Style="{StaticResource StatCaption}"/>
+                                <Label Text="{Binding CompletedText}" Style="{StaticResource StatValue}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="2" Padding="0,0,0,10">
+                                <Label Text="{Binding RemainingLabel}" Style="{StaticResource StatCaption}"/>
+                                <Label Text="{Binding RemainingText}" Style="{StaticResource StatValue}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="2" Padding="0,0,0,10"
+                                                 IsVisible="{Binding HasStreak}">
+                                <Label Text="{Binding StreakLabel}" Style="{StaticResource StatCaption}"/>
+                                <Label Text="{Binding StreakText}" Style="{StaticResource StatValue}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="2" Padding="0,0,0,10"
+                                                 IsVisible="{Binding ShowAdaptedStat}">
+                                <Label Text="{Binding AdaptedLabel}" Style="{StaticResource StatCaption}"/>
+                                <Label Text="{Binding AdaptedText}" Style="{StaticResource StatValue}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="2" Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding MinutesLabel}" Style="{StaticResource StatCaption}"/>
+                                <Label Text="{Binding MinutesText}" Style="{StaticResource StatValue}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="2">
+                                <Label Text="{localize:Tr Bootcamp.Progress.Finish}" Style="{StaticResource StatCaption}"/>
+                                <Label Text="{Binding FinishEstimateText}" Style="{StaticResource StatValue}"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Label Text="{Binding MilestoneText}" Style="{StaticResource LCaption}" FontSize="12"
+                               IsVisible="{Binding ShowMilestone}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                               LineBreakMode="WordWrap"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Today's plan + the real adaptation explanation (only when a rule fired) -->
+                <Border Style="{StaticResource AccentCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                            <Label Grid.Column="1" Text="{Binding PlanForTodayLabel}" Style="{StaticResource SectionHeader}"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                        </Grid>
+                        <!-- Enrolled but past the last day / nothing scheduled: one honest line. -->
+                        <Label Text="{Binding TodayTitleText}" Style="{StaticResource LBody}"
+                               IsVisible="{Binding ShowEmptyToday}"
+                               LineBreakMode="WordWrap"/>
+                        <VerticalStackLayout Spacing="4" IsVisible="{Binding HasTodayPlan}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Label Grid.Column="0" Text="{Binding TodayTitleText}" Style="{StaticResource LSubheading}"
+                                       VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                                <Border Grid.Column="1" IsVisible="{Binding WasAdapted}"
+                                        VerticalOptions="Center" HorizontalOptions="End"
+                                        Background="{StaticResource AccentBrush}" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 8" Padding="7,2">
+                                    <Label Text="{Binding AdaptedBadge}" FontSize="10.5"
+                                           TextColor="{StaticResource TextOnAccent}"
+                                           LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                            <Label Text="{Binding TodayDetailText}" Style="{StaticResource LBodySecondary}"
+                                   FontSize="13" LineBreakMode="WordWrap"/>
+                            <Label Text="{Binding TodayMinutesText}" Style="{StaticResource LCaption}" FontSize="12"
+                                   LineBreakMode="WordWrap"/>
+                            <!-- Not enrolled yet: this is day 1 of the template, not a live plan. -->
+                            <Label Text="{Binding PreviewLabel}" Style="{StaticResource LCaption}" FontSize="11"
+                                   IsVisible="{Binding IsPreview}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                   LineBreakMode="WordWrap"/>
+                            <!-- Nothing here unless a rule genuinely produced a change: the reason
+                                 sentence is built from the same Rule.Why.* key that fired. -->
+                            <Label Text="{Binding AdaptationReasonText}"
+                                   IsVisible="{Binding WasAdapted}"
+                                   Style="{StaticResource LCaption}" FontSize="12"
+                                   TextColor="{StaticResource Accent}"
+                                   LineBreakMode="WordWrap"/>
+                            <HorizontalStackLayout Spacing="6" IsVisible="{Binding ShowOriginalPlan}">
+                                <Label Text="{Binding OriginalPlanLabel}" Style="{StaticResource LCaption}" FontSize="11"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                                <Label Text="{Binding OriginalPlanText}" Style="{StaticResource LCaption}" FontSize="11"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                       LineBreakMode="WordWrap"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Enrollment / action row -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <Button Grid.Column="0" Text="{Binding EnrollText}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    HorizontalOptions="Fill" Padding="16,10" MinimumHeightRequest="44"
+                                    IsVisible="{Binding NotEnrolled}"
+                                    LineBreakMode="WordWrap"
+                                    SemanticProperties.Description="{Binding EnrollText}"
+                                    Command="{Binding EnrollCommand}"/>
+                            <Button Grid.Column="0" Text="{Binding CompleteDayText}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    HorizontalOptions="Fill" Padding="16,10" MinimumHeightRequest="44"
+                                    IsVisible="{Binding IsEnrolled}"
+                                    LineBreakMode="WordWrap"
+                                    SemanticProperties.Description="{Binding CompleteDayText}"
+                                    Command="{Binding CompleteDayCommand}"/>
+                            <Button Grid.Column="1" Text="{Binding LeaveText}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    BorderColor="{StaticResource Negative}" TextColor="{StaticResource Negative}"
+                                    Padding="16,10" FontSize="13" MinimumHeightRequest="44"
+                                    IsVisible="{Binding IsEnrolled}"
+                                    VerticalOptions="Center" LineBreakMode="WordWrap"
+                                    SemanticProperties.Description="{Binding LeaveText}"
+                                    Command="{Binding LeaveCommand}"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Day calendar: every cell is one program day, colored by real state
+                     (completed / today / adapted today / upcoming) and tappable to inspect. -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                            <Label Grid.Column="1" Text="{Binding CalendarLabel}" Style="{StaticResource SectionHeader}"
+                                   SemanticProperties.HeadingLevel="Level2"/>
+                        </Grid>
+
+                        <!-- legend -->
+                        <FlexLayout Wrap="Wrap" AlignItems="Center">
+                            <Border Style="{StaticResource ChipNeutral}" Margin="0,0,8,0"
+                                    Background="{StaticResource AccentSoftBrush}">
+                                <Label Text="{localize:Tr Bootcamp.Day.Completed}" Style="{StaticResource ChipLabel}"/>
+                            </Border>
+                            <Border Style="{StaticResource ChipNeutral}" Margin="0,0,8,0"
+                                    Stroke="{StaticResource AccentBrush}" StrokeThickness="2">
+                                <Label Text="{localize:Tr Bootcamp.Day.Today}" Style="{StaticResource ChipLabel}"/>
+                            </Border>
+                            <Border Style="{StaticResource ChipNeutral}" Margin="0,0,8,0"
+                                    Background="{StaticResource MetricActivitySoftBrush}">
+                                <Label Text="{localize:Tr Bootcamp.Day.Adapted}" Style="{StaticResource ChipLabel}"/>
+                            </Border>
+                            <Border Style="{StaticResource ChipNeutral}">
+                                <Label Text="{localize:Tr Bootcamp.Day.Upcoming}" Style="{StaticResource ChipLabel}"/>
+                            </Border>
+                        </FlexLayout>
+
+                        <FlexLayout Wrap="Wrap" AlignItems="Start" BindableLayout.ItemsSource="{Binding Days}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:BootcampDayCellViewModel">
+                                    <Border WidthRequest="56" HeightRequest="56" Margin="0,0,8,8"
+                                            Padding="0" StrokeShape="RoundRectangle 14"
+                                            Background="{Binding FillKey, Converter={StaticResource BrushByKey}}"
+                                            Stroke="{Binding StrokeKey, Converter={StaticResource BrushByKey}}"
+                                            StrokeThickness="{Binding StrokeThickness}"
+                                            comp:TappableFeedback.Tappable="True"
+                                            comp:TappableFeedback.PressScale="0.94"
+                                            SemanticProperties.Description="{Binding SemanticText}"
+                                            SemanticProperties.Hint="{Binding PlanText}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectCommand}"/>
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout Spacing="0" Padding="4"
+                                                             VerticalOptions="Center" HorizontalOptions="Center">
+                                            <Label Text="{Binding NumberText}" Style="{StaticResource LMetric}" FontSize="16"
+                                                   HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                                                   LineBreakMode="TailTruncation" MaxLines="1"/>
+                                            <!-- adaptation mark: a dot, not a clipped word (the
+                                                 status word is in the cell's accessibility text) -->
+                                            <BoxView WidthRequest="6" HeightRequest="6" CornerRadius="3"
+                                                     Color="{StaticResource MetricActivity}"
+                                                     HorizontalOptions="Center"
+                                                     IsVisible="{Binding IsAdapted}"/>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+
+                        <!-- The day the user tapped: full plan detail for any cell, not only today -->
+                        <Border Style="{StaticResource SoftCard}" Padding="12,10">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding SelectedDayLabel}" Style="{StaticResource LCaption}" FontSize="11"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                       LineBreakMode="WordWrap"/>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label Grid.Column="0" Text="{Binding SelectedDayTitleText}" Style="{StaticResource LBody}"
+                                           FontAttributes="Bold" VerticalOptions="Center"
+                                           LineBreakMode="WordWrap" MaxLines="2"/>
+                                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" VerticalOptions="Center">
+                                        <Label Text="{Binding SelectedDayStatusText}" Style="{StaticResource ChipLabel}"/>
+                                    </Border>
+                                </Grid>
+                                <Label Text="{Binding SelectedDayDetailText}" Style="{StaticResource LBodySecondary}"
+                                       FontSize="13" LineBreakMode="WordWrap"/>
+                                <Label Text="{Binding SelectedDayMinutesText}" Style="{StaticResource LCaption}" FontSize="12"
+                                       LineBreakMode="WordWrap"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="12" Color="Transparent"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

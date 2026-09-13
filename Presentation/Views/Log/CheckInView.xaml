@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="LIVORA.Presentation.Views.Log.CheckInView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:LogEntryViewModel">
+
+    <!-- ========================================================================
+         Lane 03 — the daily check-in editor: ONE implementation, two entry
+         points (embedded by LogPage in the Log tab, hosted by LogEntryPage on
+         the pushed log-entry route). BindingContext is the LogEntryViewModel.
+         Every string is a re-raised VM property backed by LogUiStrings — one
+         owner for the whole feature — so a live language switch re-resolves the
+         entire form.
+         only on Border.Background/Stroke; alignment uses Start/End so RTL
+         mirrors cleanly. Page-local styles below deliberately reuse the chip /
+         rail vocabulary of Today/Health rather than new shared keys.
+         ======================================================================== -->
+
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <comp:NotConverter x:Key="Not"/>
+
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="TailTruncation"/>
+                <Setter Property="MaxLines" Value="1"/>
+            </Style>
+            <Style x:Key="ChipBase" TargetType="Border">
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 12"/>
+                <Setter Property="Padding" Value="12,7"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="ChipNeutral" TargetType="Border" BasedOn="{StaticResource ChipBase}">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+            </Style>
+            <Style x:Key="ChipSelected" TargetType="Border" BasedOn="{StaticResource ChipBase}">
+                <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+                <Setter Property="Stroke" Value="{StaticResource AccentBrush}"/>
+                <Setter Property="StrokeThickness" Value="1.4"/>
+            </Style>
+
+            <Style x:Key="FieldLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="EntryField" TargetType="Entry">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+                <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="MinimumHeightRequest" Value="46"/>
+            </Style>
+            <Style x:Key="SectionTitle" TargetType="Label" BasedOn="{StaticResource LSubheading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <!-- status tints: token colors, inline because lane 05 owns the dictionaries -->
+            <SolidColorBrush x:Key="StatusOkBrush" Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"/>
+            <SolidColorBrush x:Key="StatusBadBrush" Color="{AppThemeBinding Light={StaticResource MetricActivitySoft}, Dark={StaticResource MetricActivitySoftDark}}"/>
+        </ResourceDictionary>
+    </ContentView.Resources>
+
+    <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+
+        <!-- ===== Date: Today/Yesterday chips + calendar ====================== -->
+        <Border Style="{StaticResource Card}">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{Binding DateLabel}" Style="{StaticResource FieldLabel}"/>
+
+                <HorizontalStackLayout Spacing="8">
+                    <Border IsVisible="{Binding IsTodaySelected}" Style="{StaticResource ChipSelected}">
+                        <Label Text="{Binding TodayText}" Style="{StaticResource ChipLabel}"
+                               FontAttributes="Bold" TextColor="{StaticResource Accent}"/>
+                    </Border>
+                    <Border IsVisible="{Binding IsTodaySelected, Converter={StaticResource Not}}" Style="{StaticResource ChipNeutral}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectTodayCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding TodayText}" Style="{StaticResource ChipLabel}"/>
+                    </Border>
+                    <Border IsVisible="{Binding IsYesterdaySelected}" Style="{StaticResource ChipSelected}">
+                        <Label Text="{Binding YesterdayText}" Style="{StaticResource ChipLabel}"
+                               FontAttributes="Bold" TextColor="{StaticResource Accent}"/>
+                    </Border>
+                    <Border IsVisible="{Binding IsYesterdaySelected, Converter={StaticResource Not}}" Style="{StaticResource ChipNeutral}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectYesterdayCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding YesterdayText}" Style="{StaticResource ChipLabel}"/>
+                    </Border>
+                </HorizontalStackLayout>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <DatePicker Grid.Column="0"
+                                Date="{Binding Date, Mode=TwoWay}"
+                                MinimumDate="{Binding MinDate}"
+                                MaximumDate="{Binding MaxDate}"
+                                VerticalOptions="Center"
+                                SemanticProperties.Description="{Binding SelectedDateText}"/>
+                    <Label Grid.Column="1" Text="{Binding SelectedDateText}" Style="{StaticResource LCaption}" FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                           VerticalTextAlignment="Center" HorizontalOptions="End"
+                           LineBreakMode="WordWrap" MaxLines="2" MaximumWidthRequest="160"/>
+                </Grid>
+
+                <Border Style="{StaticResource SoftCard}" Padding="12,8"
+                        IsVisible="{Binding ExistingEntryNoteVisible}">
+                    <Label Text="{Binding ExistingEntryNote}" Style="{StaticResource LCaption}" FontSize="12"
+                           LineBreakMode="WordWrap" MaxLines="2"/>
+                </Border>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ===== Sleep ======================================================= -->
+        <Border Style="{StaticResource Card}">
+            <VerticalStackLayout Spacing="12">
+                <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource MetricSleep}"
+                             CornerRadius="2" VerticalOptions="Fill"/>
+                    <Label Grid.Column="1" Text="{Binding SleepSection}" Style="{StaticResource SectionTitle}"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,10,*">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{Binding HoursLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Entry Style="{StaticResource EntryField}" Text="{Binding SleepHoursText, Mode=TwoWay}"
+                               Placeholder="{Binding SleepExampleHint}" Keyboard="Numeric" MaxLength="2"
+                               HorizontalTextAlignment="Center"
+                               SemanticProperties.Description="{Binding HoursLabel}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="4">
+                        <Label Text="{Binding MinutesLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Entry Style="{StaticResource EntryField}" Text="{Binding SleepMinutesText, Mode=TwoWay}"
+                               Placeholder="{Binding MinutesExampleHint}" Keyboard="Numeric" MaxLength="2"
+                               HorizontalTextAlignment="Center"
+                               SemanticProperties.Description="{Binding MinutesLabel}"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <VerticalStackLayout Spacing="2">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="{Binding SleepQualityLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Label Grid.Column="1" Text="{Binding SleepQualityPercent}" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource MetricSleep}" VerticalOptions="Center"
+                               SemanticProperties.Description="{Binding SleepQualityLabel}"/>
+                    </Grid>
+                    <Slider Minimum="0" Maximum="1" Value="{Binding SleepQualitySlider, Mode=TwoWay}"
+                            MinimumTrackColor="{StaticResource MetricSleep}"
+                            MaximumTrackColor="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"
+                            ThumbColor="{StaticResource MetricSleep}"
+                            SemanticProperties.Description="{Binding SleepQualityLabel}"/>
+                    <Button Text="{Binding ClearText}" Style="{StaticResource GhostButton}" FontSize="12"
+                            Command="{Binding ClearSleepQualityCommand}" Padding="12,2" MinimumHeightRequest="40"
+                            HorizontalOptions="Start" IsVisible="{Binding HasSleepQuality}"
+                            SemanticProperties.Description="{Binding ClearText}"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ===== Activity ==================================================== -->
+        <Border Style="{StaticResource Card}">
+            <VerticalStackLayout Spacing="12">
+                <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource MetricActivity}"
+                             CornerRadius="2" VerticalOptions="Fill"/>
+                    <Label Grid.Column="1" Text="{Binding ActivitySection}" Style="{StaticResource SectionTitle}"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,10,*">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{Binding StepsLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Entry Style="{StaticResource EntryField}" Text="{Binding StepsText, Mode=TwoWay}"
+                               Placeholder="{Binding StepsExampleHint}" Keyboard="Numeric" MaxLength="6"
+                               HorizontalTextAlignment="Center"
+                               SemanticProperties.Description="{Binding StepsLabel}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="4">
+                        <Label Text="{Binding ActiveLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Entry Style="{StaticResource EntryField}" Text="{Binding ActiveText, Mode=TwoWay}"
+                               Placeholder="{Binding ActiveExampleHint}" Keyboard="Numeric" MaxLength="4"
+                               HorizontalTextAlignment="Center"
+                               SemanticProperties.Description="{Binding ActiveLabel}"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ===== Feelings: mood / energy / stress + note ====================== -->
+        <Border Style="{StaticResource Card}">
+            <VerticalStackLayout Spacing="14">
+                <Grid ColumnDefinitions="4,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource MetricWellness}"
+                             CornerRadius="2" VerticalOptions="Fill"/>
+                    <Label Grid.Column="1" Text="{Binding FeelingsSection}" Style="{StaticResource SectionTitle}"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
+
+                <VerticalStackLayout Spacing="2">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="{Binding MoodLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Label Grid.Column="1" Text="{Binding MoodPercent}" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource MetricWellness}" VerticalOptions="Center"/>
+                    </Grid>
+                    <Slider Minimum="0" Maximum="1" Value="{Binding MoodSlider, Mode=TwoWay}"
+                            MinimumTrackColor="{StaticResource MetricWellness}"
+                            MaximumTrackColor="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"
+                            ThumbColor="{StaticResource MetricWellness}"
+                            SemanticProperties.Description="{Binding MoodLabel}"/>
+                    <Button Text="{Binding ClearText}" Style="{StaticResource GhostButton}" FontSize="12"
+                            Command="{Binding ClearMoodCommand}" Padding="12,2" MinimumHeightRequest="40"
+                            HorizontalOptions="Start" IsVisible="{Binding HasMood}"
+                            SemanticProperties.Description="{Binding ClearText}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="{Binding EnergyLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Label Grid.Column="1" Text="{Binding EnergyPercent}" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource Positive}" VerticalOptions="Center"/>
+                    </Grid>
+                    <Slider Minimum="0" Maximum="1" Value="{Binding EnergySlider, Mode=TwoWay}"
+                            MinimumTrackColor="{StaticResource Positive}"
+                            MaximumTrackColor="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"
+                            ThumbColor="{StaticResource Positive}"
+                            SemanticProperties.Description="{Binding EnergyLabel}"/>
+                    <Button Text="{Binding ClearText}" Style="{StaticResource GhostButton}" FontSize="12"
+                            Command="{Binding ClearEnergyCommand}" Padding="12,2" MinimumHeightRequest="40"
+                            HorizontalOptions="Start" IsVisible="{Binding HasEnergy}"
+                            SemanticProperties.Description="{Binding ClearText}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="{Binding StressLabel}" Style="{StaticResource FieldLabel}"/>
+                        <Label Grid.Column="1" Text="{Binding StressPercent}" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource Caution}" VerticalOptions="Center"/>
+                    </Grid>
+                    <Slider Minimum="0" Maximum="1" Value="{Binding StressSlider, Mode=TwoWay}"
+                            MinimumTrackColor="{StaticResource Caution}"
+                            MaximumTrackColor="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"
+                            ThumbColor="{StaticResource Caution}"
+                            SemanticProperties.Description="{Binding StressLabel}"/>
+                    <Button Text="{Binding ClearText}" Style="{StaticResource GhostButton}" FontSize="12"
+                            Command="{Binding ClearStressCommand}" Padding="12,2" MinimumHeightRequest="40"
+                            HorizontalOptions="Start" IsVisible="{Binding HasStress}"
+                            SemanticProperties.Description="{Binding ClearText}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding NoteLabel}" Style="{StaticResource FieldLabel}"/>
+                    <Editor Text="{Binding NoteText, Mode=TwoWay}" HeightRequest="76"
+                            Placeholder="{Binding OptionalHint}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                            PlaceholderColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                            FontSize="14"
+                            SemanticProperties.Description="{Binding NoteLabel}"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ===== Honesty note (product law: self-reported ≠ measured) ======== -->
+        <Border Style="{StaticResource SoftCard}" Padding="14,10">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource Accent}"
+                         CornerRadius="2" VerticalOptions="Fill"/>
+                <Label Grid.Column="1" Text="{Binding HonestyNote}" Style="{StaticResource LCaption}" FontSize="11.5"
+                       TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                       VerticalOptions="Center" LineBreakMode="WordWrap"/>
+            </Grid>
+        </Border>
+
+        <!-- ===== Inline status: success and failure share one slot =========== -->
+        <Border Padding="14,10" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                Background="{StaticResource StatusOkBrush}"
+                IsVisible="{Binding StatusOkVisible}">
+            <Label Text="{Binding StatusText}" Style="{StaticResource LCaption}" FontSize="12.5" FontAttributes="Bold"
+                   TextColor="{StaticResource Accent}" LineBreakMode="WordWrap" MaxLines="3"/>
+        </Border>
+        <Border Padding="14,10" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                Background="{StaticResource StatusBadBrush}"
+                IsVisible="{Binding StatusBadVisible}">
+            <Label Text="{Binding StatusText}" Style="{StaticResource LCaption}" FontSize="12.5" FontAttributes="Bold"
+                   TextColor="{StaticResource Negative}" LineBreakMode="WordWrap" MaxLines="3"/>
+        </Border>
+
+        <!-- ===== Actions ===================================================== -->
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <Button Grid.Column="0" Text="{Binding SaveText}" Style="{StaticResource PrimaryButton}"
+                    Command="{Binding SaveCommand}" IsVisible="{Binding IsBusy, Converter={StaticResource Not}}"
+                    SemanticProperties.Description="{Binding SaveText}"/>
+            <ActivityIndicator Grid.Column="0" IsRunning="{Binding IsBusy}" Color="{StaticResource Accent}"
+                               IsVisible="{Binding IsBusy}" HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Button Grid.Column="1" Text="{Binding DeleteText}" Style="{StaticResource GhostButton}"
+                    Command="{Binding DeleteCommand}" IsVisible="{Binding DeleteVisible}"
+                    TextColor="{StaticResource Negative}" MinimumHeightRequest="44"
+                    SemanticProperties.Description="{Binding DeleteText}"/>
+        </Grid>
+    </VerticalStackLayout>
+</ContentView>

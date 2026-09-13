@@ -379,4 +379,288 @@
 
   <data name="ErrorDialog_Title" xml:space="preserve"><value>مشکلی پیش آمد</value></data>
   <data name="ErrorDialog_Body" xml:space="preserve"><value>لیورا با یک خطای غیرمنتظره روبه‌رو شد. داده‌های شما روی همین دستگاه امن است — می‌توانید ادامه دهید.</value></data>
+  <!-- ============ Wave 3 (lane merge) ============ -->
+  <data name="Bootcamp.Calendar" xml:space="preserve"><value>تقویم روزها</value></data>
+  <data name="Bootcamp.Day.Adapted" xml:space="preserve"><value>بازتنظیم‌شده</value></data>
+  <data name="Bootcamp.Day.Completed" xml:space="preserve"><value>انجام‌شده</value></data>
+  <data name="Bootcamp.Day.Today" xml:space="preserve"><value>امروز</value></data>
+  <data name="Bootcamp.Day.Upcoming" xml:space="preserve"><value>پیش‌رو</value></data>
+  <data name="Bootcamp.Length" xml:space="preserve"><value>{0} روز</value></data>
+  <data name="Bootcamp.Minutes" xml:space="preserve"><value>{0} دقیقه</value></data>
+  <data name="Bootcamp.NotFound" xml:space="preserve"><value>پیدا نشدش — شاید حذف شده باشد.</value></data>
+  <data name="Bootcamp.Overview" xml:space="preserve"><value>نمای کلی</value></data>
+  <data name="Bootcamp.Progress.Adapted" xml:space="preserve"><value>بازتنظیم‌شده توسط LIVORA</value></data>
+  <data name="Bootcamp.Progress.AdaptedDays" xml:space="preserve"><value>{0} روز تا حالا بازنظیم شده</value></data>
+  <data name="Bootcamp.Progress.AllPlanned" xml:space="preserve"><value>همه روزها برنامه‌ریزی شده</value></data>
+  <data name="Bootcamp.Progress.Completed" xml:space="preserve"><value>روزهای انجام‌شده</value></data>
+  <data name="Bootcamp.Progress.CompletedDays" xml:space="preserve"><value>{0} از {1} روز انجام شد</value></data>
+  <data name="Bootcamp.Progress.Finish" xml:space="preserve"><value>پایان احتمالی</value></data>
+  <data name="Bootcamp.Progress.FinishDate" xml:space="preserve"><value>پایان احتمالی: {0}</value></data>
+  <data name="Bootcamp.Progress.Finished" xml:space="preserve"><value>برنامه کامل شد</value></data>
+  <data name="Bootcamp.Progress.MinutesLeft" xml:space="preserve"><value>دقیقه باقی‌مانده</value></data>
+  <data name="Bootcamp.Progress.NextMilestone" xml:space="preserve"><value>مرحله بعد: روز {0} ({1})</value></data>
+  <data name="Bootcamp.Progress.NoEstimate" xml:space="preserve"><value>هنوز برآورد پایانی نیست</value></data>
+  <data name="Bootcamp.Progress.Remaining" xml:space="preserve"><value>انجام‌نشدنی</value></data>
+  <data name="Bootcamp.Progress.RemainingDays" xml:space="preserve"><value>{0} روز مانده</value></data>
+  <data name="Bootcamp.Progress.Streak" xml:space="preserve"><value>روز پیوسته فعلی</value></data>
+  <data name="Bootcamp.Status.NotStarted" xml:space="preserve"><value>هنوز شروع نشده</value></data>
+  <data name="Bootcamp.Status.InProgress" xml:space="preserve"><value>در جریان</value></data>
+  <data name="Bootcamp.Status.Completed" xml:space="preserve"><value>کامل شد</value></data>
+  <data name="Bootcamp.SampleNote" xml:space="preserve"><value>برنامه نمونه — محتوا فقط مثال است، نه توصیه پزشکی.</value></data>
+  <data name="Bootcamp.Today.None" xml:space="preserve"><value>برای امروز چیزی برنامه‌ریزی نشده</value></data>
+  <data name="Bootcamp.Today.Preview" xml:space="preserve"><value>پیش‌نمایش روز اول</value></data>
+  <data name="Common.NotAvailable" xml:space="preserve"><value>در این نسخه در دسترس نیست</value></data>
+  <data name="Common.Open" xml:space="preserve"><value>بازکردن</value></data>
+  <data name="Common.Undo" xml:space="preserve"><value>واگرد</value></data>
+  <data name="Editor.ArchiveAction" xml:space="preserve"><value>بایگانی</value></data>
+  <data name="Editor.Confirm.Archive.Title" xml:space="preserve"><value>این هدف بایگانی شود؟</value></data>
+  <data name="Editor.Confirm.DeleteHabit.Body" xml:space="preserve"><value>ثبت‌هایت در تاریخچه روزانه می‌ماند، ولی خود عادت حذف می‌شود.</value></data>
+  <data name="Editor.Confirm.DeleteHabit.Title" xml:space="preserve"><value>این عادت حذف شود؟</value></data>
+  <data name="Editor.DeadlineLabel" xml:space="preserve"><value>مهلت (اختیاری)</value></data>
+  <data name="Editor.DescriptionPlaceholder" xml:space="preserve"><value>چرا این برایت مهم است</value></data>
+  <data name="Editor.Error.DeadlinePast" xml:space="preserve"><value>مهلت نمی‌تواند گذشته باشد.</value></data>
+  <data name="Editor.Error.HabitNameEmpty" xml:space="preserve"><value>اول برای عادتی که می‌سازی یک نام بگذار.</value></data>
+  <data name="Editor.Error.MetricKey" xml:space="preserve"><value>انتخاب کن این هدف با کدام شاخص سلامت سنجیده می‌شود.</value></data>
+  <data name="Editor.Error.NameEmpty" xml:space="preserve"><value>اول برای هدفت یک نام بگذار.</value></data>
+  <data name="Editor.Error.NameTooLong" xml:space="preserve"><value>نام باید {0} حرف یا کمتر باشد.</value></data>
+  <data name="Editor.Error.TargetNotNumeric" xml:space="preserve"><value>مقدار هدف را عددی بنویس.</value></data>
+  <data name="Editor.Error.TargetNotWhole" xml:space="preserve"><value>تعداد {0} باید عدد صحیح باشد.</value></data>
+  <data name="Editor.Error.TargetRange" xml:space="preserve"><value>مقداری بین {0} تا {1} انتخاب کن.</value></data>
+  <data name="Editor.Error.TimesFixed" xml:space="preserve"><value>این تکرار، تعداد بار هفته را خودش مشخص کرده است.</value></data>
+  <data name="Editor.Error.TimesRange" xml:space="preserve"><value>بین {0} تا {1} بار در هفته انتخاب کن.</value></data>
+  <data name="Editor.GoalSubtitle" xml:space="preserve"><value>بگو چه چیزی را می‌خواهی به دست بیاوری. هر وقت خواستی عوضش می‌کنی.</value></data>
+  <data name="Editor.HabitSubtitle" xml:space="preserve"><value>کوچک و پیوسته، بهتر از بزرگ و کم است.</value></data>
+  <data name="Editor.Hint.TimesRange" xml:space="preserve"><value>عددی بین {0} تا {1} انتخاب کن.</value></data>
+  <data name="Editor.MeasurementLabel" xml:space="preserve"><value>پیشرفت چطور سنجیده می‌شود</value></data>
+  <data name="Editor.MetricLabel" xml:space="preserve"><value>شاخص سلامت</value></data>
+  <data name="Editor.MetricNote" xml:space="preserve"><value>اهداف شاخص‌محور از داده سلامت حساب می‌شوند و آن داده هنوز نمونه است — هیچ چیز از دستگاه واقعی اندازه گرفته نمی‌شود.</value></data>
+  <data name="Editor.NameHint" xml:space="preserve"><value>حداکثر {0} حرف</value></data>
+  <data name="Editor.NavigationFailed" xml:space="preserve"><value>ویرایشگر در این نسخه هنوز در دسترس نیست.</value></data>
+  <data name="Editor.NotFound" xml:space="preserve"><value>پیدایش نکردیم — شاید حذف شده باشد.</value></data>
+  <data name="Editor.TargetPlaceholder" xml:space="preserve"><value>مثلاً ۴</value></data>
+  <data name="Editor.Undo.Archived" xml:space="preserve"><value>«{0}» بایگانی شد</value></data>
+  <data name="Editor.Undo.Deleted" xml:space="preserve"><value>«{0}» حذف شد</value></data>
+  <data name="Editor.Warn.NameDuplicate" xml:space="preserve"><value>چیز هم‌نامی داری — اشکالی ندارد، فقط برای اطمینان می‌گویم.</value></data>
+  <data name="Goals.Archived" xml:space="preserve"><value>بایگانی‌شده</value></data>
+  <data name="Goals.ArchivedEmpty" xml:space="preserve"><value>چیزی بایگانی نکرده‌ای. هر هدفی که بایگانی کنی، پیشرفتش همین‌جا می‌ماند.</value></data>
+  <data name="Goals.Deadline" xml:space="preserve"><value>تا {0}</value></data>
+  <data name="Goals.LogProgress" xml:space="preserve"><value>ثبت پیشرفت</value></data>
+  <data name="Goals.MetricNote" xml:space="preserve"><value>پیشرفت از داده سلامت حساب می‌شود — تا اتصال منبع واقعی، داده نمونه.</value></data>
+  <data name="Goals.Restore" xml:space="preserve"><value>بازگردانی</value></data>
+  <data name="Habits.EditHabit" xml:space="preserve"><value>ویرایش عادت</value></data>
+  <data name="Habits.Empty" xml:space="preserve"><value>هنوز عادتی نداری. یک چیز کوچک اضافه کن که امروز از پسش بربیایی.</value></data>
+  <data name="Habits.Frequency" xml:space="preserve"><value>چند وقت یک‌بار</value></data>
+  <data name="Habits.Name" xml:space="preserve"><value>نام عادت</value></data>
+  <data name="Habits.NewHabit" xml:space="preserve"><value>عادت جدید</value></data>
+  <data name="Habits.Reminder" xml:space="preserve"><value>یادآوری</value></data>
+  <data name="Habits.ReminderDenied" xml:space="preserve"><value>یادآوری ذخیره شد، ولی اعلان‌ها روی این دستگاه بسته‌اند — از تنظیمات سیستم روشنشان کن.</value></data>
+  <data name="Habits.ReminderNeedsPermission" xml:space="preserve"><value>یادآوری ذخیره شد. هنوز اعلان‌ها اجازه ندارند، پس ممکن است به دستت نرسد.</value></data>
+  <data name="Habits.ReminderNote" xml:space="preserve"><value>LIVORA فقط وقتی یادآوری می‌فرستد که اعلان‌ها روی این دستگاه اجازه داشته باشند.</value></data>
+  <data name="Habits.ReminderUnavailable" xml:space="preserve"><value>ساعت یادآوری روی عادت ذخیره شد، ولی در این نسخه زمان‌بند اعلان وجود ندارد.</value></data>
+  <data name="Habits.ReminderUnsupported" xml:space="preserve"><value>یادآوری ذخیره شد، ولی این دستگاه امکان نمایش اعلان ندارد.</value></data>
+  <data name="Habits.TimesPerWeek" xml:space="preserve"><value>تعداد بار در هفته</value></data>
+  <data name="Notification.Grant" xml:space="preserve"><value>اجازهٔ اعلان‌ها</value></data>
+  <data name="Notification.Grant.Title" xml:space="preserve"><value>اعلان‌ها</value></data>
+  <data name="Notification.GrantFailed" xml:space="preserve"><value>سیستم در برابر درخواست اعلان جوابی نداد.</value></data>
+  <data name="Notification.GrantResult" xml:space="preserve"><value>پاسخ سیستم: {0}</value></data>
+  <data name="Notification.OpenSystemSettings" xml:space="preserve"><value>بازکردن تنظیمات سیستم</value></data>
+  <data name="Notification.State.Unknown" xml:space="preserve"><value>نامعلوم</value></data>
+  <data name="Notification.SystemSettingsUnavailable" xml:space="preserve"><value>این پلتفرم صفحهٔ تنظیمات درون‌برنامه ندارد.</value></data>
+  <data name="Onboarding.Goals.ChipHint" xml:space="preserve"><value>برای افزودن یا برداشتن این حوزه بزنید</value></data>
+  <data name="Onboarding.Goals.Hint" xml:space="preserve"><value>یک تا سه حوزه را انتخاب کن. LIVORA پیشنهادهایش را با همان‌ها تنظیم می‌کند.</value></data>
+  <data name="Onboarding.Name.Optional" xml:space="preserve"><value>اختیاری. بعداً هم می‌توانی در پروفایل نام اضافه کنی.</value></data>
+  <data name="Onboarding.StepCounter" xml:space="preserve"><value>گام {0} از {1}</value></data>
+  <data name="Privacy.DeleteConfirm" xml:space="preserve"><value>این کار پروفایل، هدف‌ها، عادت‌ها، تاریخچه، ثبت‌ها، یادآوری‌ها و دادهٔ ماندگار را از این دستگاه برای همیشه حذف می‌کند و برگشت ندارد.</value></data>
+  <data name="Privacy.DeleteFailed" xml:space="preserve"><value>حذف تمام نشد. داده‌هایت هنوز روی دستگاه است.</value></data>
+  <data name="Privacy.FileCount" xml:space="preserve"><value>{0} فایل از {1} فایل روی این دستگاه داده دارند</value></data>
+  <data name="Privacy.FileHeader" xml:space="preserve"><value>فایل‌های ذخیره‌شده</value></data>
+  <data name="Privacy.Presence.StoredCount" xml:space="preserve"><value>{0} مورد ذخیره شده</value></data>
+  <data name="Privacy.RedoNo" xml:space="preserve"><value>همین برنامهٔ خالی را نگه دار</value></data>
+  <data name="Privacy.RedoYes" xml:space="preserve"><value>دوباره تنظیمش کنم</value></data>
+  <data name="Privacy.RetainedNote" xml:space="preserve"><value>انتخاب زبان و تم در تنظیمات خود برنامه می‌ماند. این‌ها دادهٔ شخصی ندارند، پس حذف هم سراغشان نمی‌رود.</value></data>
+  <data name="Privacy.WipeSampleNote" xml:space="preserve"><value>هدف‌ها و عادت‌های نمونه در اجرای بعدی خودشان برمی‌گردند؛ دادهٔ نمایشی‌اند، نه دادهٔ تو.</value></data>
+  <data name="Profile.AddYourData" xml:space="preserve"><value>دادهٔ خودت را اضافه کن</value></data>
+  <data name="Profile.ConnectionCenterHint" xml:space="preserve"><value>هر چه LIVORA همین حالا واقعاً می‌خواند، نه بیشتر.</value></data>
+  <data name="Profile.Identity" xml:space="preserve"><value>پروفایل تو</value></data>
+  <data name="Profile.InitialsPlaceholder" xml:space="preserve"><value>تو</value></data>
+  <data name="Profile.NavUnavailable" xml:space="preserve"><value>این صفحه هنوز در این نسخه نیست.</value></data>
+  <data name="Profile.PrimaryGoalsEmpty" xml:space="preserve"><value>هنوز چیزی انتخاب نشده.</value></data>
+  <data name="Profile.PrimaryGoalsHint" xml:space="preserve"><value>حداکثر سه تا انتخاب کن؛ همین‌ها پیشنهادها را جهت می‌دهند.</value></data>
+  <data name="Profile.RemindersEntryNote" xml:space="preserve"><value>ساعت و روزهای آرامهٔ شب، ثبت روزانه و عادت‌ها.</value></data>
+  <data name="Profile.SettingsEntry" xml:space="preserve"><value>تنظیمات</value></data>
+  <data name="Profile.SettingsEntryNote" xml:space="preserve"><value>اعلان‌ها، ظاهر، زبان، به‌روزرسانی و دربارهٔ برنامه.</value></data>
+  <data name="Profile.Source.Manual" xml:space="preserve"><value>ثبت‌های خودت</value></data>
+  <data name="Profile.Source.Updates" xml:space="preserve"><value>فید به‌روزرسانی</value></data>
+  <data name="Profile.Status.CheckFailed" xml:space="preserve"><value>نتوانست بررسی کند</value></data>
+  <data name="Profile.Status.SelfReportedCount" xml:space="preserve"><value>{0} روز را خودت ثبت کرده‌ای</value></data>
+  <data name="Profile.Status.SelfReportedNone" xml:space="preserve"><value>هنوز خودت چیزی ثبت نکرده‌ای</value></data>
+  <data name="Profile.ThemeNote" xml:space="preserve"><value>روشن، تیره، یا همراه با سیستم.</value></data>
+  <data name="Profile.ThemeUnavailable" xml:space="preserve"><value>تعویض تم در این نسخه وصل نشده، پس برنامه با سیستم می‌آید.</value></data>
+  <data name="Profile.Update.Prerelease" xml:space="preserve"><value>نسخه پیش‌آزمایش در دسترس است ({0})</value></data>
+  <data name="Profile.Update.Available" xml:space="preserve"><value>به‌روزرسانی موجود است</value></data>
+  <data name="Profile.Update.CheckNow" xml:space="preserve"><value>همین حالا بررسی کن</value></data>
+  <data name="Profile.Update.CheckedAt" xml:space="preserve"><value>آخرین بررسی: {0}</value></data>
+  <data name="Profile.Update.CurrentIs" xml:space="preserve"><value>نسخهٔ نصب‌شده {0}</value></data>
+  <data name="Profile.Update.Disabled" xml:space="preserve"><value>به‌روزرسانی جای دیگری مدیریت می‌شود</value></data>
+  <data name="Profile.Update.Error" xml:space="preserve"><value>فید به‌روزرسانی خوانده نشد</value></data>
+  <data name="Profile.Update.Idle" xml:space="preserve"><value>هنوز بررسی نشده</value></data>
+  <data name="Profile.Update.NewerThanFeed" xml:space="preserve"><value>این نسخه از فید تازه‌تر است</value></data>
+  <data name="Profile.Update.NoConnection" xml:space="preserve"><value>اتصالی به فید برقرار نشد</value></data>
+  <data name="Profile.Update.NotConfigured" xml:space="preserve"><value>این نسخه فید انتشار ندارد</value></data>
+  <data name="Profile.Update.OfflineHint" xml:space="preserve"><value>آفلاین بودی؛ آخرین پاسخ نشان داده می‌شود</value></data>
+  <data name="Profile.Update.Open" xml:space="preserve"><value>به‌روزرسانی‌ها</value></data>
+  <data name="Profile.Update.RateLimited" xml:space="preserve"><value>فید گفت کمی صبر کنیم</value></data>
+  <data name="Profile.Update.TryLater" xml:space="preserve"><value>کمی بعد دوباره امتحان کن</value></data>
+  <data name="Profile.Update.UpToDate" xml:space="preserve"><value>به‌روز است</value></data>
+  <data name="Profile.Update.VersionFromTo" xml:space="preserve"><value>نصب‌شده {0} — تازه‌ترین منتشرشده {1}</value></data>
+  <data name="Profile.UpdatesEntry" xml:space="preserve"><value>به‌روزرسانی برنامه</value></data>
+  <data name="Profile.UpdatesEntryNote" xml:space="preserve"><value>LIVORA انتشارهای عمومی را از شبکه بررسی می‌کند. چیزی به‌صورت خودکار دانلود یا نصب نمی‌شود.</value></data>
+  <data name="Profile.VersionNote" xml:space="preserve"><value>ساختهٔ LIVORA. بدون حساب، بدون سرور.</value></data>
+  <data name="Profile.WeeklyReview" xml:space="preserve"><value>مرور هفتگی</value></data>
+  <data name="Profile.WeeklyReviewNote" xml:space="preserve"><value>هفته چطور گذشت، از داده‌هایی که خودت ثبت کرده‌ای.</value></data>
+  <data name="Programs.Empty" xml:space="preserve"><value>هنوز برنامه‌ای اینجا نیست — یکی را شروع کن تا LIVORA آن را با روزهای تو تنظیم کند.</value></data>
+  <data name="Programs.Empty.Filtered" xml:space="preserve"><value>هیچ موردی با این فیلتر مطابقت ندارد.</value></data>
+  <data name="Programs.Filter.All" xml:space="preserve"><value>همه</value></data>
+  <data name="Programs.Filter.Hint" xml:space="preserve"><value>نمایش برنامه‌ها بر پایهٔ دسته</value></data>
+  <data name="Programs.Recommend.ForGoal" xml:space="preserve"><value>برای هدفت: {0}</value></data>
+  <data name="Programs.Recommend.Reason" xml:space="preserve"><value>چون تمرکزت روی {0} است، این انتخاب شده.</value></data>
+  <data name="Programs.Recommend.Starter" xml:space="preserve"><value>شروع ساده</value></data>
+  <data name="Programs.Search.Clear" xml:space="preserve"><value>پاک کردن جست‌وجو</value></data>
+  <data name="Programs.Search.Placeholder" xml:space="preserve"><value>جست‌وجوی برنامه‌ها…</value></data>
+  <data name="Reminders.Grant.OpenSettings" xml:space="preserve"><value>باز کردن تنظیمات سیستم</value></data>
+  <data name="Reminders.Grant.Request" xml:space="preserve"><value>اجازه‌دادن به اعلان‌ها</value></data>
+  <data name="Reminders.Grant.Result.Allowed" xml:space="preserve"><value>سیستم تأیید کرد که اعلان‌ها مجازند.</value></data>
+  <data name="Reminders.Grant.Result.Denied" xml:space="preserve"><value>گزارش سیستم می‌گوید اعلان‌ها برای این برنامه مسدود است.</value></data>
+  <data name="Reminders.Grant.Result.NotAsked" xml:space="preserve"><value>سیستم هنوز پاسخ نداده است.</value></data>
+  <data name="Reminders.Grant.Result.SystemManaged" xml:space="preserve"><value>مدیریت اعلان‌ها بیرون از برنامه، دست خودِ سیستم است.</value></data>
+  <data name="Reminders.Grant.Result.Unknown" xml:space="preserve"><value>سیستم پاسخ نداد؛ آنچه نشان داده می‌شود شاید دقیق نیست.</value></data>
+  <data name="Reminders.Grant.Result.Unsupported" xml:space="preserve"><value>این بستر پشتیبانی اعلان محلی ندارد.</value></data>
+  <data name="Reminders.HoursHint" xml:space="preserve"><value>ساعت‌ها با ساعت دستگاه تو کار می‌کنند. اگر دستگاه در آن لحظه خواب باشد، رسیدن اعلان ممکن است عقب بیفتد.</value></data>
+  <data name="Reminders.LoadFailed" xml:space="preserve"><value>یاداورها بارگذاری نشد.</value></data>
+  <data name="Reminders.Loading" xml:space="preserve"><value>در حال بارگذاری یاداورها…</value></data>
+  <data name="Reminders.OpenSettingsFailed" xml:space="preserve"><value>صفحه‌ی تنظیمات سیستم باز نشد.</value></data>
+  <data name="Reminders.Preview.Empty" xml:space="preserve"><value>همین الان یادآوریِ در نوبتی نیست، یا شرطش برقرار نیست (بدهی خواب، زنجیره‌ی در خطر، روز باز دوره، ثبت‌نکردن).</value></data>
+  <data name="Reminders.Preview.Empty.Title" xml:space="preserve"><value>چیزی در نوبت نیست</value></data>
+  <data name="Reminders.Preview.Header" xml:space="preserve"><value>همین الان چه چیزی بهت یادآوری می‌شود</value></data>
+  <data name="Reminders.SaveFailed" xml:space="preserve"><value>این یاداور ذخیره نشد؛ آنچه می‌بینی شاید باقی نماند.</value></data>
+  <data name="Reminders.Schedule" xml:space="preserve"><value>زمان‌بندی یاداورها</value></data>
+  <data name="Reminders.Subtitle" xml:space="preserve"><value>انتخاب کن LIVORA درباره‌ی چه چیزی و چه زمانی بهت یادآوری کند.</value></data>
+  <data name="Reminders.Test.Button" xml:space="preserve"><value>ارسال آزمایشی</value></data>
+  <data name="Reminders.Test.Failed" xml:space="preserve"><value>سیستم تست را نپذیرفت (وضعیت: {0}).</value></data>
+  <data name="Reminders.Test.Note" xml:space="preserve"><value>یک اعلان را برای یک دقیقه‌ی دیگر زمان‌بندی می‌کند تا ببینی واقعاً می‌رسد یا نه.</value></data>
+  <data name="Reminders.Test.Scheduled" xml:space="preserve"><value>سیستم تست را برای {0} پذیرفت. اگر چیزی ظاهر نشد، وضعیت اعلانِ بالا را نگاه کن.</value></data>
+  <data name="Reminders.Test.Title" xml:space="preserve"><value>یادآور آزمایشی</value></data>
+  <data name="Reminders.TimeLabel" xml:space="preserve"><value>ساعت یاداور</value></data>
+  <data name="Reminders.Title" xml:space="preserve"><value>یادآوردها</value></data>
+  <data name="Settings.AppearanceNote" xml:space="preserve"><value>تغییر تم همان لحظه اعمال می‌شود و به خاطر می‌ماند.</value></data>
+  <data name="Settings.Notifications" xml:space="preserve"><value>اعلان‌ها</value></data>
+  <data name="Settings.NotificationsNote" xml:space="preserve"><value>LIVORA فقط وقتی بزنی سؤال می‌کند؛ وضعیت پایین همان جوابِ خود سیستم است.</value></data>
+  <data name="Settings.PrivacyEntryNote" xml:space="preserve"><value>فهرست کامل فایل‌ها و دکمهٔ حذف همه در صفحهٔ پروفایل است.</value></data>
+  <data name="Settings.RemindersNote" xml:space="preserve"><value>ساعت و روزهای یادآوری آنجا تنظیم می‌شود.</value></data>
+  <data name="Settings.SampleData" xml:space="preserve"><value>دادهٔ نمونه</value></data>
+  <data name="Settings.SampleDataNote" xml:space="preserve"><value>سری‌های سلامت در این نسخه دادهٔ نمونهٔ تولیدشده‌اند و همین‌طور برچسب خورده‌اند؛ از دستگاهی اندازه‌گیری نشده‌اند. هر چه خودت ثبت کنی هم برچسب خودگزارش می‌گیرد.</value></data>
+  <data name="Settings.Title" xml:space="preserve"><value>تنظیمات</value></data>
+  <data name="Settings.Updates" xml:space="preserve"><value>به‌روزرسانی</value></data>
+  <data name="Settings.UpdatesNote" xml:space="preserve"><value>فقط بررسی دستی؛ LIVORA هیچ‌چیز را خودش نصب نمی‌کند.</value></data>
+  <data name="Settings.WhatsNew" xml:space="preserve"><value>تازه‌ها</value></data>
+  <data name="Theme.Dark" xml:space="preserve"><value>تیره</value></data>
+  <data name="Theme.Light" xml:space="preserve"><value>روشن</value></data>
+  <data name="Theme.System" xml:space="preserve"><value>همراه سیستم</value></data>
+  <data name="Today.Empty.Goals" xml:space="preserve"><value>یک هدف بگذار تا پیشرفتش همین‌جا دیده شود.</value></data>
+  <data name="Today.Empty.Goals.Cta" xml:space="preserve"><value>برو به هدف‌ها</value></data>
+  <data name="Today.Empty.Goals.Title" xml:space="preserve"><value>هدف فعالی نیست</value></data>
+  <data name="Today.Empty.Habits" xml:space="preserve"><value>عادت‌ها همان چیزی‌اند که LIVORA در روزهای سخت برایت نگه می‌دارد.</value></data>
+  <data name="Today.Empty.Habits.Cta" xml:space="preserve"><value>اولین عادتش را اضافه کن</value></data>
+  <data name="Today.Empty.Habits.Title" xml:space="preserve"><value>هنوز عادتی نداری</value></data>
+  <data name="Today.Empty.Plan" xml:space="preserve"><value>برنامه‌ی امروز وقتی خودش را می‌سازد که وضعیت و هدفت داده داشته باشند.</value></data>
+  <data name="Today.Empty.Plan.Title" xml:space="preserve"><value>بلوک برنامه‌ای نیست</value></data>
+  <data name="Today.Empty.Recommendations" xml:space="preserve"><value>همه‌چیز الان نزدیک خط پایه‌ی خودت است — چیزی لازم ندارد تنظیم شود.</value></data>
+  <data name="Today.Empty.Recommendations.Title" xml:space="preserve"><value>پیشنهادی نیست</value></data>
+  <data name="Today.LogNudge.Action" xml:space="preserve"><value>ثبت امروز</value></data>
+  <data name="Today.LogNudge.Body" xml:space="preserve"><value>عدد‌های امروزت را هنوز ثبت نکرده‌ای.</value></data>
+  <data name="Today.PullToRefresh" xml:space="preserve"><value>برای تازه‌سازی بکشید</value></data>
+  <data name="Today.QA.Log" xml:space="preserve"><value>ثبت حالت</value></data>
+  <data name="Today.QA.Reminders" xml:space="preserve"><value>یاداوردها</value></data>
+  <data name="Today.QA.Review" xml:space="preserve"><value>مرور هفته</value></data>
+  <data name="Today.QA.Updates" xml:space="preserve"><value>بروزرسانی‌ها</value></data>
+  <data name="Today.QuickActions" xml:space="preserve"><value>دسترسی سریع</value></data>
+  <data name="Today.Recommend.Benefit" xml:space="preserve"><value>فایده‌ی مورد انتظار</value></data>
+  <data name="Today.Recommend.Confidence" xml:space="preserve"><value>اطمینان {0} — از همان قاعده و داده‌ای که می‌بینی.</value></data>
+  <data name="Today.Recommend.TapToExpand" xml:space="preserve"><value>بزن تا دلیلش را ببینی — یا یک‌روز پنهانش کنی</value></data>
+  <data name="Today.Recommend.Why" xml:space="preserve"><value>چرا</value></data>
+  <data name="Today.RouteUnavailable" xml:space="preserve"><value>«{0}» هنوز در این نسخه در دسترس نیست.</value></data>
+  <data name="Today.Snooze" xml:space="preserve"><value>۲۴ ساعت پنهان کن</value></data>
+  <data name="Today.Snoozed.ShowAgain" xml:space="preserve"><value>پیشنادهای پنهان را نشان بده</value></data>
+  <data name="Today.SnoozedHidden" xml:space="preserve"><value>{0} پیشنهاد تا فردا پنهان شد.</value></data>
+  <data name="Update.CheckAgain" xml:space="preserve"><value>بررسی دوباره</value></data>
+  <data name="Update.Current" xml:space="preserve"><value>نسخهٔ نصب‌شده</value></data>
+  <data name="Update.CurrentVersion" xml:space="preserve"><value>نسخهٔ نصب‌شده {0}</value></data>
+  <data name="Update.Device.ThisDevice" xml:space="preserve"><value>همین دستگاه</value></data>
+  <data name="Update.Download" xml:space="preserve"><value>دریافت برای {0}</value></data>
+  <data name="Update.Download.Action" xml:space="preserve"><value>دریافت</value></data>
+  <data name="Update.Downloads.Empty" xml:space="preserve"><value>این نسخه هنوز فایل قابل دریافتی ندارد. برای دیدن گزینه‌ها صفحهٔ انتشار را باز کنید.</value></data>
+  <data name="Update.Downloads.Title" xml:space="preserve"><value>فایل‌های قابل دریافت</value></data>
+  <data name="Update.Error.Feed" xml:space="preserve"><value>سرویس به‌روزرسانی فعلاً در دسترس نیست.</value></data>
+  <data name="Update.Error.NoDownload" xml:space="preserve"><value>هنوز پیوند دریافتی برای باز کردن وجود ندارد.</value></data>
+  <data name="Update.Error.OpenLink" xml:space="preserve"><value>{0} در مرورگر باز نشد.</value></data>
+  <data name="Update.Footer.How" xml:space="preserve"><value>LIVORA فقط همان چیزی را می‌گوید که صفحهٔ انتشار نوشته است؛ هیچ فایلی را خودش دریافت یا نصب نمی‌کند.</value></data>
+  <data name="Update.GetUpdate" xml:space="preserve"><value>دریافت به‌روزرسانی</value></data>
+  <data name="Update.Headline.Error" xml:space="preserve"><value>بررسی کامل نشد</value></data>
+  <data name="Update.Headline.Unknown" xml:space="preserve"><value>هنوز اطلاعاتی دربارهٔ به‌روزرسانی نیست</value></data>
+  <data name="Update.Installed" xml:space="preserve"><value>نصب‌شده</value></data>
+  <data name="Update.LastChecked" xml:space="preserve"><value>آخرین بررسی: {0}، ساعت {1}</value></data>
+  <data name="Update.LatestUnknown" xml:space="preserve"><value>هنوز منتشر نشده</value></data>
+  <data name="Update.NeverChecked" xml:space="preserve"><value>تا به حال بررسی نشده</value></data>
+  <data name="Update.Note.Disabled" xml:space="preserve"><value>این نسخه فهرست انتشاری برای بررسی ندارد، پس نسخهٔ جدیدی را نمی‌تواند جست‌وجو کند.</value></data>
+  <data name="Update.Note.FromCache" xml:space="preserve"><value>این پاسخ آخرین بررسی است، نه یک بررسی تازه.</value></data>
+  <data name="Update.Note.OpenedBrowser" xml:space="preserve"><value>در مرورگر شما باز شد.</value></data>
+  <data name="Update.Note.Prerelease" xml:space="preserve"><value>این نسخه پیش‌انتشار است؛ ممکن است تغییر کند یا پس گرفته شود.</value></data>
+  <data name="Update.Note.SourceInstall" xml:space="preserve"><value>نسخهٔ شما از همهٔ نسخه‌های منتشرشده جلوتر است؛ احتمالاً از سورس نصب شده است.</value></data>
+  <data name="Update.Notes.Empty" xml:space="preserve"><value>ناشر برای این نسخه یادداشتی ننوشته است.</value></data>
+  <data name="Update.Notes.Title" xml:space="preserve"><value>تازه‌ها</value></data>
+  <data name="Update.Open" xml:space="preserve"><value>جزئیات به‌روزرسانی</value></data>
+  <data name="Update.OpenReleasePage" xml:space="preserve"><value>صفحهٔ انتشار</value></data>
+  <data name="Update.Platform.All" xml:space="preserve"><value>انتخاب فایل</value></data>
+  <data name="Update.Platform.Android" xml:space="preserve"><value>اندروید</value></data>
+  <data name="Update.Platform.MacOS" xml:space="preserve"><value>macOS</value></data>
+  <data name="Update.Platform.Unknown" xml:space="preserve"><value>فایل دیگر</value></data>
+  <data name="Update.Platform.Windows" xml:space="preserve"><value>ویندوز</value></data>
+  <data name="Update.Platform.iOS" xml:space="preserve"><value>iOS</value></data>
+  <data name="Update.Published" xml:space="preserve"><value>تازه‌ترین انتشار</value></data>
+  <data name="Update.PublishedVersion" xml:space="preserve"><value>{0} (منتشرشده)</value></data>
+  <data name="Update.Status.Unknown" xml:space="preserve"><value>بررسی‌نشده</value></data>
+  <data name="Update.Subtitle" xml:space="preserve"><value>چه چیزی نصب است، چه چیزی تازه شده، و از کجا بگیرید</value></data>
+  <data name="Update.Title" xml:space="preserve"><value>به‌روزرسانی‌ها</value></data>
+  <data name="Update.VersionUnknown" xml:space="preserve"><value>نامشخص</value></data>
+  <data name="Update.WhatsNew.Action" xml:space="preserve"><value>تازه‌ها را ببینید</value></data>
+  <data name="Update.WhatsNew.Title" xml:space="preserve"><value>تازه‌های این نسخه</value></data>
+  <data name="WeekProgress.Confidence.Early" xml:space="preserve"><value>بر پایه {0} روز تاریخچه — هنوز اوایل راه است.</value></data>
+  <data name="WeekProgress.Confidence.Solid" xml:space="preserve"><value>بر پایه {0} روز تاریخچه.</value></data>
+  <data name="WeekProgress.Empty" xml:space="preserve"><value>هنوز داده‌ای برای این هفته نیست</value></data>
+  <data name="WeekProgress.Goals" xml:space="preserve"><value>اهداف</value></data>
+  <data name="WeekProgress.Goals.Empty" xml:space="preserve"><value>هدفی برای سنجش نیست</value></data>
+  <data name="WeekProgress.Habits" xml:space="preserve"><value>عادت‌ها</value></data>
+  <data name="WeekProgress.Habits.Empty" xml:space="preserve"><value>این هفته عادتی ثبت نشده</value></data>
+  <data name="WeekProgress.Insufficient" xml:space="preserve"><value>تنها {0} از {1} روز لازم ثبت شده، پس تصویر صادقانه‌ای از هفته نیست.</value></data>
+  <data name="WeekProgress.NoTarget" xml:space="preserve"><value>این هفته انتظاری نیست</value></data>
+  <data name="WeekProgress.Period" xml:space="preserve"><value>{0} — {1}</value></data>
+  <data name="WeekProgress.Programs" xml:space="preserve"><value>برنامه‌ها</value></data>
+  <data name="WeekProgress.Programs.Empty" xml:space="preserve"><value>روز برنامه‌ای ثبت نشده</value></data>
+  <data name="WeekProgress.Streak" xml:space="preserve"><value>روزهای پیوسته</value></data>
+  <data name="WeekProgress.Title" xml:space="preserve"><value>هفته‌ات در اعداد</value></data>
+  <data name="WeeklySummary.BarActiveGoals" xml:space="preserve"><value>{0} هدف فعال</value></data>
+  <data name="WeeklySummary.BarActiveHabits" xml:space="preserve"><value>{0} عادت پیگیری می‌شود</value></data>
+  <data name="WeeklySummary.BarDays" xml:space="preserve"><value>بر پایه‌ی {0} روز از {1} روز</value></data>
+  <data name="WeeklySummary.BarHabitsDone" xml:space="preserve"><value>{0} انجام از {1} فرصت</value></data>
+  <data name="WeeklySummary.Bars" xml:space="preserve"><value>عدد‌های این بازه</value></data>
+  <data name="WeeklySummary.DaysCount" xml:space="preserve"><value>{0} روز از {1} روز داده دارد</value></data>
+  <data name="WeeklySummary.Empty.Title" xml:space="preserve"><value>تاریخچه کافی نیست</value></data>
+  <data name="WeeklySummary.InProgress" xml:space="preserve"><value>در حال جریان — برای هفته‌ی جاری قضاوت روند نداریم.</value></data>
+  <data name="WeeklySummary.Newer" xml:space="preserve"><value>هفته‌ی بعد</value></data>
+  <data name="WeeklySummary.Older" xml:space="preserve"><value>هفته‌ی قبل</value></data>
+  <data name="WeeklySummary.OlderHint" xml:space="preserve"><value>هفته‌های قدیمی‌تر تنها تا جایی که تاریخچه‌ات می‌رسد در دسترس‌اند.</value></data>
+  <data name="WeeklySummary.Tab.LastWeek" xml:space="preserve"><value>هفته‌ی گذشته</value></data>
+  <data name="WeeklySummary.Tab.ThisWeek" xml:space="preserve"><value>این هفته</value></data>
+  <data name="WeeklySummary.Trends" xml:space="preserve"><value>روندها</value></data>
+
 </root>

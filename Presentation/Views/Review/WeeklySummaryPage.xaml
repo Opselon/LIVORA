@@ -5,12 +5,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:LIVORA.Presentation.Views"
     xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
     xmlns:vm="clr-namespace:LIVORA.Presentation"
+    Title="{localize:Tr Tab.Weekly}"
     x:DataType="vm:WeeklySummaryViewModel">
 
     <!-- Page-local presentation vocabulary (rails/chips) — in-view only, no new shared keys. -->
     <views:BaseContentPage.Resources>
         <ResourceDictionary>
+            <comp:NotConverter x:Key="Not" />
             <Style x:Key="HeaderRail" TargetType="BoxView">
                 <Setter Property="WidthRequest" Value="4"/>
                 <Setter Property="Color" Value="{StaticResource Accent}"/>
@@ -22,13 +25,29 @@
                 <Setter Property="LineBreakMode" Value="WordWrap"/>
                 <Setter Property="MaxLines" Value="2"/>
             </Style>
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+                <Setter Property="Padding" Value="9,4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="WeekChip" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                <Setter Property="Stroke" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 16"/>
+                <Setter Property="Padding" Value="14,9"/>
+                <Setter Property="MinimumHeightRequest" Value="44"/>
+            </Style>
         </ResourceDictionary>
     </views:BaseContentPage.Resources>
 
     <ScrollView Padding="{StaticResource PageThickness}">
         <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
-            <!-- Header: title + back/close. CloseCommand behavior unchanged. -->
+            <!-- Header: title + back/close. Works modally (Today entry) and pushed (route `review`) —
+                 the code-behind picks whichever pop is valid, so the same button is honest in both. -->
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,2">
                 <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
                     <Label Text="{Binding Title}" Style="{StaticResource LDisplay}"
@@ -44,22 +63,106 @@
                         Command="{Binding CloseCommand}"/>
             </Grid>
 
-            <!-- Not enough history: an honest, centered empty state (never a fake review) -->
-            <VerticalStackLayout Spacing="12" Padding="8,28" IsVisible="{Binding IsEmpty}">
-                <BoxView WidthRequest="56" HeightRequest="56" CornerRadius="28"
-                         Color="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"
-                         HorizontalOptions="Center"/>
-                <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
-                       HorizontalTextAlignment="Center"
-                       LineBreakMode="WordWrap"
-                       SemanticProperties.HeadingLevel="Level2"/>
+            <!-- Week navigation (issue #1): this/last presets + step older/newer. Start/End mirrored. -->
+            <VerticalStackLayout Spacing="8">
+                <HorizontalStackLayout Spacing="8">
+                    <Border Style="{StaticResource WeekChip}" comp:TappableFeedback.Tappable="True"
+                            SemanticProperties.Description="{Binding ThisWeekLabel}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ThisWeekCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding ThisWeekLabel}" Style="{StaticResource LCaption}" FontSize="12.5"
+                               FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    </Border>
+                    <Border Style="{StaticResource WeekChip}" comp:TappableFeedback.Tappable="True"
+                            SemanticProperties.Description="{Binding LastWeekLabel}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LastWeekCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding LastWeekLabel}" Style="{StaticResource LCaption}" FontSize="12.5"
+                               FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    </Border>
+                </HorizontalStackLayout>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Button Grid.Column="0" Text="{localize:Tr WeeklySummary.Older}"
+                            Command="{Binding PreviousWeekCommand}"
+                            Style="{StaticResource GhostButton}" Padding="10,8" MinimumHeightRequest="44"
+                            IsVisible="{Binding CanGoOlder}"
+                            SemanticProperties.Description="{localize:Tr WeeklySummary.Older}"/>
+                    <Label Grid.Column="1" Text="{Binding WeekRangeText}" Style="{StaticResource LBody}"
+                           FontSize="13.5" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" VerticalOptions="Center"
+                           LineBreakMode="WordWrap" MaxLines="2"/>
+                    <Button Grid.Column="2" Text="{localize:Tr WeeklySummary.Newer}"
+                            Command="{Binding NextWeekCommand}"
+                            Style="{StaticResource GhostButton}" Padding="10,8" MinimumHeightRequest="44"
+                            IsVisible="{Binding HasNewer}"
+                            SemanticProperties.Description="{localize:Tr WeeklySummary.Newer}"/>
+                </Grid>
+                <!-- sample honesty line: days in window (+ in-progress note for the current week) -->
+                <Label Text="{Binding DaysCountText}" Style="{StaticResource LCaption}" FontSize="11.5"
+                       HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                <Border Style="{StaticResource ChipNeutral}" HorizontalOptions="Center"
+                        IsVisible="{Binding InProgressNote, Converter={StaticResource IsNotEmpty}}">
+                    <Label Text="{Binding InProgressNote}" Style="{StaticResource ChipLabel}"
+                           FontSize="11" LineBreakMode="WordWrap" MaxLines="2"/>
+                </Border>
+                <Label Text="{Binding OlderHint}" Style="{StaticResource LCaption}" FontSize="11"
+                       HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
             </VerticalStackLayout>
 
-            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasSummary}">
+            <!-- Not enough history in this window: an honest, centered empty state (never a fake
+                 review, never a zeroed chart). Same 3-day floor WeeklySummaryService uses. -->
+            <comp:EmptyStateView Title="{localize:Tr WeeklySummary.Empty.Title}"
+                                 Message="{Binding EmptyText}"
+                                 IsVisible="{Binding IsEmpty}" />
+
+            <!-- Bars for the selected window (VM-computed; lane 08's WeekProgressView can host the
+                 same rows once its APPEND lands — see lane report NOTES). -->
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasBars}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                    <Label Grid.Column="1" Text="{Binding BarsHeader}" Style="{StaticResource SectionHeader}"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
+                <Border Style="{StaticResource Card}">
+                    <comp:ItemsStackLayout ItemsSource="{Binding Bars}" Spacing="10">
+                        <comp:ItemsStackLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WeeklyBarViewModel">
+                                <VerticalStackLayout Spacing="4" SemanticProperties.Description="{Binding Label}">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Label}" Style="{StaticResource LBody}"
+                                               FontSize="13.5" VerticalOptions="Center"
+                                               LineBreakMode="WordWrap" MaxLines="2"/>
+                                        <Label Grid.Column="1" Text="{Binding ValueText}" Style="{StaticResource LMetric}"
+                                               FontSize="14" TextColor="{Binding ColorKey, Converter={StaticResource ColorByKey}}"
+                                               VerticalOptions="Center"
+                                               LineBreakMode="TailTruncation" MaxLines="1"/>
+                                    </Grid>
+                                    <ProgressBar Progress="{Binding Fraction}" Style="{StaticResource ProgressTrack}"
+                                                 ProgressColor="{Binding ColorKey, Converter={StaticResource ColorByKey}}"
+                                                 HeightRequest="5"
+                                                 IsVisible="{Binding HasValue}"
+                                                 SemanticProperties.Description="{Binding ValueText}"/>
+                                    <Label Text="{Binding Note}" Style="{StaticResource LCaption}" FontSize="10.5"
+                                           LineBreakMode="WordWrap" MaxLines="2"
+                                           IsVisible="{Binding HasNote}"/>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </comp:ItemsStackLayout.ItemTemplate>
+                    </comp:ItemsStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Narrative (arrows/bullets/next-focus): rendered ONLY for the closed week the
+                 WeeklySummaryService itself approved (null below 3 days — respected, not reimplemented). -->
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasNarrative}">
 
                 <!-- Trends -->
                 <Border Style="{StaticResource Card}">
                     <VerticalStackLayout Spacing="6">
+                        <Label Text="{Binding TrendsHeader}" Style="{StaticResource SectionHeader}" FontSize="14"
+                               SemanticProperties.HeadingLevel="Level2"/>
                         <comp:ItemsStackLayout ItemsSource="{Binding Trends}" Spacing="6">
                             <comp:ItemsStackLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TrendLineViewModel">

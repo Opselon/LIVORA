@@ -1,81 +1,219 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- LIVORA typography + shared element styles.
-         Fonts: SegoeUI covers Latin; Vazirmatn covers Persian and also renders Latin cleanly,
-         so Persian UI uses it throughout for glyph consistency. -->
+    <!-- LIVORA typography + shared element styles — design system v2 (Wave 3, lane 05).
 
-    <!-- Text styles (font family resolved per-language at runtime via LocalizationService) -->
+         FONTS: Vazirmatn sits smaller on the x-height and needs more leading than OpenSans at the
+         same px size, so every text style carries an explicit LineHeight and the scale is tuned one
+         notch up for caption/tiny. Named styles NEVER set FontFamily — BaseContentPage applies the
+         per-language font at runtime from ObservableObject.AppFont; only the implicit styles keep
+         the OpenSansRegular pre-layout default the original dictionary had.
+
+         KEY STABILITY (LANES.md §2 + the wave-3 duplication audit): every pre-existing key keeps
+         its name, its TargetType and its role. v2 (a) adds the missing §2 keys, (b) tunes VALUES
+         for AA contrast (the color dictionary documents the math), (c) gives buttons real
+         pressed/focus/disabled states. Interaction states ride Style.Triggers driven by
+         Button.IsPressed / VisualElement.IsFocused / IsEnabled — these fire on all four heads,
+         while VisualStateManager's Pressed group has NO automatic driver for plain Buttons in
+         MAUI Controls (TappableFeedback remains the answer for Borders/rows and complements,
+         not competes with, these triggers). Triggers are written per concrete style (not inherited
+         via BasedOn) because MAUI does not cascade Style.Triggers through BasedOn, and every
+         <Trigger> carries an EXPLICIT TargetType — MauiXamlInflator=SourceGen fails the whole
+         dictionary parse ("The given key 'ElementNode' was not present") on a bare Trigger.
+
+         CANONICAL PAGE VOCABULARY: ChipNeutral, ChipTint, ChipLabel, ChipLabelTone,
+         SectionHeader, HeaderRail, FieldLabel, Divider, BadgeChip now match — setter for setter —
+         the best page-local copies in TodayPage/HealthPage/ProgramsPage (and Profile's FieldLabel,
+         Weekly's HeaderRail/SectionHeader), so the merge can delete those page copies with zero
+         visual change. The old global 13px eyebrow role (the ORIGINAL meaning of the previous
+         global SectionHeader, which no shipped page used unshadowed) lives on as `Eyebrow`. -->
+
+    <!-- ============ Type scale ============ -->
     <Style x:Key="LDisplay" TargetType="Label">
-        <Setter Property="FontSize" Value="30"/>
+        <Setter Property="FontSize" Value="31"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
-        <Setter Property="LineHeight" Value="1.15"/>
+        <Setter Property="LineHeight" Value="1.12"/>
     </Style>
     <Style x:Key="LHeading" TargetType="Label">
         <Setter Property="FontSize" Value="22"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="LineHeight" Value="1.22"/>
     </Style>
     <Style x:Key="LSubheading" TargetType="Label">
         <Setter Property="FontSize" Value="17"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="LineHeight" Value="1.28"/>
     </Style>
     <Style x:Key="LBody" TargetType="Label">
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
-        <Setter Property="LineHeight" Value="1.35"/>
+        <Setter Property="LineHeight" Value="1.42"/>
     </Style>
     <Style x:Key="LBodySecondary" TargetType="Label">
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
-        <Setter Property="LineHeight" Value="1.35"/>
+        <Setter Property="LineHeight" Value="1.42"/>
     </Style>
     <Style x:Key="LCaption" TargetType="Label">
-        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+        <Setter Property="LineHeight" Value="1.3"/>
+    </Style>
+    <Style x:Key="LTiny" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
         <Setter Property="LineHeight" Value="1.25"/>
     </Style>
+    <Style x:Key="LQuote" TargetType="Label">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontAttributes" Value="Italic"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+        <Setter Property="LineHeight" Value="1.45"/>
+        <Setter Property="HorizontalTextAlignment" Value="Start"/>
+    </Style>
     <Style x:Key="LMetric" TargetType="Label">
-        <Setter Property="FontSize" Value="21"/>
+        <Setter Property="FontSize" Value="22"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="LineHeight" Value="1.05"/>
     </Style>
     <Style x:Key="LMetricLarge" TargetType="Label">
-        <Setter Property="FontSize" Value="40"/>
+        <Setter Property="FontSize" Value="44"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="LineHeight" Value="1.0"/>
     </Style>
     <Style x:Key="LButton" TargetType="Label">
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="TextColor" Value="{StaticResource TextOnAccent}"/>
+        <Setter Property="LineHeight" Value="1.1"/>
+    </Style>
+    <!-- Section eyebrow (the ORIGINAL role of the pre-v2 global SectionHeader; pages that used
+         SectionHeader as a rail title keep their meaning via the canonical key below). -->
+    <Style x:Key="Eyebrow" TargetType="Label">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+        <Setter Property="LineHeight" Value="1.2"/>
+        <Setter Property="Margin" Value="2,18,2,6"/>
+    </Style>
+    <!-- IconGlyph: for icon-font/symbol text (SVG glyphs render through Image instead). -->
+    <Style x:Key="IconGlyph" TargetType="Label">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="HorizontalTextAlignment" Value="Center"/>
+        <Setter Property="VerticalTextAlignment" Value="Center"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentText}, Dark={StaticResource AccentTextDark}}"/>
+    </Style>
+    <!-- FieldLabel: label above an input. Canonical copy of the Profile/Onboarding page-local style. -->
+    <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+        <Setter Property="LineBreakMode" Value="WordWrap"/>
+        <Setter Property="MaxLines" Value="2"/>
     </Style>
 
-    <!-- Buttons -->
-    <Style x:Key="PrimaryButton" TargetType="Button">
+    <!-- ============ Buttons (shared chrome + real interaction states) ============ -->
+    <Style x:Key="ButtonBase" TargetType="Button">
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="20,14"/>
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource ButtonHeight}"/>
+        <Setter Property="BorderWidth" Value="0"/>
+    </Style>
+    <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
         <Setter Property="BackgroundColor" Value="{StaticResource Accent}"/>
         <Setter Property="TextColor" Value="{StaticResource TextOnAccent}"/>
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="Padding" Value="20,14"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="FontSize" Value="15"/>
-        <Setter Property="MinimumHeightRequest" Value="50"/>
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource AccentDeep}"/>
+                <Setter Property="Opacity" Value="0.95"/>
+                <Setter Property="Scale" Value="0.975"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsFocused" Value="True">
+                <Setter Property="BorderWidth" Value="2"/>
+                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource FocusRing}, Dark={StaticResource FocusRingDark}}"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Scale" Value="1"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
-    <Style x:Key="SecondaryButton" TargetType="Button">
+    <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
         <Setter Property="BackgroundColor" Value="Transparent"/>
-        <Setter Property="TextColor" Value="{StaticResource Accent}"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentText}, Dark={StaticResource AccentTextDark}}"/>
         <Setter Property="BorderColor" Value="{StaticResource Accent}"/>
         <Setter Property="BorderWidth" Value="1.4"/>
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="Padding" Value="20,14"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="FontSize" Value="15"/>
-        <Setter Property="MinimumHeightRequest" Value="50"/>
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"/>
+                <Setter Property="Scale" Value="0.975"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsFocused" Value="True">
+                <Setter Property="BorderWidth" Value="2"/>
+                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource FocusRing}, Dark={StaticResource FocusRingDark}}"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Scale" Value="1"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="GhostButton" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+        <Setter Property="BorderWidth" Value="0"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="14,8"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="MinimumHeightRequest" Value="40"/>
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+                <Setter Property="Scale" Value="0.975"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsFocused" Value="True">
+                <Setter Property="BorderWidth" Value="2"/>
+                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource FocusRing}, Dark={StaticResource FocusRingDark}}"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Scale" Value="1"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <!-- Round icon-only button (ImageSource or single-glyph Text). ≥44dp target. -->
+    <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentText}, Dark={StaticResource AccentTextDark}}"/>
+        <Setter Property="BorderWidth" Value="0"/>
+        <Setter Property="Padding" Value="10"/>
+        <Setter Property="CornerRadius" Value="22"/>
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource ControlHeight}"/>
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource ControlHeight}"/>
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource AccentSoft}, Dark={StaticResource AccentSoftDark}}"/>
+                <Setter Property="Scale" Value="0.96"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsFocused" Value="True">
+                <Setter Property="BorderWidth" Value="2"/>
+                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource FocusRing}, Dark={StaticResource FocusRingDark}}"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Scale" Value="1"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
-    <!-- Cards / surfaces -->
+    <!-- ============ Cards / surfaces ============ -->
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
         <Setter Property="Stroke" Value="{StaticResource OverlayBrush}"/>
@@ -91,10 +229,19 @@
         <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
         <Setter Property="StrokeThickness" Value="0"/>
     </Style>
+    <!-- v2 opt-in: elevated card — quieter hairline + soft shadow for hero surfaces. -->
+    <Style x:Key="ElevatedCard" TargetType="Border" BasedOn="{StaticResource Card}">
+        <Setter Property="Stroke" Value="{StaticResource SurfaceAltBrush}"/>
+        <Setter Property="Shadow" Value="{StaticResource CardShadow}"/>
+    </Style>
+    <!-- v2 opt-in: metric tile (tighter padding, radius 16 — the health-grid rhythm). -->
+    <Style x:Key="MetricCard" TargetType="Border" BasedOn="{StaticResource Card}">
+        <Setter Property="Padding" Value="14,12"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape" Value="RoundRectangle 16"/>
+    </Style>
 
-    <!-- Opt-in page-level building blocks (pages reference these by key; nothing here
-         changes existing styles). Border brush props use *Brush keys; Color-typed props
-         (Label.TextColor, BoxView.Color) use AppThemeBinding over plain Color keys. -->
+    <!-- ============ Canonical page vocabulary (promoted from the duplicated page copies) ============ -->
     <Style x:Key="BadgeChip" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
         <Setter Property="Stroke" Value="{StaticResource OverlayBrush}"/>
@@ -103,22 +250,56 @@
         <Setter Property="Padding" Value="10,4"/>
         <Setter Property="VerticalOptions" Value="Center"/>
     </Style>
-    <Style x:Key="GhostButton" TargetType="Button">
-        <Setter Property="BackgroundColor" Value="Transparent"/>
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
-        <Setter Property="BorderWidth" Value="0"/>
-        <Setter Property="CornerRadius" Value="14"/>
-        <Setter Property="Padding" Value="14,8"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="MinimumHeightRequest" Value="40"/>
+    <!-- ChipNeutral: the dense chip every page re-declared (OverlayBrush / radius 10 / 9,4). -->
+    <Style x:Key="ChipNeutral" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+        <Setter Property="Padding" Value="9,4"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
     </Style>
-    <Style x:Key="SectionHeader" TargetType="Label">
-        <Setter Property="FontSize" Value="13"/>
+    <Style x:Key="ChipTint" TargetType="Border" BasedOn="{StaticResource ChipNeutral}">
+        <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+    </Style>
+    <Style x:Key="ChipPositive" TargetType="Border" BasedOn="{StaticResource ChipNeutral}">
+        <Setter Property="Background" Value="{StaticResource PositiveSoftBrush}"/>
+    </Style>
+    <Style x:Key="ChipCaution" TargetType="Border" BasedOn="{StaticResource ChipNeutral}">
+        <Setter Property="Background" Value="{StaticResource CautionSoftBrush}"/>
+    </Style>
+    <Style x:Key="ChipNegative" TargetType="Border" BasedOn="{StaticResource ChipNeutral}">
+        <Setter Property="Background" Value="{StaticResource NegativeSoftBrush}"/>
+    </Style>
+    <!-- ChipLabel: dense chip text (canonical Today/Health/Programs copy: single line). -->
+    <Style x:Key="ChipLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+        <Setter Property="VerticalTextAlignment" Value="Center"/>
+        <Setter Property="LineBreakMode" Value="TailTruncation"/>
+        <Setter Property="MaxLines" Value="1"/>
+    </Style>
+    <!-- ChipLabelWrap: the wrapping variant ProfilePage uses for long Persian chip text. -->
+    <Style x:Key="ChipLabelWrap" TargetType="Label" BasedOn="{StaticResource ChipLabel}">
+        <Setter Property="LineBreakMode" Value="WordWrap"/>
+        <Setter Property="MaxLines" Value="2"/>
+    </Style>
+    <Style x:Key="ChipLabelTone" TargetType="Label" BasedOn="{StaticResource ChipLabel}">
         <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
-        <Setter Property="LineHeight" Value="1.2"/>
-        <Setter Property="Margin" Value="2,18,2,6"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentText}, Dark={StaticResource AccentTextDark}}"/>
+        <Setter Property="HorizontalTextAlignment" Value="Center"/>
+    </Style>
+    <!-- SectionHeader: canonical rail-titled section header (5 pages carried identical copies). -->
+    <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+        <Setter Property="VerticalOptions" Value="Center"/>
+        <Setter Property="LineBreakMode" Value="WordWrap"/>
+        <Setter Property="MaxLines" Value="2"/>
+    </Style>
+    <!-- HeaderRail: 4dp accent bar. BoxView.Color is Color-typed — a Color, never a brush (§0.7). -->
+    <Style x:Key="HeaderRail" TargetType="BoxView">
+        <Setter Property="WidthRequest" Value="4"/>
+        <Setter Property="Color" Value="{StaticResource Accent}"/>
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="VerticalOptions" Value="Fill"/>
     </Style>
     <Style x:Key="Divider" TargetType="BoxView">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
@@ -128,24 +309,113 @@
         <Setter Property="Margin" Value="0,10"/>
     </Style>
 
+    <!-- ============ Progress / skeleton / segmented ============ -->
     <Style x:Key="ProgressTrack" TargetType="ProgressBar">
-        <Setter Property="ProgressColor" Value="{StaticResource Accent}"/>
+        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource Accent}, Dark={StaticResource AccentDark}}"/>
         <Setter Property="HeightRequest" Value="6"/>
     </Style>
+    <!-- Skeleton: loading placeholder block. Pages may animate Opacity; keep the token color. -->
+    <Style x:Key="Skeleton" TargetType="BoxView">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+        <Setter Property="HeightRequest" Value="12"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Opacity" Value="0.75"/>
+    </Style>
+    <!-- SegmentText: label used by SegmentedControlView (also reusable standalone). -->
+    <Style x:Key="SegmentText" TargetType="Label">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="HorizontalTextAlignment" Value="Center"/>
+        <Setter Property="VerticalTextAlignment" Value="Center"/>
+        <Setter Property="LineBreakMode" Value="TailTruncation"/>
+        <Setter Property="MaxLines" Value="1"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+    </Style>
 
-    <!-- Implicit defaults so the app never shows raw MAUI template look -->
+    <!-- ============ Inputs ============ -->
+    <!-- InputField: opt-in card-friendly Entry. -->
+    <Style x:Key="InputField" TargetType="Entry">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource ControlHeight}"/>
+        <Setter Property="ClearButtonVisibility" Value="WhileEditing"/>
+        <Style.Triggers>
+            <Trigger TargetType="Entry" Property="IsFocused" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+            </Trigger>
+            <Trigger TargetType="Entry" Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="EditorStyle" TargetType="Editor">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="MinimumHeightRequest" Value="88"/>
+    </Style>
+    <Style x:Key="PickerStyle" TargetType="Picker">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource ControlHeight}"/>
+    </Style>
+    <Style x:Key="DatePickerStyle" TargetType="DatePicker">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource ControlHeight}"/>
+    </Style>
+    <Style x:Key="TimePickerStyle" TargetType="TimePicker">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource ControlHeight}"/>
+    </Style>
+    <Style x:Key="SwitchStyle" TargetType="Switch">
+        <Setter Property="OnColor" Value="{StaticResource Accent}"/>
+        <Setter Property="ThumbColor" Value="{StaticResource TextOnAccent}"/>
+        <Setter Property="OffColor" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+    <Style x:Key="SliderStyle" TargetType="Slider">
+        <Setter Property="MinimumTrackColor" Value="{StaticResource Accent}"/>
+        <Setter Property="MaximumTrackColor" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+        <Setter Property="ThumbColor" Value="{StaticResource Accent}"/>
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource ControlHeight}"/>
+    </Style>
+
+    <!-- ============ Implicit defaults so the app never shows raw MAUI template look ============ -->
     <Style TargetType="Label">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
     </Style>
-    <Style TargetType="Button">
+    <!-- Implicit button = PrimaryButton look + states. Written out (not BasedOn-only) because
+         MAUI does NOT cascade Style.Triggers through BasedOn — implicit Buttons must keep the
+         press/focus/disabled language too. -->
+    <Style TargetType="Button" BasedOn="{StaticResource ButtonBase}">
         <Setter Property="BackgroundColor" Value="{StaticResource Accent}"/>
         <Setter Property="TextColor" Value="{StaticResource TextOnAccent}"/>
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="FontSize" Value="15"/>
-        <Setter Property="MinimumHeightRequest" Value="50"/>
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource AccentDeep}"/>
+                <Setter Property="Opacity" Value="0.95"/>
+                <Setter Property="Scale" Value="0.975"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsFocused" Value="True">
+                <Setter Property="BorderWidth" Value="2"/>
+                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource FocusRing}, Dark={StaticResource FocusRingDark}}"/>
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+                <Setter Property="Scale" Value="1"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
     <Style TargetType="Entry">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
@@ -154,6 +424,55 @@
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="16"/>
         <Setter Property="MinimumHeightRequest" Value="48"/>
+        <Style.Triggers>
+            <Trigger TargetType="Entry" Property="IsFocused" Value="True">
+                <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <!-- Wave-3 audit fix: Picker/DatePicker/TimePicker/Editor were absent from BaseContentPage's
+         font walk, so Persian pages rendered them in the system font. These implicit styles set
+         the same OpenSansRegular pre-layout default the other controls carry; the page base then
+         overwrites FontFamily per language on every re-style (its walk is extended to cover
+         pickers on merge). -->
+    <Style TargetType="Picker">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="MinimumHeightRequest" Value="48"/>
+    </Style>
+    <Style TargetType="DatePicker">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="MinimumHeightRequest" Value="48"/>
+    </Style>
+    <Style TargetType="TimePicker">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="MinimumHeightRequest" Value="48"/>
+    </Style>
+    <Style TargetType="Editor">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"/>
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontSize" Value="15"/>
+    </Style>
+    <Style TargetType="Switch">
+        <Setter Property="OnColor" Value="{StaticResource Accent}"/>
+        <Setter Property="ThumbColor" Value="{StaticResource TextOnAccent}"/>
+        <Setter Property="OffColor" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+    </Style>
+    <Style TargetType="Slider">
+        <Setter Property="MinimumTrackColor" Value="{StaticResource Accent}"/>
+        <Setter Property="MaximumTrackColor" Value="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+        <Setter Property="ThumbColor" Value="{StaticResource Accent}"/>
+    </Style>
+    <Style TargetType="ActivityIndicator">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Accent}, Dark={StaticResource AccentDark}}"/>
     </Style>
     <Style TargetType="Page" ApplyToDerivedTypes="True">
         <Setter Property="Padding" Value="0"/>

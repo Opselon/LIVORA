@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using LIVORA.Application.Abstractions;
 using LIVORA.Application.Context;
+using LIVORA.Application.Insights;
 using LIVORA.Domain.Enums;
 using LIVORA.Domain.Models;
 using LIVORA.Domain.Models.Planning;
@@ -11,9 +12,14 @@ using StateMetrics = LIVORA.Domain.Models.State.Metrics;
 
 namespace LIVORA.Presentation;
 
-/// <summary>Presentation item for a recommendation: text + structured explanation.</summary>
-public sealed class RecommendationItemViewModel
+/// <summary>Presentation item for a recommendation: text + structured explanation (why / benefit /
+/// confidence come from the engine's ExplainKey / ExpectedBenefitKey / Confidence — never invented
+/// prose), plus the Wave 3 expand + snooze behaviour.</summary>
+public sealed class RecommendationItemViewModel : ObservableObject
 {
+    /// <summary>Stable identity across reloads (rules are deterministic, Guids are not):
+    /// producing rule + text key. This is what the snooze store persists.</summary>
+    public required string StableId { get; init; }
     public required string Text { get; init; }
     public required string Explanation { get; init; }
     public required string Benefit { get; init; }
@@ -21,8 +27,35 @@ public sealed class RecommendationItemViewModel
     public int DurationMinutes { get; init; }
     public required string DurationText { get; init; }
     public double Confidence { get; init; }
+    // Raw percent digits (machine format): the localized label lives in ConfidenceLabel.
     public string ConfidencePercentText => ((int)Math.Round(Confidence * 100)) + "%";
+    public required string ConfidenceLabel { get; init; }   // "Confidence: 68%" localized
+    public required string WhyLabel { get; init; }
+    public required string BenefitLabel { get; init; }
+    public required string SnoozeLabel { get; init; }
+    public required string ExpandHint { get; init; }
     public bool HasDetail => Explanation.Length > 0 || Benefit.Length > 0;
+
+    private bool _isExpanded;
+    public bool IsExpanded => _isExpanded;
+    /// <summary>Detail lines only render when the user opens the card (Wave 3: tappable why).</summary>
+    public bool ShowDetail => IsExpanded && HasDetail;
+    public string ExpandChevron => IsExpanded ? "⌃" : "⌄";
+
+    /// <summary>Assigned by the VM right after construction, closing over THIS item — so a tap
+    /// on one card can never expand another (and XAML needs no CommandParameter plumbing).</summary>
+    public ICommand? ToggleCommand { get; set; }
+    public ICommand? SnoozeCommand { get; set; }
+
+    /// <summary>Card tap entry point (the command lives on THIS item, so expansion can't leak
+    /// into the parent VM's state and the setter stays private to the item).</summary>
+    public void ToggleExpanded()
+    {
+        _isExpanded = !_isExpanded;
+        Raise(nameof(IsExpanded));
+        Raise(nameof(ShowDetail));
+        Raise(nameof(ExpandChevron));
+    }
 }
 
 public sealed class PlanItemViewModel
@@ -35,9 +68,23 @@ public sealed class PlanItemViewModel
     public required Color AccentColor { get; init; }
 }
 
+/// <summary>One Today quick action: localized label + the route it opens. Navigation itself is
+/// defensive — an unregistered route (a lane whose shell line hasn't landed) reports an honest
+/// "not available yet" line instead of a silent no-op or a crash.</summary>
+public sealed class QuickActionViewModel
+{
+    public required string Label { get; init; }
+    public required string Route { get; init; }
+    public required string Icon { get; init; }
+    public ICommand? Command { get; init; }
+}
+
 /// <summary>
-/// Wave 2 Today: pure coordinator. PersonalState -> DailyPlan -> Recommendations -> Insight,
-/// all through services; the VM only localizes and shapes presentation.
+/// Wave 2/3 Today: pure coordinator. PersonalState -> DailyPlan -> Recommendations -> Insight,
+/// all through services; the VM only localizes and shapes presentation. Wave 3 adds:
+/// pull-to-refresh, the "log today" nudge (manual-entry check through IManualEntryService),
+/// a quick-actions row, expandable/snoozable recommendation cards, and honest inline empty
+/// states so a section with nothing never just disappears.
 /// </summary>
 public sealed class TodayViewModel : ObservableObject
 {
@@ -51,7 +98,10 @@ public sealed class TodayViewModel : ObservableObject
     private readonly IRepository<Goal> _goalRepo;
     private readonly IHistoryRepository _history;
     private readonly SessionState _session;
+    private readonly IManualEntryService _manual;
+    private readonly ISnoozeStore _snoozes;
     private PersonalState? _state;
+    private int _hiddenBySnooze;
 
     public TodayViewModel(
         IUserStateService stateService,
@@ -63,7 +113,9 @@ public sealed class TodayViewModel : ObservableObject
         IRepository<Habit> habitRepo,
         IRepository<Goal> goalRepo,
         IHistoryRepository history,
-        SessionState session)
+        SessionState session,
+        IManualEntryService manual,
+        ISnoozeStore snoozes)
     {
         _stateService = stateService;
         _planService = planService;
@@ -75,19 +127,40 @@ public sealed class TodayViewModel : ObservableObject
         _goalRepo = goalRepo;
         _history = history;
         _session = session;
+        _manual = manual;
+        _snoozes = snoozes;
         SubscribeLanguage();
         ToggleHabitCommand = new Command<HabitRowViewModel>(async row => await ToggleHabitAsync(row));
         ReviewWeekCommand = new Command(async () =>
         {
             if (OpenWeeklyReview is { } open) await open();
         });
+        RefreshCommand = new Command(async () =>
+        {
+            try { await LoadAsync(DataRefreshMode.ManualRefresh); }
+            finally { IsRefreshing = false; }
+        });
+        GoalsTabCommand = new Command(() => GoSafe("//Goals", "Goals.Title"));
+        ShowSnoozedAgainCommand = new Command(async () =>
+        {
+            await _snoozes.ClearAllAsync();
+            await LoadAsync(DataRefreshMode.ManualRefresh);
+        });
+        RebuildQuickActions();
     }
 
     public ICommand ToggleHabitCommand { get; }
+    public ICommand ReviewWeekCommand { get; }
+    public ICommand RefreshCommand { get; }
+    public ICommand GoalsTabCommand { get; }
+    public ICommand ShowSnoozedAgainCommand { get; }
 
     /// <summary>Set by TodayPage to open the weekly review modally.</summary>
     public Func<Task>? OpenWeeklyReview { get; set; }
-    public ICommand ReviewWeekCommand { get; private set; }
+    /// <summary>Set by TodayPage: navigate to a route; returns false when the route is unknown
+    /// in this build (MAUI versions differ between throwing and logging-and-ignoring, so the page
+    /// checks BOTH the exception and whether the location actually moved).</summary>
+    public Func<string, Task<bool>>? OpenRoute { get; set; }
 
     // ---- Static labels ----
     public string Greeting => BuildGreeting();
@@ -104,6 +177,95 @@ public sealed class TodayViewModel : ObservableObject
     public string HabitsTitle => L("Today.Habits");
     public string GoalsTitle => L("Today.ActiveGoals");
     public string ReviewWeekText => L("Today.ViewWeek");
+
+    // ---- Wave 3 Today chrome ----
+    public string PullToRefreshHint => L("Today.PullToRefresh");
+    public string LogNudgeText => L("Today.LogNudge.Body");
+    public string LogNudgeAction => L("Today.LogNudge.Action");
+    public string QuickActionsTitle => L("Today.QuickActions");
+    public string EmptyRecommendations => L("Today.Empty.Recommendations");
+    public string EmptyPlan => L("Today.Empty.Plan");
+    public string EmptyHabits => L("Today.Empty.Habits");
+    public string EmptyHabitsCta => L("Today.Empty.Habits.Cta");
+    public string EmptyGoals => L("Today.Empty.Goals");
+    public string EmptyGoalsCta => L("Today.Empty.Goals.Cta");
+    public string HiddenBySnoozeNote => _hiddenBySnooze > 0
+        ? L("Today.SnoozedHidden", _format.Number(_hiddenBySnooze)) : string.Empty;
+    public string ShowSnoozedAgain => L("Today.Snoozed.ShowAgain");
+
+    // ---- Log-today nudge (manual-entry honesty: only about USER data, never the mock feed) ----
+    private bool _showLogNudge;
+    public bool ShowLogNudge { get => _showLogNudge; private set => Set(ref _showLogNudge, value); }
+
+    /// <summary>True once the manual-entry check has actually answered (nag appears from truth,
+    /// never from a default).</summary>
+    private bool _logCheckDone;
+    public bool LogCheckDone { get => _logCheckDone; private set => Set(ref _logCheckDone, value); }
+
+    // ---- Quick actions + defensive navigation ----
+    public ObservableCollection<QuickActionViewModel> QuickActions { get; } = new();
+    /// <summary>Explicit tiles (compiled bindings can't index a collection in XAML safely).</summary>
+    public QuickActionViewModel LogAction { get; private set; } = null!;
+    public QuickActionViewModel RemindersAction { get; private set; } = null!;
+    public QuickActionViewModel UpdatesAction { get; private set; } = null!;
+    public QuickActionViewModel ReviewAction { get; private set; } = null!;
+
+    private string _routeNotice = string.Empty;
+    /// <summary>Transient honest line after a quick action whose route is not available in this build.</summary>
+    public string RouteNotice { get => _routeNotice; private set { Set(ref _routeNotice, value); Raise(nameof(HasRouteNotice)); } }
+    public bool HasRouteNotice => RouteNotice.Length > 0;
+
+    public ICommand LogTodayCommand => _logToday ??= new Command(() => GoSafe("log-entry", "Today.QA.Log"));
+    private ICommand? _logToday;
+
+    private void RebuildQuickActions()
+    {
+        LogAction = new QuickActionViewModel
+        {
+            Label = L("Today.QA.Log"), Route = "log-entry", Icon = "＋", Command = LogTodayCommand,
+        };
+        RemindersAction = new QuickActionViewModel
+        {
+            Label = L("Today.QA.Reminders"), Route = "reminders", Icon = "🔔",
+            Command = new Command(() => GoSafe("reminders", "Today.QA.Reminders")),
+        };
+        UpdatesAction = new QuickActionViewModel
+        {
+            Label = L("Today.QA.Updates"), Route = "updates", Icon = "↑",
+            Command = new Command(() => GoSafe("updates", "Today.QA.Updates")),
+        };
+        ReviewAction = new QuickActionViewModel
+        {
+            Label = L("Today.QA.Review"), Route = "review", Icon = "↺", Command = ReviewWeekCommand,
+        };
+        QuickActions.Clear();
+        QuickActions.Add(LogAction);
+        QuickActions.Add(RemindersAction);
+        QuickActions.Add(UpdatesAction);
+        QuickActions.Add(ReviewAction);
+        Raise(nameof(LogAction));
+        Raise(nameof(RemindersAction));
+        Raise(nameof(UpdatesAction));
+        Raise(nameof(ReviewAction));
+    }
+
+    /// <summary>Navigate or admit failure. Routes are registered by other lanes; until (or unless)
+    /// a line lands, the tap must say so honestly instead of doing nothing.</summary>
+    private async void GoSafe(string route, string nameKey)
+    {
+        RouteNotice = string.Empty;
+        if (OpenRoute is not { } open)
+        {
+            // No host wiring at all (e.g. the page forgot to set the hook): admit it, don't lie
+            // with a silent no-op.
+            RouteNotice = L("Today.RouteUnavailable", L(nameKey));
+            return;
+        }
+        bool moved;
+        try { moved = await open(route); }
+        catch { moved = false; }
+        if (!moved) RouteNotice = L("Today.RouteUnavailable", L(nameKey));
+    }
 
     // ---- Daily score ----
     private double _dailyScore;
@@ -152,6 +314,12 @@ public sealed class TodayViewModel : ObservableObject
     private bool _isBusy;
     public bool IsBusy { get => _isBusy; set => Set(ref _isBusy, value); }
 
+    /// <summary>RefreshView's own flag. Deliberately separate from IsBusy: RefreshView sets
+    /// IsRefreshing=true BEFORE executing the command, and LoadAsync's IsBusy guard would then
+    /// swallow the pull and leave the spinner running forever.</summary>
+    private bool _isRefreshing;
+    public bool IsRefreshing { get => _isRefreshing; set => Set(ref _isRefreshing, value); }
+
     public async Task LoadAsync(DataRefreshMode mode = DataRefreshMode.InitialLoad)
     {
         if (IsBusy) return;
@@ -175,6 +343,16 @@ public sealed class TodayViewModel : ObservableObject
             var recs = _recommendations.BuildRecommendations(state, profile, goals, habits, plan, _clock.Now);
             var insight = await _intelligence.GenerateDailyInsightAsync(state, profile, plan, goals, habits);
 
+            // Wave 3 side checks — manual entry (nudge) and snoozes (hidden recommendations).
+            var snoozedTask = SafeSnoozesAsync();
+            var loggedTask = SafeLoggedTodayAsync();
+            await Task.WhenAll(snoozedTask, loggedTask);
+            var snoozed = await snoozedTask;
+            bool loggedToday = await loggedTask;
+            // Evening only (no morning nagging), and only after the real check answered above —
+            // ShowLogNudge is never set from a default, so an unanswered store cannot nag.
+            ShowLogNudge = !loggedToday && _clock.Now.Hour >= 19;
+
             DailyScore = ComputeDailyScore(state);
             InsightTitle = L(insight.TitleKey);
             InsightSummary = FormatInsight(insight);
@@ -182,11 +360,15 @@ public sealed class TodayViewModel : ObservableObject
             Raise(nameof(StateConfidenceLabel));
             Raise(nameof(DataCompletenessLabel));
 
+            _hiddenBySnooze = 0;
             Recommendations.Clear();
             foreach (var r in recs)
             {
-                Recommendations.Add(new RecommendationItemViewModel
+                var stable = (r.ProducedByRule ?? r.ActionKind.ToString()) + "|" + r.TextKey;
+                if (snoozed.Contains(stable)) { _hiddenBySnooze++; continue; }
+                var card = new RecommendationItemViewModel
                 {
+                    StableId = stable,
                     Text = L(r.TextKey, FormatArgs(r.TextArgs)),
                     Explanation = r.ExplainKey.Length > 0 ? L(r.ExplainKey, FormatArgs(r.ExplainArgs)) : string.Empty,
                     Benefit = r.ExpectedBenefitKey.Length > 0 ? L(r.ExpectedBenefitKey) : string.Empty,
@@ -194,7 +376,22 @@ public sealed class TodayViewModel : ObservableObject
                     DurationMinutes = r.DurationMinutes,
                     DurationText = r.DurationMinutes > 0 ? _format.DurationFromMinutes(r.DurationMinutes) : string.Empty,
                     Confidence = r.Confidence,
+                    ConfidenceLabel = L("Today.Recommend.Confidence", _format.Percent(r.Confidence)),
+                    WhyLabel = L("Today.Recommend.Why"),
+                    BenefitLabel = L("Today.Recommend.Benefit"),
+                    SnoozeLabel = L("Today.Snooze"),
+                    ExpandHint = L("Today.Recommend.TapToExpand"),
+                };
+                card.ToggleCommand = new Command(card.ToggleExpanded);
+                card.SnoozeCommand = new Command(async () =>
+                {
+                    await _snoozes.SnoozeAsync(card.StableId, TimeSpan.FromHours(24));
+                    Recommendations.Remove(card);
+                    _hiddenBySnooze++;
+                    Raise(nameof(HasRecommendations));
+                    Raise(nameof(HiddenBySnoozeNote));
                 });
+                Recommendations.Add(card);
             }
 
             PlanItems.Clear();
@@ -231,8 +428,32 @@ public sealed class TodayViewModel : ObservableObject
             Raise(nameof(HasGoals));
             Raise(nameof(HasHabits));
             Raise(nameof(PlanStandardNote));
+            Raise(nameof(HiddenBySnoozeNote));
         }
         finally { IsBusy = false; }
+    }
+
+    /// <summary>Snooze IO must never blank Today: on failure, nothing is hidden (fail open, the
+    /// recommendations are the safer fallback than losing the section).</summary>
+    private async Task<HashSet<string>> SafeSnoozesAsync()
+    {
+        try
+        {
+            var items = await _snoozes.GetActiveAsync(DateTime.UtcNow);
+            return items.Select(i => i.ItemId).ToHashSet(StringComparer.Ordinal);
+        }
+        catch { return new HashSet<string>(StringComparer.Ordinal); }
+    }
+
+    /// <summary>Same honesty in the other direction: if the store cannot answer, do NOT nag.</summary>
+    private async Task<bool> SafeLoggedTodayAsync()
+    {
+        try
+        {
+            var entry = await _manual.GetForDayAsync(_clock.Today);
+            return entry is not null && !entry.IsEmpty;
+        }
+        catch { return true; }
     }
 
     private MiniMetricViewModel MetricRow(string title, MetricState ms, Func<double, string> fmt, Color accent)
@@ -351,6 +572,15 @@ public sealed class TodayViewModel : ObservableObject
         Raise(nameof(StateConfidenceLabel));
         Raise(nameof(DataCompletenessLabel));
         Raise(nameof(PlanStandardNote));
+        Raise(nameof(PullToRefreshHint));
+        Raise(nameof(LogNudgeText)); Raise(nameof(LogNudgeAction));
+        Raise(nameof(QuickActionsTitle)); Raise(nameof(RouteNotice));
+        Raise(nameof(EmptyRecommendations)); Raise(nameof(EmptyPlan));
+        Raise(nameof(EmptyHabits)); Raise(nameof(EmptyHabitsCta));
+        Raise(nameof(EmptyGoals)); Raise(nameof(EmptyGoalsCta));
+        Raise(nameof(HiddenBySnoozeNote)); Raise(nameof(ShowSnoozedAgain));
+        RebuildQuickActions();
+        Raise(nameof(QuickActionsTitle));
         _ = LoadAsync(DataRefreshMode.ManualRefresh);
     }
 }

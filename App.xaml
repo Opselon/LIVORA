@@ -3,12 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:LIVORA"
              xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+             xmlns:resp="clr-namespace:LIVORA.Presentation.Responsive"
              x:Class="LIVORA.App">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary>
                 <comp:IsNotEmptyConverter x:Key="IsNotEmpty" />
                 <comp:ColorByKeyConverter x:Key="ColorByKey" />
+                <!-- Responsive glue (lane 04): pages key IsVisible / ColumnSpan off the live
+                     AdaptiveLayout.Breakpoint attached value through these. -->
+                <resp:BreakpointToBoolConverter x:Key="BpToBool" />
+                <resp:BreakpointToIntConverter x:Key="BpToInt" />
             </ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/LivoraColors.xaml" />

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="LIVORA.Presentation.Components.SearchBarView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    x:DataType="comp:SearchBarView">
+
+    <!-- Shared search field (lane 09; lanes 07/08 code against this name). Owns no strings:
+         the localized placeholder comes from the host. Text is TwoWay so a VM can clear it,
+         and SearchCommand fires on the keyboard search/enter key. -->
+    <Border Style="{StaticResource SoftCard}" Padding="14,2" StrokeThickness="0">
+        <SearchBar
+            x:Name="Field"
+            Text="{Binding Text, Mode=TwoWay}"
+            Placeholder="{Binding Placeholder}"
+            SearchButtonPressed="OnSearchButtonPressed"
+            HorizontalTextAlignment="Start"
+            SemanticProperties.Description="{Binding Placeholder}" />
+    </Border>
+</ContentView>

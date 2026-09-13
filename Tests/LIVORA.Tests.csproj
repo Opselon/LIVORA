@@ -17,6 +17,23 @@
 		<!-- One UI-free Infrastructure file is under test too: the deterministic mock intelligence
 		     provider (insight topic selection) depends only on Domain + Application abstractions. -->
 		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\IntelligenceProviders\SampleIntelligenceProvider.cs" LinkBase="Infrastructure" />
+		<!-- WAVE 3 (lane 10): the localization stack is MAUI-free even though it lives under
+		     Infrastructure/ — LocalizationService needs only Application.Abstractions +
+		     Microsoft.Extensions.Logging.Abstractions, so the real key lookup, the [missing]
+		     fallback and the Persian digit / percent / duration formatting are all testable here.
+		     AppResources.cs + the two resx files give the test assembly its own resource manifest,
+		     which is what the resx-integrity and honesty suites read.
+		     DemoDataSeeder is likewise MAUI/IO-free (it talks to IRepository + a Func<string,string>
+		     localizer), so its seeding/idempotency logic is compiled in for real coverage. -->
+		<Compile Include="$(MSBuildThisFileDirectory)..\Resources\Localization\AppResources.cs" LinkBase="Resources" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Localization\*.cs" LinkBase="Infrastructure" />
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Persistence\DemoDataSeeder.cs" LinkBase="Infrastructure" />
+		<EmbeddedResource Include="$(MSBuildThisFileDirectory)..\Resources\Localization\AppResources.resx">
+			<ManifestResourceName>LIVORA.Resources.Localization.AppResources</ManifestResourceName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="$(MSBuildThisFileDirectory)..\Resources\Localization\AppResources.fa.resx">
+			<ManifestResourceName>LIVORA.Resources.Localization.AppResources.fa</ManifestResourceName>
+		</EmbeddedResource>
 		<Compile Include="$(MSBuildThisFileDirectory)Tests\**\*.cs" />
 	</ItemGroup>
 
@@ -24,6 +41,10 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 		<PackageReference Include="xunit" Version="2.9.2" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+		<!-- Only the abstractions are needed: LocalizationService takes ILogger<T>, and the DI
+		     smoke test builds a real ServiceProvider so Wave 3 registrations are verified for real. -->
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
 	</ItemGroup>
 
 </Project>

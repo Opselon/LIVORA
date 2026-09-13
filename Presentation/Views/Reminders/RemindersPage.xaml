@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.RemindersPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:RemindersViewModel">
+
+    <!-- Reminders (lane 09). The grant banner reports EXACTLY what the OS answered; every control
+         writes through IReminderService immediately (and re-syncs the platform scheduler).
+         Brushes only on Border.Background/.Stroke; Color-typed props take a Color or inline
+         AppThemeBinding. Start/End alignment everywhere for RTL. -->
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <comp:NotConverter x:Key="Not" />
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}" />
+                <Setter Property="StrokeThickness" Value="0" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+                <Setter Property="Padding" Value="9,4" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <ScrollView Padding="{StaticResource PageThickness}">
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{Binding TitleText}" Style="{StaticResource LDisplay}"
+                       LineBreakMode="WordWrap" MaxLines="2"
+                       SemanticProperties.HeadingLevel="Level1" />
+                <Label Text="{Binding SubtitleText}" Style="{StaticResource LCaption}"
+                       LineBreakMode="WordWrap" MaxLines="2" />
+            </VerticalStackLayout>
+
+            <!-- Grant banner: the real platform answer, phrased per state, never assumed -->
+            <Border Style="{StaticResource Card}" Padding="16,14">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Label Grid.Column="0" Text="{Binding GrantTitle}" Style="{StaticResource LSubheading}"
+                               LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level2" />
+                        <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" MaximumWidthRequest="220">
+                            <Label Text="{Binding GrantText}" Style="{StaticResource ChipLabel}"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                   LineBreakMode="WordWrap" MaxLines="2" />
+                        </Border>
+                    </Grid>
+                    <Label Text="{Binding GrantDetail}" Style="{StaticResource LBodySecondary}" FontSize="13"
+                           LineBreakMode="WordWrap" IsVisible="{Binding HasGrantDetail}" />
+                    <!-- Not-asked/unknown → ask now. Denied → the OS says no in-app, so open settings.
+                         Allowed/SystemManaged/Unsupported → nothing to press (the state text says why). -->
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="{localize:Tr Reminders.Grant.Request}"
+                                Command="{Binding RequestGrantCommand}"
+                                Style="{StaticResource SecondaryButton}" Padding="14,8" FontSize="13"
+                                MinimumHeightRequest="44"
+                                IsVisible="{Binding CanRequestGrant}"
+                                SemanticProperties.Description="{localize:Tr Reminders.Grant.Request}" />
+                        <Button Text="{localize:Tr Reminders.Grant.OpenSettings}"
+                                Command="{Binding OpenSystemSettingsCommand}"
+                                Style="{StaticResource GhostButton}"
+                                MinimumHeightRequest="44"
+                                IsVisible="{Binding CanOpenSettings}"
+                                SemanticProperties.Description="{localize:Tr Reminders.Grant.OpenSettings}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Loading language -->
+            <Border Style="{StaticResource SoftCard}" Padding="14,12" IsVisible="{Binding IsBusy}">
+                <HorizontalStackLayout Spacing="12">
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource Accent}"
+                                       WidthRequest="22" HeightRequest="22" VerticalOptions="Center" />
+                    <Label Text="{localize:Tr Reminders.Loading}" Style="{StaticResource LCaption}"
+                           VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="2" />
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Reminder kinds -->
+            <Label Text="{Binding ScheduleSection}" Style="{StaticResource SectionHeader}" />
+            <comp:ItemsStackLayout ItemsSource="{Binding Rows}" Spacing="10">
+                <comp:ItemsStackLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ReminderRowViewModel">
+                        <Border Style="{StaticResource Card}" Padding="16,12">
+                            <VerticalStackLayout Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                        <Label Text="{Binding Title}" Style="{StaticResource LBody}" FontAttributes="Bold"
+                                               LineBreakMode="WordWrap" MaxLines="2"
+                                               SemanticProperties.HeadingLevel="Level3" />
+                                        <Label Text="{Binding Description}" Style="{StaticResource LCaption}" FontSize="12"
+                                               LineBreakMode="WordWrap" MaxLines="3" />
+                                    </VerticalStackLayout>
+                                    <Switch Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End"
+                                            IsToggled="{Binding Enabled}"
+                                            OnColor="{StaticResource Accent}"
+                                            ThumbColor="{StaticResource Surface}"
+                                            SemanticProperties.Description="{Binding Title}" />
+                                </Grid>
+
+                                <!-- time picker: MAUI TwoWay by default; the row persists on change -->
+                                <HorizontalStackLayout Spacing="10">
+                                    <TimePicker Time="{Binding Time}"
+                                                SemanticProperties.Description="{localize:Tr Reminders.TimeLabel}" />
+                                    <Border Style="{StaticResource ChipNeutral}">
+                                        <Label Text="{Binding TimeText}" Style="{StaticResource ChipLabel}"
+                                               FontAttributes="Bold"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                    </Border>
+                                </HorizontalStackLayout>
+
+                                <!-- weekday chips (Sunday first — the mask order), Start-aligned so
+                                     the row mirrors correctly under RTL -->
+                                <HorizontalStackLayout Spacing="6"
+                                                       BindableLayout.ItemsSource="{Binding DayLabels}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:WeekdayChipViewModel">
+                                            <Border WidthRequest="36" HeightRequest="36"
+                                                    StrokeThickness="1" StrokeShape="RoundRectangle 18"
+                                                    Background="{StaticResource SurfaceAltBrush}"
+                                                    Stroke="{StaticResource OverlayBrush}"
+                                                    comp:TappableFeedback.Tappable="True"
+                                                    SemanticProperties.Description="{Binding Label}">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsOn}" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                                                        <Setter Property="Stroke" Value="{StaticResource AccentBrush}" />
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Toggle}" />
+                                                </Border.GestureRecognizers>
+                                                <Label Text="{Binding Label}" FontSize="11" FontAttributes="Bold"
+                                                       HorizontalOptions="Center" VerticalOptions="Center"
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding IsOn}" Value="True">
+                                                            <Setter Property="TextColor" Value="{StaticResource AccentDeep}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </HorizontalStackLayout>
+
+                                <!-- a failed write is reported inline, never swallowed silently -->
+                                <Label Text="{Binding SaveError}" Style="{StaticResource LCaption}" FontSize="11.5"
+                                       TextColor="{StaticResource Negative}"
+                                       LineBreakMode="WordWrap" MaxLines="3"
+                                       IsVisible="{Binding SaveError, Converter={StaticResource IsNotEmpty}}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </comp:ItemsStackLayout.ItemTemplate>
+            </comp:ItemsStackLayout>
+
+            <!-- Test reminder: the result line says exactly what happened -->
+            <Border Style="{StaticResource SoftCard}" Padding="16,12">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{localize:Tr Reminders.Test.Title}" Style="{StaticResource LSubheading}"
+                                   LineBreakMode="WordWrap" MaxLines="2" />
+                            <Label Text="{localize:Tr Reminders.Test.Note}" Style="{StaticResource LCaption}" FontSize="12"
+                                   LineBreakMode="WordWrap" MaxLines="3" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1" Text="{Binding TestButton}"
+                                Command="{Binding TestReminderCommand}"
+                                Style="{StaticResource SecondaryButton}" Padding="14,8" FontSize="13"
+                                MinimumHeightRequest="44" VerticalOptions="Center"
+                                SemanticProperties.Description="{Binding TestButton}" />
+                    </Grid>
+                    <Label Text="{Binding TestResult}" Style="{StaticResource LBodySecondary}" FontSize="13"
+                           LineBreakMode="WordWrap" IsVisible="{Binding HasTestResult}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- What would notify right now — engine output, keys localized here -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{Binding PreviewHeader}" Style="{StaticResource SectionHeader}" />
+                <comp:ItemsStackLayout ItemsSource="{Binding Preview}" Spacing="8"
+                                       IsVisible="{Binding HasPreview}">
+                    <comp:ItemsStackLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PreviewItemViewModel">
+                            <Border Style="{StaticResource SoftCard}" Padding="14,10">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                    <Border Grid.Column="0" Style="{StaticResource ChipNeutral}" VerticalOptions="Center">
+                                        <Label Text="{Binding KindText}" Style="{StaticResource ChipLabel}" />
+                                    </Border>
+                                    <Label Grid.Column="1" Text="{Binding BodyText}" Style="{StaticResource LBody}" FontSize="13.5"
+                                           VerticalOptions="Center" LineBreakMode="WordWrap" />
+                                    <Label Grid.Column="2" Text="{Binding AtText}" Style="{StaticResource LCaption}" FontSize="11"
+                                           VerticalOptions="Center" HorizontalOptions="End"
+                                           LineBreakMode="WordWrap" MaxLines="2" HorizontalTextAlignment="End" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </comp:ItemsStackLayout.ItemTemplate>
+                </comp:ItemsStackLayout>
+                <comp:EmptyStateView
+                    Title="{localize:Tr Reminders.Preview.Empty.Title}"
+                    Message="{Binding PreviewEmpty}"
+                    IsVisible="{Binding HasPreview, Converter={StaticResource Not}}" />
+            </VerticalStackLayout>
+
+            <Label Text="{Binding HoursHint}" Style="{StaticResource LCaption}" FontSize="11.5"
+                   LineBreakMode="WordWrap" MaxLines="3" />
+
+            <BoxView HeightRequest="12" Color="Transparent" />
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:LIVORA.Presentation.Views"
     xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
     xmlns:vm="clr-namespace:LIVORA.Presentation"
     x:DataType="vm:TodayViewModel">
 
@@ -13,6 +14,7 @@
          tokens they consume (colors, radius, spacing) all come from LivoraColors.xaml. -->
     <views:BaseContentPage.Resources>
         <ResourceDictionary>
+            <comp:NotConverter x:Key="Not" />
             <Style x:Key="ChipNeutral" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
                 <Setter Property="StrokeThickness" Value="0"/>
@@ -50,14 +52,28 @@
                 <Setter Property="CornerRadius" Value="2"/>
                 <Setter Property="VerticalOptions" Value="Fill"/>
             </Style>
+            <!-- quick-action tile: same shape everywhere, ≥44dp, Start/End only -->
+            <Style x:Key="QuickAction" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                <Setter Property="Stroke" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 16"/>
+                <Setter Property="Padding" Value="6,10"/>
+                <Setter Property="MinimumHeightRequest" Value="62"/>
+            </Style>
         </ResourceDictionary>
     </views:BaseContentPage.Resources>
 
-    <ScrollView Padding="{StaticResource PageThickness}">
-        <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+    <!-- Wave 3: pull-to-refresh is a real affordance now (RefreshView + LoadAsync). -->
+    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsRefreshing}"
+                 RefreshColor="{StaticResource Accent}">
+        <ScrollView Padding="{StaticResource PageThickness}">
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
 
             <!-- Header: greeting wraps to two lines so a long Persian greeting never clips
-                 against the fixed 88dp score ring (Start/End alignment keeps RTL mirroring intact) -->
+                 against the score block (Start/End alignment keeps RTL mirroring intact).
+                 The score is NOT a ring: an honest number + a linear track, with the data-quality
+                 chips right beside it so the score never looks more certain than the data supports. -->
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14" Margin="0,0,0,2">
                 <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
                     <Label Text="{Binding Greeting}"
@@ -73,30 +89,38 @@
                     </Border>
                 </VerticalStackLayout>
 
-                <Border Grid.Column="1" WidthRequest="88" HeightRequest="88"
-                        StrokeThickness="0" VerticalOptions="Center"
-                        StrokeShape="RoundRectangle 44" Background="{StaticResource SurfaceBrush}"
+                <Border Grid.Column="1" WidthRequest="112" StrokeThickness="0" VerticalOptions="Center"
+                        StrokeShape="RoundRectangle 18" Background="{StaticResource SurfaceBrush}"
                         SemanticProperties.Description="{Binding DailyScoreTitle}">
-                    <Grid>
-                        <ProgressBar Progress="{Binding DailyScore}"
-                                     Style="{StaticResource ProgressTrack}"
-                                     VerticalOptions="Start" Margin="0,-4,0,0"
+                    <VerticalStackLayout Spacing="5" Padding="10,10">
+                        <Label Text="{Binding DailyScoreTitle}" FontSize="10"
+                               Style="{StaticResource LCaption}"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                               LineBreakMode="WordWrap" MaxLines="2"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <Label Text="{Binding DailyScoreDisplay}" Style="{StaticResource LMetricLarge}" FontSize="26"
+                               TextColor="{StaticResource Accent}"
+                               HorizontalOptions="Center"
+                               LineBreakMode="TailTruncation" MaxLines="1"/>
+                        <ProgressBar Progress="{Binding DailyScore}" Style="{StaticResource ProgressTrack}"
+                                     ProgressColor="{StaticResource Accent}" HeightRequest="4"
                                      SemanticProperties.Description="{Binding DailyScoreDisplay}"/>
-                        <VerticalStackLayout VerticalOptions="Center" Spacing="0" Padding="6,0">
-                            <Label Text="{Binding DailyScoreDisplay}" Style="{StaticResource LMetric}"
-                                   HorizontalOptions="Center" TextColor="{StaticResource Accent}"
-                                   LineBreakMode="TailTruncation" MaxLines="1"/>
-                            <Label Text="{Binding DailyScoreTitle}" FontSize="10" HorizontalOptions="Center"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                   HorizontalTextAlignment="Center"
-                                   LineBreakMode="WordWrap" MaxLines="2"/>
-                        </VerticalStackLayout>
-                    </Grid>
+                        <!-- honesty pair: the score is only as strong as coverage + confidence -->
+                        <Label Text="{Binding DataCompletenessLabel}" Style="{StaticResource LCaption}" FontSize="10.5"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="TailTruncation" MaxLines="1"
+                               SemanticProperties.Description="{Binding CompletenessTitle}"/>
+                        <Label Text="{Binding StateConfidenceLabel}" Style="{StaticResource LCaption}" FontSize="10.5"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{StaticResource Accent}" FontAttributes="Bold"
+                               LineBreakMode="TailTruncation" MaxLines="1"
+                               SemanticProperties.Description="{Binding ConfidenceTitle}"/>
+                    </VerticalStackLayout>
                 </Border>
             </Grid>
 
-            <!-- Loading language: an honest inline skeleton while the pipeline runs.
-                 Uses the VM's existing IsBusy flag only — no new view-model surface. -->
+            <!-- Loading language: an honest inline skeleton while the pipeline runs. -->
             <Border Style="{StaticResource SoftCard}" Padding="14,12" IsVisible="{Binding IsBusy}">
                 <HorizontalStackLayout Spacing="12">
                     <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource Accent}"
@@ -110,7 +134,87 @@
                 </HorizontalStackLayout>
             </Border>
 
-            <!-- State quality line: honest about confidence + coverage -->
+            <!-- Log-today nudge: appears only after the manual-entry check answered AND it is evening.
+                 Speaks about USER data only (self-reported), never about the mock feed. -->
+            <Border StrokeShape="RoundRectangle 20" StrokeThickness="1" Padding="14,12"
+                    Background="{StaticResource AccentSoftBrush}" Stroke="{StaticResource AccentBrush}"
+                    IsVisible="{Binding ShowLogNudge}">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Label Grid.Column="0" Text="{Binding LogNudgeText}" Style="{StaticResource LBody}" FontSize="13.5"
+                           VerticalOptions="Center" LineBreakMode="WordWrap" MaxLines="3"/>
+                    <Button Grid.Column="1" Text="{Binding LogNudgeAction}" Command="{Binding LogTodayCommand}"
+                            Style="{StaticResource SecondaryButton}" Padding="12,8" FontSize="13"
+                            MinimumHeightRequest="44" VerticalOptions="Center"
+                            SemanticProperties.Description="{Binding LogNudgeAction}"/>
+                </Grid>
+            </Border>
+
+            <!-- Quick actions: routes belong to other lanes, so every tile is defensive and a failed
+                 navigation says "not available yet" in the line below instead of dying quietly. -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{Binding QuickActionsTitle}" Style="{StaticResource SectionHeader}" FontSize="12"
+                       SemanticProperties.HeadingLevel="Level2"/>
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                    <Border Grid.Column="0" Style="{StaticResource QuickAction}" Margin="0"
+                            comp:TappableFeedback.Tappable="True"
+                            SemanticProperties.Description="{Binding LogAction.Label}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LogAction.Command}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="{Binding LogAction.Icon}" FontSize="16" HorizontalOptions="Center"
+                                   TextColor="{StaticResource Accent}"/>
+                            <Label Text="{Binding LogAction.Label}" Style="{StaticResource LCaption}" FontSize="10.5"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource QuickAction}"
+                            comp:TappableFeedback.Tappable="True"
+                            SemanticProperties.Description="{Binding RemindersAction.Label}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RemindersAction.Command}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="{Binding RemindersAction.Icon}" FontSize="16" HorizontalOptions="Center"
+                                   TextColor="{StaticResource Accent}"/>
+                            <Label Text="{Binding RemindersAction.Label}" Style="{StaticResource LCaption}" FontSize="10.5"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource QuickAction}"
+                            comp:TappableFeedback.Tappable="True"
+                            SemanticProperties.Description="{Binding UpdatesAction.Label}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding UpdatesAction.Command}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="{Binding UpdatesAction.Icon}" FontSize="16" HorizontalOptions="Center"
+                                   TextColor="{StaticResource Accent}"/>
+                            <Label Text="{Binding UpdatesAction.Label}" Style="{StaticResource LCaption}" FontSize="10.5"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="3" Style="{StaticResource QuickAction}"
+                            comp:TappableFeedback.Tappable="True"
+                            SemanticProperties.Description="{Binding ReviewAction.Label}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ReviewAction.Command}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="{Binding ReviewAction.Icon}" FontSize="16" HorizontalOptions="Center"
+                                   TextColor="{StaticResource Accent}"/>
+                            <Label Text="{Binding ReviewAction.Label}" Style="{StaticResource LCaption}" FontSize="10.5"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+                <Label Text="{Binding RouteNotice}" Style="{StaticResource LCaption}" FontSize="12"
+                       TextColor="{StaticResource Caution}"
+                       LineBreakMode="WordWrap" MaxLines="3"
+                       IsVisible="{Binding HasRouteNotice}"/>
+            </VerticalStackLayout>
+
+            <!-- State quality line: honest about coverage + confidence (kept from Wave 2) -->
             <Border Style="{StaticResource SoftCard}" Padding="14,10">
                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
                     <Label Grid.Column="0" Text="{Binding CompletenessTitle}"
@@ -165,8 +269,9 @@
                     Command="{Binding ReviewWeekCommand}" HorizontalOptions="Start"
                     SemanticProperties.Description="{Binding ReviewWeekText}"/>
 
-            <!-- Recommendations with structured reasons -->
-            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasRecommendations}">
+            <!-- Recommendations: tappable why/benefit/confidence cards + snooze. A section with
+                 nothing says so inline (Wave 3 fix: it used to simply disappear). -->
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                     <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
                     <Label Grid.Column="1" Text="{Binding RecommendedTitle}" Style="{StaticResource SectionHeader}"
@@ -178,39 +283,80 @@
                             <Border Style="{StaticResource Card}" Padding="14,12"
                                     comp:TappableFeedback.Tappable="True"
                                     SemanticProperties.Description="{Binding Text}">
-                                <Grid ColumnDefinitions="4,*" ColumnSpacing="12">
-                                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource Accent}"
-                                             CornerRadius="2" VerticalOptions="Fill"/>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                            <Label Grid.Column="0" Text="{Binding Text}" Style="{StaticResource LBody}"
-                                                   FontAttributes="Bold" LineBreakMode="WordWrap"
-                                                   VerticalOptions="Center"
-                                                   SemanticProperties.HeadingLevel="Level3"/>
-                                            <Border Grid.Column="1" Style="{StaticResource ChipNeutral}"
-                                                    IsVisible="{Binding DurationText, Converter={StaticResource IsNotEmpty}}">
-                                                <Label Text="{Binding DurationText}" Style="{StaticResource ChipLabel}"/>
-                                            </Border>
-                                            <Border Grid.Column="2" Style="{StaticResource ChipTint}">
-                                                <Label Text="{Binding ConfidencePercentText}" Style="{StaticResource ChipLabel}"
-                                                       FontAttributes="Bold" TextColor="{StaticResource Accent}"/>
-                                            </Border>
-                                        </Grid>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleCommand}"/>
+                                </Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="6">
+                                    <Grid ColumnDefinitions="4,*,Auto,Auto,Auto" ColumnSpacing="10">
+                                        <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource Accent}"
+                                                 CornerRadius="2" VerticalOptions="Fill"/>
+                                        <Label Grid.Column="1" Text="{Binding Text}" Style="{StaticResource LBody}"
+                                               FontAttributes="Bold" LineBreakMode="WordWrap" MaxLines="3"
+                                               VerticalOptions="Center"
+                                               SemanticProperties.HeadingLevel="Level3"/>
+                                        <Border Grid.Column="2" Style="{StaticResource ChipNeutral}"
+                                                IsVisible="{Binding DurationText, Converter={StaticResource IsNotEmpty}}">
+                                            <Label Text="{Binding DurationText}" Style="{StaticResource ChipLabel}"/>
+                                        </Border>
+                                        <Border Grid.Column="3" Style="{StaticResource ChipTint}"
+                                                SemanticProperties.Description="{Binding ConfidenceLabel}">
+                                            <Label Text="{Binding ConfidencePercentText}" Style="{StaticResource ChipLabel}"
+                                                   FontAttributes="Bold" TextColor="{StaticResource Accent}"/>
+                                        </Border>
+                                        <Label Grid.Column="4" Text="{Binding ExpandChevron}" FontSize="13"
+                                               VerticalOptions="Center"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                                    </Grid>
+
+                                    <Label Text="{Binding ExpandHint}" Style="{StaticResource LCaption}" FontSize="11"
+                                           LineBreakMode="WordWrap" MaxLines="2"
+                                           IsVisible="{Binding ShowDetail, Converter={StaticResource Not}}"/>
+
+                                    <!-- expanded: the engine's own why + benefit + confidence label -->
+                                    <VerticalStackLayout Spacing="4" IsVisible="{Binding ShowDetail}">
+                                        <Label Text="{Binding WhyLabel}" Style="{StaticResource LCaption}" FontSize="11"
+                                               FontAttributes="Bold"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                               IsVisible="{Binding Explanation, Converter={StaticResource IsNotEmpty}}"/>
                                         <Label Text="{Binding Explanation}" Style="{StaticResource LCaption}" FontSize="12"
-                                               LineBreakMode="WordWrap" IsVisible="{Binding HasDetail}"/>
-                                        <Label Text="{Binding Benefit}" FontSize="11.5"
-                                               TextColor="{StaticResource Accent}"
-                                               LineBreakMode="WordWrap" IsVisible="{Binding HasDetail}"/>
+                                               LineBreakMode="WordWrap"/>
+                                        <Label Text="{Binding BenefitLabel}" Style="{StaticResource LCaption}" FontSize="11"
+                                               FontAttributes="Bold"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                                               IsVisible="{Binding Benefit, Converter={StaticResource IsNotEmpty}}"/>
+                                        <Label Text="{Binding Benefit}" FontSize="11.5" TextColor="{StaticResource Accent}"
+                                               LineBreakMode="WordWrap"/>
+                                        <Label Text="{Binding ConfidenceLabel}" FontSize="11"
+                                               LineBreakMode="WordWrap" MaxLines="2"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                                        <Button Text="{Binding SnoozeLabel}" Style="{StaticResource GhostButton}"
+                                                Padding="4,8" FontSize="13" MinimumHeightRequest="44"
+                                                HorizontalOptions="Start"
+                                                Command="{Binding SnoozeCommand}"
+                                                SemanticProperties.Description="{Binding SnoozeLabel}"/>
                                     </VerticalStackLayout>
-                                </Grid>
+                                </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
                     </comp:ItemsStackLayout.ItemTemplate>
                 </comp:ItemsStackLayout>
+                <!-- nothing recommended: say so honestly instead of vanishing (Wave 3 audit fix) -->
+                <comp:EmptyStateView Title="{localize:Tr Today.Empty.Recommendations.Title}"
+                                     Message="{Binding EmptyRecommendations}"
+                                     IsVisible="{Binding HasRecommendations, Converter={StaticResource Not}}" />
+                <!-- snoozed cards are gone but never silently: one line + one way back -->
+                <Label Text="{Binding HiddenBySnoozeNote}" Style="{StaticResource LCaption}" FontSize="11.5"
+                       LineBreakMode="WordWrap" MaxLines="2"
+                       IsVisible="{Binding HiddenBySnoozeNote, Converter={StaticResource IsNotEmpty}}"/>
+                <Button Text="{Binding ShowSnoozedAgain}" Style="{StaticResource GhostButton}"
+                        Padding="4,8" FontSize="13" MinimumHeightRequest="44" HorizontalOptions="Start"
+                        Command="{Binding ShowSnoozedAgainCommand}"
+                        IsVisible="{Binding HiddenBySnoozeNote, Converter={StaticResource IsNotEmpty}}"
+                        SemanticProperties.Description="{Binding ShowSnoozedAgain}"/>
             </VerticalStackLayout>
 
             <!-- Adaptive plan -->
-            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasPlan}">
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
                 <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
                     <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
                     <Label Grid.Column="1" Text="{Binding PlanTitle}" Style="{StaticResource SectionHeader}"
@@ -226,7 +372,7 @@
                         <Label Text="{Binding PlanStandardNote}" Style="{StaticResource ChipLabel}"/>
                     </Border>
                 </Grid>
-                <Border Style="{StaticResource Card}" Padding="0">
+                <Border Style="{StaticResource Card}" Padding="0" IsVisible="{Binding HasPlan}">
                     <comp:ItemsStackLayout ItemsSource="{Binding PlanItems}" Spacing="0">
                         <comp:ItemsStackLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:PlanItemViewModel">
@@ -240,7 +386,7 @@
                                                IsVisible="{Binding Detail, Converter={StaticResource IsNotEmpty}}"
                                                LineBreakMode="WordWrap"/>
                                     </VerticalStackLayout>
-                                    <!-- right edge: category chip + time window, one End-anchored group (mirrors cleanly) -->
+                                    <!-- End-anchored group (category chip + time window) mirrors cleanly -->
                                     <HorizontalStackLayout Grid.Row="0" Grid.Column="2" Spacing="8" VerticalOptions="Center">
                                         <Border Style="{StaticResource ChipNeutral}">
                                             <Label Text="{Binding CategoryText}" Style="{StaticResource ChipLabel}"/>
@@ -255,6 +401,9 @@
                         </comp:ItemsStackLayout.ItemTemplate>
                     </comp:ItemsStackLayout>
                 </Border>
+                <comp:EmptyStateView Title="{localize:Tr Today.Empty.Plan.Title}"
+                                     Message="{Binding EmptyPlan}"
+                                     IsVisible="{Binding HasPlan, Converter={StaticResource Not}}" />
             </VerticalStackLayout>
 
             <!-- Metrics with baseline deltas -->
@@ -293,21 +442,20 @@
                 </comp:ItemsStackLayout.ItemTemplate>
             </comp:ItemsStackLayout>
 
-            <!-- Habits -->
-            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasHabits}">
+            <!-- Habits: with a real one-line reason + CTA when the user has none yet -->
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                     <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
                     <Label Grid.Column="1" Text="{Binding HabitsTitle}" Style="{StaticResource SectionHeader}"
                            SemanticProperties.HeadingLevel="Level2"/>
                 </Grid>
-                <Border Style="{StaticResource Card}" Padding="0">
+                <Border Style="{StaticResource Card}" Padding="0" IsVisible="{Binding HasHabits}">
                     <comp:ItemsStackLayout ItemsSource="{Binding Habits}" Spacing="0">
                         <comp:ItemsStackLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:HabitRowViewModel">
                                 <!-- press feedback: this row owns a toggle action -->
                                 <Grid Padding="16,12" ColumnDefinitions="*,Auto" ColumnSpacing="12"
                                       MinimumHeightRequest="52"
-                                      comp:TappableFeedback.Tappable="True"
                                       SemanticProperties.Description="{Binding Name}">
                                     <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="3" VerticalOptions="Center">
                                         <!-- stacked: Persian streak + week counts are too long for one line on 360dp -->
@@ -323,22 +471,27 @@
                                             SemanticProperties.Description="{Binding ActionText}"
                                             Padding="14,8"
                                             VerticalOptions="Center"
-                                            Command="{Binding ToggleCommand}"/>
+                                            Command="{Binding ToggleCommand}" CommandParameter="{Binding .}"/>
                                 </Grid>
                             </DataTemplate>
                         </comp:ItemsStackLayout.ItemTemplate>
                     </comp:ItemsStackLayout>
                 </Border>
+                <comp:EmptyStateView Title="{localize:Tr Today.Empty.Habits.Title}"
+                                     Message="{Binding EmptyHabits}"
+                                     ActionText="{Binding EmptyHabitsCta}"
+                                     ActionCommand="{Binding GoalsTabCommand}"
+                                     IsVisible="{Binding HasHabits, Converter={StaticResource Not}}" />
             </VerticalStackLayout>
 
             <!-- Active goals -->
-            <VerticalStackLayout Spacing="{StaticResource CardSpacing}" IsVisible="{Binding HasGoals}">
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                     <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
-                    <Label Grid.Column="1" Text="{Binding GoalsTitle}" Style="{StaticResource SectionHeader}"
-                           SemanticProperties.HeadingLevel="Level2"/>
-                </Grid>
-                <comp:ItemsStackLayout ItemsSource="{Binding ActiveGoals}" Spacing="10">
+                <Label Grid.Column="1" Text="{Binding GoalsTitle}" Style="{StaticResource SectionHeader}"
+                       SemanticProperties.HeadingLevel="Level2"/>
+            </Grid>
+                <comp:ItemsStackLayout ItemsSource="{Binding ActiveGoals}" Spacing="10" IsVisible="{Binding HasGoals}">
                     <comp:ItemsStackLayout.ItemTemplate>
                         <DataTemplate x:DataType="vm:GoalItemViewModel">
                             <Border Style="{StaticResource Card}" Padding="14,12"
@@ -371,9 +524,19 @@
                         </DataTemplate>
                     </comp:ItemsStackLayout.ItemTemplate>
                 </comp:ItemsStackLayout>
+                <comp:EmptyStateView Title="{localize:Tr Today.Empty.Goals.Title}"
+                                     Message="{Binding EmptyGoals}"
+                                     ActionText="{Binding EmptyGoalsCta}"
+                                     ActionCommand="{Binding GoalsTabCommand}"
+                                     IsVisible="{Binding HasGoals, Converter={StaticResource Not}}" />
             </VerticalStackLayout>
 
-            <BoxView HeightRequest="12" Color="Transparent"/>
-        </VerticalStackLayout>
-    </ScrollView>
+                <Label Text="{Binding PullToRefreshHint}" Style="{StaticResource LCaption}" FontSize="10.5"
+                       HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"
+                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+
+                <BoxView HeightRequest="12" Color="Transparent"/>
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
 </views:BaseContentPage>

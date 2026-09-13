@@ -1,3 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="28" fill="#2C5D53"/>
+  <!-- LIVORA brand mark v2 (lane 05): the L-i monogram on a deep-teal gradient tile.
+       Master/background art (Windows tile, iOS). Adaptive foreground (appiconfg.svg) repeats the
+       same paths at 85% for the round safe zone, so every head ships ONE mark. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#356B5F"/>
+      <stop offset="1" stop-color="#234C44"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <!-- hairline inner edge: the quiet premium touch that keeps big flat tiles from looking soft -->
+  <rect x="4.5" y="4.5" width="119" height="119" rx="24" fill="none" stroke="#FFFFFF" stroke-opacity="0.07" stroke-width="1"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round" transform="translate(-10.5 0)">
+    <path d="M40 32 V96 H80"/>
+    <circle cx="94" cy="52" r="15"/>
+    <path d="M94 67 V96"/>
+  </g>
 </svg>

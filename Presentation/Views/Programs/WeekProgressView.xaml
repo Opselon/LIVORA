@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="LIVORA.Presentation.Views.WeekProgressView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:localize="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:WeekProgressViewModel">
+
+    <!-- Week progress block: habit / goal / program bars for one Saturday-start week, built from
+         persisted history. Hosted by the weekly review page — lane 09 owns that page, so this view
+         reaches it through the orchestrator's APPEND block instead of lane 08 editing the file.
+         The bars are drawn ONLY when WeekProgress says the week carries enough days of data; below
+         that the honest "not enough history" note replaces them (product law: no verdicts from a
+         two-day sample). -->
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Style x:Key="BarLabel" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="BarCaption" TargetType="Label" BasedOn="{StaticResource LCaption}">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
+
+    <Border Style="{StaticResource Card}">
+        <VerticalStackLayout Spacing="12">
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                    <Label Text="{Binding Title}" Style="{StaticResource LSubheading}"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level2"/>
+                    <Label Text="{Binding Subtitle}" Style="{StaticResource LCaption}" FontSize="11"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                           LineBreakMode="WordWrap" MaxLines="2"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Nothing at all to report (fresh install, no history): one honest line, no empty bars -->
+            <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
+                   IsVisible="{Binding ShowEmpty}"
+                   LineBreakMode="WordWrap"
+                   SemanticProperties.HeadingLevel="Level3"/>
+
+            <!-- Not enough days yet: the note replaces the bars -->
+            <Label Text="{Binding InsufficientText}" Style="{StaticResource LBodySecondary}"
+                   IsVisible="{Binding ShowInsufficient}"
+                   LineBreakMode="WordWrap"
+                   SemanticProperties.HeadingLevel="Level3"/>
+
+            <!-- Streak: the single most motivating number, only when there is one to show -->
+            <Border Style="{StaticResource SoftCard}" Padding="12,10" IsVisible="{Binding ShowStreak}">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Label Grid.Column="0" Text="{Binding StreakHeader}" Style="{StaticResource LBody}"
+                           VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                    <Label Grid.Column="1" Text="{Binding StreakValue}" Style="{StaticResource LMetric}"
+                           TextColor="{StaticResource Accent}" VerticalOptions="Center"
+                           HorizontalOptions="End" HorizontalTextAlignment="End"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.Description="{Binding StreakValue}"/>
+                </Grid>
+            </Border>
+
+            <VerticalStackLayout Spacing="14" IsVisible="{Binding ShowBars}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{Binding HabitsHeader}" Style="{StaticResource LCaption}" FontAttributes="Bold"
+                           LineBreakMode="WordWrap" SemanticProperties.HeadingLevel="Level3"/>
+                    <comp:ItemsStackLayout ItemsSource="{Binding HabitRows}" Spacing="10">
+                        <comp:ItemsStackLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WeekBarRowViewModel">
+                                <VerticalStackLayout Spacing="3">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Label}" Style="{StaticResource BarLabel}"
+                                               VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                                        <Label Grid.Column="1" Text="{Binding ValueText}" Style="{StaticResource BarCaption}"
+                                               HorizontalOptions="End" HorizontalTextAlignment="End"
+                                               VerticalOptions="Center"
+                                               SemanticProperties.Description="{Binding Caption}"/>
+                                    </Grid>
+                                    <ProgressBar Progress="{Binding Value}"
+                                                 ProgressColor="{Binding ColorKey, Converter={StaticResource ColorByKey}}"
+                                                 Style="{StaticResource ProgressTrack}"
+                                                 SemanticProperties.Description="{Binding Caption}"/>
+                                    <Label Text="{Binding Caption}" Style="{StaticResource BarCaption}"
+                                           LineBreakMode="WordWrap"/>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </comp:ItemsStackLayout.ItemTemplate>
+                    </comp:ItemsStackLayout>
+                    <Label Text="{Binding SectionEmptyHabits}" Style="{StaticResource BarCaption}"
+                           IsVisible="{Binding NoHabitRows}" LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+
+                <BoxView Style="{StaticResource Divider}"/>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{Binding GoalsHeader}" Style="{StaticResource LCaption}" FontAttributes="Bold"
+                           LineBreakMode="WordWrap" SemanticProperties.HeadingLevel="Level3"/>
+                    <comp:ItemsStackLayout ItemsSource="{Binding GoalRows}" Spacing="10">
+                        <comp:ItemsStackLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WeekBarRowViewModel">
+                                <VerticalStackLayout Spacing="3">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Label}" Style="{StaticResource BarLabel}"
+                                               VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                                        <Label Grid.Column="1" Text="{Binding ValueText}" Style="{StaticResource BarCaption}"
+                                               HorizontalOptions="End" HorizontalTextAlignment="End"
+                                               VerticalOptions="Center"
+                                               SemanticProperties.Description="{Binding Caption}"/>
+                                    </Grid>
+                                    <ProgressBar Progress="{Binding Value}"
+                                                 ProgressColor="{Binding ColorKey, Converter={StaticResource ColorByKey}}"
+                                                 Style="{StaticResource ProgressTrack}"
+                                                 SemanticProperties.Description="{Binding Caption}"/>
+                                    <Label Text="{Binding Caption}" Style="{StaticResource BarCaption}"
+                                           LineBreakMode="WordWrap"/>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </comp:ItemsStackLayout.ItemTemplate>
+                    </comp:ItemsStackLayout>
+                    <Label Text="{Binding SectionEmptyGoals}" Style="{StaticResource BarCaption}"
+                           IsVisible="{Binding NoGoalRows}" LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+
+                <BoxView Style="{StaticResource Divider}"/>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{Binding ProgramsHeader}" Style="{StaticResource LCaption}" FontAttributes="Bold"
+                           LineBreakMode="WordWrap" SemanticProperties.HeadingLevel="Level3"/>
+                    <comp:ItemsStackLayout ItemsSource="{Binding ProgramRows}" Spacing="10">
+                        <comp:ItemsStackLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WeekBarRowViewModel">
+                                <VerticalStackLayout Spacing="3">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Label}" Style="{StaticResource BarLabel}"
+                                               VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                                        <Label Grid.Column="1" Text="{Binding ValueText}" Style="{StaticResource BarCaption}"
+                                               HorizontalOptions="End" HorizontalTextAlignment="End"
+                                               VerticalOptions="Center"
+                                               SemanticProperties.Description="{Binding Caption}"/>
+                                    </Grid>
+                                    <ProgressBar Progress="{Binding Value}"
+                                                 ProgressColor="{Binding ColorKey, Converter={StaticResource ColorByKey}}"
+                                                 Style="{StaticResource ProgressTrack}"
+                                                 SemanticProperties.Description="{Binding Caption}"/>
+                                    <Label Text="{Binding Caption}" Style="{StaticResource BarCaption}"
+                                           LineBreakMode="WordWrap"/>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </comp:ItemsStackLayout.ItemTemplate>
+                    </comp:ItemsStackLayout>
+                    <Label Text="{Binding SectionEmptyPrograms}" Style="{StaticResource BarCaption}"
+                           IsVisible="{Binding NoProgramRows}" LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Confidence line: how many days of history these bars really rest on -->
+            <Label Text="{Binding HonestyNote}" Style="{StaticResource LCaption}" FontSize="11"
+                   IsVisible="{Binding HasHonestyNote}"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                   LineBreakMode="WordWrap"/>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

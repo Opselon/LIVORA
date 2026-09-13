@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<views:BaseContentPage
+    x:Class="LIVORA.Presentation.Views.LogPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:LIVORA.Presentation.Views"
+    xmlns:log="clr-namespace:LIVORA.Presentation.Views.Log"
+    xmlns:comp="clr-namespace:LIVORA.Presentation.Components"
+    xmlns:vm="clr-namespace:LIVORA.Presentation"
+    x:DataType="vm:LogViewModel">
+
+    <!-- ========================================================================
+         Lane 03 — the Log tab: the daily check-in editor inline, the real
+         14-night SkiaSharp sleep chart, and the recent self-reported entries
+         with tap-to-edit + delete. Header/chip/rail vocabulary matches Today &
+         Health so the six tabs read as one system.
+         ======================================================================== -->
+
+    <views:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <comp:NotConverter x:Key="Not"/>
+            <Style x:Key="ChipNeutral" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 10"/>
+                <Setter Property="Padding" Value="9,4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+            </Style>
+            <Style x:Key="ChipLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"/>
+                <Setter Property="VerticalTextAlignment" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource LHeading}">
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="LineBreakMode" Value="WordWrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+            </Style>
+            <Style x:Key="HeaderRail" TargetType="BoxView">
+                <Setter Property="WidthRequest" Value="4"/>
+                <Setter Property="Color" Value="{StaticResource Accent}"/>
+                <Setter Property="CornerRadius" Value="2"/>
+                <Setter Property="VerticalOptions" Value="Fill"/>
+            </Style>
+            <!-- legend dots: the chart's own provenance shapes, sampled at tiny size -->
+            <Style x:Key="LegendDot" TargetType="Border">
+                <Setter Property="WidthRequest" Value="12"/>
+                <Setter Property="HeightRequest" Value="12"/>
+                <Setter Property="StrokeShape" Value="RoundRectangle 4"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="HorizontalOptions" Value="Center"/>
+            </Style>
+        </ResourceDictionary>
+    </views:BaseContentPage.Resources>
+
+    <ScrollView x:Name="Scroller" Padding="{StaticResource PageThickness}">
+        <!-- Wide-window safety (1400dp desktop): the column caps at a readable measure and
+             centers, so a phone still fills the width and a desktop never stretches sentences.
+             Kept page-local so Log needs nothing from other lanes. -->
+        <VerticalStackLayout Spacing="{StaticResource CardSpacing}" MaximumWidthRequest="760"
+                             HorizontalOptions="Center">
+
+            <!-- Header: title + logged-days counter chip -->
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,2">
+                <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding Title}" Style="{StaticResource LDisplay}"
+                           LineBreakMode="WordWrap" MaxLines="2"
+                           SemanticProperties.HeadingLevel="Level1"/>
+                    <Label Text="{Binding Subtitle}" Style="{StaticResource LCaption}" FontSize="12.5"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                           LineBreakMode="WordWrap" MaxLines="2"/>
+                </VerticalStackLayout>
+                <Border Grid.Column="1" Style="{StaticResource ChipNeutral}" VerticalOptions="Start"
+                        HorizontalOptions="End" IsVisible="{Binding HasEntryCount}">
+                    <Label Text="{Binding EntryCount}" Style="{StaticResource ChipLabel}" FontAttributes="Bold"
+                           TextColor="{StaticResource Accent}"/>
+                </Border>
+            </Grid>
+
+            <!-- Loading language: honest inline skeleton (same vocabulary as Today/Health) -->
+            <Border Style="{StaticResource SoftCard}" Padding="14,12" IsVisible="{Binding IsBusy}">
+                <HorizontalStackLayout Spacing="12">
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource Accent}"
+                                       WidthRequest="22" HeightRequest="22" VerticalOptions="Center"/>
+                    <VerticalStackLayout Spacing="6" VerticalOptions="Center">
+                        <BoxView HeightRequest="10" WidthRequest="140" CornerRadius="5"
+                                 Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+                        <BoxView HeightRequest="10" WidthRequest="90" CornerRadius="5"
+                                 Color="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- ===== The real 14-night sleep chart ========================== -->
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                    <Label Grid.Column="1" Text="{Binding ChartTitle}" Style="{StaticResource SectionHeader}"
+                           FontSize="19" SemanticProperties.HeadingLevel="Level2"/>
+                    <Border Grid.Column="2" Style="{StaticResource ChipNeutral}"
+                            IsVisible="{Binding HasBaseline}" HorizontalOptions="End">
+                        <Label Text="{Binding BaselineText}" Style="{StaticResource ChipLabel}"/>
+                    </Border>
+                </Grid>
+
+                <Border Style="{StaticResource Card}" Padding="10,10">
+                    <VerticalStackLayout Spacing="8">
+                        <!-- The Skia canvas: paints the model the VM builds (labels included).
+                             Skeleton/empty states sit behind it so the card never collapses. -->
+                        <Grid HeightRequest="190">
+                            <log:SleepTrendChart x:Name="SleepChart" Model="{Binding Chart}"
+                                                 IsVisible="{Binding ChartReady}"/>
+                            <VerticalStackLayout Spacing="8" IsVisible="{Binding ChartReady, Converter={StaticResource Not}}"
+                                                 VerticalOptions="Center">
+                                <BoxView HeightRequest="10" WidthRequest="120" CornerRadius="5" HorizontalOptions="Center"
+                                         Color="{AppThemeBinding Light={StaticResource Overlay}, Dark={StaticResource OverlayDark}}"/>
+                                <BoxView HeightRequest="90" CornerRadius="10"
+                                         Color="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"/>
+                            </VerticalStackLayout>
+                            <!-- honest no-data note inside the same slot -->
+                            <Label Text="{Binding NoDataNote}" Style="{StaticResource LCaption}" FontSize="12"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="3"
+                                   IsVisible="{Binding ShowNoData}"/>
+                        </Grid>
+
+                        <!-- Provenance legend: shapes, not guesses — matches how the bars render -->
+                        <HorizontalStackLayout Spacing="14" HorizontalOptions="Center"
+                                               IsVisible="{Binding HasChart}">
+                            <HorizontalStackLayout Spacing="6">
+                                <Border Style="{StaticResource LegendDot}" Background="Transparent"
+                                        Stroke="{StaticResource MetricSleepBrush}" StrokeThickness="1.6"/>
+                                <Label Text="{Binding LegendManual}" Style="{StaticResource ChipLabel}" FontSize="10.5"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="6">
+                                <Border Style="{StaticResource LegendDot}" Background="{StaticResource MetricSleepSoftBrush}"
+                                        StrokeThickness="0"/>
+                                <Label Text="{Binding LegendMock}" Style="{StaticResource ChipLabel}" FontSize="10.5"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="6" IsVisible="{Binding HasBaseline}">
+                                <BoxView WidthRequest="14" HeightRequest="2" Color="{StaticResource Accent}"
+                                         CornerRadius="1" VerticalOptions="Center"/>
+                                <Label Text="{Binding LegendBaseline}" Style="{StaticResource ChipLabel}" FontSize="10.5"/>
+                            </HorizontalStackLayout>
+                        </HorizontalStackLayout>
+
+                        <Label Text="{Binding ChartCaption}" Style="{StaticResource LCaption}" FontSize="11"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                               HorizontalTextAlignment="Center" LineBreakMode="WordWrap"
+                               IsVisible="{Binding HasChart}"/>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- ===== The check-in editor (shared CheckInView) ================ -->
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                    <Label Grid.Column="1" Text="{Binding CheckInSectionTitle}" Style="{StaticResource SectionHeader}"
+                           FontSize="19" SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
+                <log:CheckInView x:Name="Editor"/>
+            </VerticalStackLayout>
+
+            <!-- ===== Recent self-reported entries ============================ -->
+            <VerticalStackLayout Spacing="{StaticResource CardSpacing}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <BoxView Grid.Column="0" Style="{StaticResource HeaderRail}"/>
+                    <Label Grid.Column="1" Text="{Binding RecentTitle}" Style="{StaticResource SectionHeader}"
+                           FontSize="19" SemanticProperties.HeadingLevel="Level2"/>
+                </Grid>
+
+                <!-- genuine empty state: quiet, centered, restates the CTA -->
+                <VerticalStackLayout Spacing="12" Padding="8,20"
+                                     IsVisible="{Binding IsBusy, Converter={StaticResource Not}}">
+                    <VerticalStackLayout Spacing="12" IsVisible="{Binding IsEmpty}">
+                        <BoxView WidthRequest="56" HeightRequest="56" CornerRadius="28"
+                                 Color="{AppThemeBinding Light={StaticResource MetricSleepSoft}, Dark={StaticResource MetricSleepSoftDark}}"
+                                 HorizontalOptions="Center"/>
+                        <Label Text="{Binding EmptyText}" Style="{StaticResource LBodySecondary}"
+                               HorizontalTextAlignment="Center" LineBreakMode="WordWrap"
+                               SemanticProperties.HeadingLevel="Level3"/>
+                        <Label Text="{Binding EmptySub}" Style="{StaticResource LCaption}" FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource TextTertiaryDark}}"
+                               HorizontalTextAlignment="Center" LineBreakMode="WordWrap"/>
+                        <Button Text="{Binding NewEntryText}" Style="{StaticResource SecondaryButton}"
+                                Command="{Binding NewEntryCommand}" HorizontalOptions="Center"
+                                MinimumHeightRequest="44"
+                                SemanticProperties.Description="{Binding NewEntryText}"/>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <comp:ItemsStackLayout ItemsSource="{Binding Entries}" Spacing="10"
+                                       IsVisible="{Binding HasEntries}">
+                    <comp:ItemsStackLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SleepEntryRow">
+                            <Border Style="{StaticResource Card}" Padding="14,10"
+                                    comp:TappableFeedback.Tappable="True" comp:TappableFeedback.PressScale="0.99"
+                                    SemanticProperties.Description="{Binding DateText}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding EditCommand}"/>
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="4,*,Auto,Auto" ColumnSpacing="10">
+                                    <BoxView Grid.Column="0" WidthRequest="4" Color="{StaticResource Accent}"
+                                             CornerRadius="2" VerticalOptions="Fill"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="{Binding DayLabel}" Style="{StaticResource LBody}" FontAttributes="Bold"
+                                               LineBreakMode="WordWrap" MaxLines="2"/>
+                                        <Label Text="{Binding DateText}" Style="{StaticResource LCaption}" FontSize="11.5"
+                                               LineBreakMode="TailTruncation" MaxLines="1"/>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center"
+                                                         SemanticProperties.Description="{Binding SleepText}">
+                                        <Label Text="{Binding SleepText}" Style="{StaticResource LBody}" FontAttributes="Bold"
+                                               HorizontalTextAlignment="End" LineBreakMode="WordWrap" MaxLines="2"/>
+                                        <Label Text="{Binding StepsText}" Style="{StaticResource LCaption}" FontSize="11"
+                                               HorizontalTextAlignment="End" LineBreakMode="WordWrap" MaxLines="2"
+                                               IsVisible="{Binding StepsText, Converter={StaticResource IsNotEmpty}}"/>
+                                    </VerticalStackLayout>
+                                    <Border Grid.Column="3" Style="{StaticResource ChipNeutral}" VerticalOptions="Center"
+                                            HorizontalOptions="End" Padding="12,8"
+                                            MinimumHeightRequest="44" MinimumWidthRequest="52">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding DeleteCommand}"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding DeleteLabel}" Style="{StaticResource ChipLabel}"
+                                               FontSize="10.5" FontAttributes="Bold" TextColor="{StaticResource Negative}"
+                                               SemanticProperties.Description="{Binding DeleteLabel}"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </comp:ItemsStackLayout.ItemTemplate>
+                </comp:ItemsStackLayout>
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="12" Color="Transparent"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:BaseContentPage>

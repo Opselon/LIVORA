@@ -1,8 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <g fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round">
-    <path d="M34 88 L34 40"/>
-    <path d="M34 88 L74 88"/>
+  <!-- LIVORA splash v2 (lane 05): the monogram rides a soft halo so first launch reads
+       deliberate on the #2C5D53 background the csproj paints. Mark-only (no plate):
+       resizetizer composites this over the platform color on all four heads.
+       Mark art is shared with appicon.svg (same paths); the translate puts the mark's optical
+       center (74.5, 64) on the canvas center (64, 64). -->
+  <circle cx="64" cy="64" r="47" fill="#FFFFFF" fill-opacity="0.05"/>
+  <circle cx="64" cy="64" r="47" fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="1.5"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" transform="translate(-10.5 0)">
+    <path d="M40 32 V96 H80"/>
+    <circle cx="94" cy="52" r="15"/>
+    <path d="M94 67 V96"/>
   </g>
-  <circle cx="88" cy="52" r="13" fill="none" stroke="#FFFFFF" stroke-width="7"/>
-  <path d="M88 65 L88 88" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" fill="none"/>
 </svg>
