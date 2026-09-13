@@ -14,6 +14,34 @@ tests ok, patch at %LOCALAPPDATA%\Temp\lane09.diff — sha256 8fd54656…67e1d) 
 LANES STILL RUNNING: 01 updates, 02 manual pipeline, 03 log UI+chart, 04 shell/responsive,
 05 design system, 06 profile/settings/onboarding, 07 goals/habits editors, 08 programs/discovery.
 
+## PROBE RESULT (validated at `bf5edbd`, probe copy `Temp/livora_w3/probe09`)
+
+Lane 09 + lane 10 patches applied onto `bf5edbd` → **build 0 warnings / 0 errors, 439 tests pass**.
+Reconciliation steps that the merge MUST repeat (all mechanical, 10 minutes at merge):
+
+1. `TrExtension` declared `IMarkupExtension<object>` (non-nullable) — fixed centrally in `0dfb783`;
+   without it every `{localize:Tr}` site emits generated-CS8619 (19 warnings on lane 09's pages).
+2. `Tests/Tests/Wave3LocalizationTests.cs`: `StubSettings` needs `public bool DemoDataSeeded { get; set; }`.
+3. `Tests/Tests/Wave3DomainAndSeedTests.cs`: `DemoDataSeeder` ctor gained `ISettingsService` before
+   the localizer — add a small `SeedingSettings` fake, thread it through `Build()` (now a 5-tuple
+   incl. settings) and the two direct ctor sites.
+4. Same file: `EmptiedGoalStore_ReseedsEverything_KnownWave3Hazard` must become
+   `EmptiedGoalStore_DoesNotReseed_OnceSeededFlagIsSet` (+ `CatalogSeeding_IsIdempotentByTitleKey`),
+   because `bf5edbd` fixed the hazard it pinned.
+5. `Tests/Tests/Wave3ResxIntegrityTests.cs`: `KnownDriftWaivers` must be emptied — the
+   `Rec.AdvanceGoal` EN `{0}` drift is fixed in `bf5edbd`, and the companion test
+   `KnownDriftWaivers_AreAllStillNeeded` deliberately fails on dead waivers.
+6. Lane 10's `docs/WAVE3-MERGE.md` collides with mine — mine is now
+   `docs/WAVE3-MERGE-STATE.md`; lane 10's checklist owns that filename.
+7. Lane 10's prose describes the seeding gate as OPEN DEBT (README §9 / docs/WAVE3.md §5.2 ask for
+   "a seeded-once flag in ISettingsService instead of emptiness"). `bf5edbd` implemented exactly
+   that, so both docs must be reworded to "done" (and docs/WAVE3.md keeps the historical note that
+   a pre-fix install needs the TitleKey idempotency guard).
+
+Probe artifacts: reconciled test/doc files live in `Temp/livora_w3/probe09/Tests/` — regenerate
+lane 10's patch from there so the merge lands them already reconciled:
+`git -C probe09 add -A && git -C probe09 diff --cached -- Tests docs README.md` (paths relative).
+
 ## Tripwires lane 10 left that MUST be updated at merge time (they pin pre-fix behavior)
 
 Lane 10 wrote two tests that deliberately assert the OLD behavior of code I have since fixed in
