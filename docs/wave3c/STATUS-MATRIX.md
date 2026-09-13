@@ -64,3 +64,9 @@ Windows Release build: **0 Warning(s), 0 Error(s), 52.0s**. Android Release buil
   registered for the same interface *with different type-name lengths* or a duplicated
   `LocalDataCatalog` under two names (§5 of INTEGRATION-PLAN) will not fail any test — reviewer check
   per merge.
+
+## Post-integration verification (04436af + this commit)
+- merged tree: dotnet test 1188/1188 green; net10.0-windows Release 0 Errors; net10.0-android Release 0 Errors (pre-existing doc warnings only).
+- DI composed: security/AI/plan/sync/health/workout/UI lanes registered (single-owner rule honored; catalog arbitrated: lane-01 LocalDataCatalog owns ILocalDataCatalogService, lane-06 concrete service kept for meta/sync writers).
+- Lock gate wired in App.CreateWindow (no-op without a passcode); ConnectionTester records probe verdicts through the single writer.
+- Honest PENDING after this PR: Android Health Connect runtime (client unbundled), key rotation (historical exposure), store packaging, launch smoke, mobile pickers.
