@@ -668,5 +668,144 @@
   <data name="WeeklySummary.Tab.LastWeek" xml:space="preserve"><value>Last week</value></data>
   <data name="WeeklySummary.Tab.ThisWeek" xml:space="preserve"><value>This week</value></data>
   <data name="WeeklySummary.Trends" xml:space="preserve"><value>Trends</value></data>
+  <!-- ============ Wave 3 (lane merge, finalizer) ============ -->
+  <data name="Editor.Confirm.Archive.Body" xml:space="preserve"><value>It leaves your active list but keeps its progress, and you can restore it any time.</value></data>
+  <data name="Editor.Confirm.Delete.Body" xml:space="preserve"><value>Nothing has been logged for it, so it will be removed completely.</value></data>
+  <data name="Editor.Confirm.Delete.Title" xml:space="preserve"><value>Delete this goal?</value></data>
+  <data name="Editor.GoalTitle" xml:space="preserve"><value>Create a goal</value></data>
+  <data name="Editor.HabitTitle" xml:space="preserve"><value>Create a habit</value></data>
+  <data name="Editor.Hint.Range" xml:space="preserve"><value>Use a number between {0} and {1} {2}.</value></data>
+  <data name="Editor.Measurement.Average" xml:space="preserve"><value>Daily average of a metric</value></data>
+  <data name="Editor.Measurement.Days" xml:space="preserve"><value>Days that meet a threshold</value></data>
+  <data name="Editor.Measurement.Manual" xml:space="preserve"><value>Manual counter (you log it)</value></data>
+  <data name="Editor.Measurement.Sum" xml:space="preserve"><value>Total of a metric over the period</value></data>
+  <data name="Editor.Metric.ActiveMinutes" xml:space="preserve"><value>Active minutes</value></data>
+  <data name="Editor.Metric.Bedtime" xml:space="preserve"><value>Bedtime</value></data>
+  <data name="Editor.Metric.Custom" xml:space="preserve"><value>Something else</value></data>
+  <data name="Editor.Metric.Energy" xml:space="preserve"><value>Energy</value></data>
+  <data name="Editor.Metric.Focus" xml:space="preserve"><value>Focus</value></data>
+  <data name="Editor.Metric.Hrv" xml:space="preserve"><value>HRV</value></data>
+  <data name="Editor.Metric.Mood" xml:space="preserve"><value>Mood</value></data>
+  <data name="Editor.Metric.Recovery" xml:space="preserve"><value>Recovery score</value></data>
+  <data name="Editor.Metric.RestingHeartRate" xml:space="preserve"><value>Resting heart rate</value></data>
+  <data name="Editor.Metric.SleepConsistency" xml:space="preserve"><value>Sleep consistency</value></data>
+  <data name="Editor.Metric.SleepMinutes" xml:space="preserve"><value>Sleep duration</value></data>
+  <data name="Editor.Metric.SleepQuality" xml:space="preserve"><value>Sleep quality</value></data>
+  <data name="Editor.Metric.Steps" xml:space="preserve"><value>Steps</value></data>
+  <data name="Editor.Metric.Stress" xml:space="preserve"><value>Stress</value></data>
+  <data name="Enum.HabitFrequencyKind.Daily" xml:space="preserve"><value>Every day</value></data>
+  <data name="Enum.HabitFrequencyKind.TimesPerWeek" xml:space="preserve"><value>A few times a week</value></data>
+  <data name="Enum.HabitFrequencyKind.Weekdays" xml:space="preserve"><value>Weekdays only</value></data>
+  <data name="Goals.HabitReminderText" xml:space="preserve"><value>Time for: {0}</value></data>
+  <data name="Log.ActiveMinutes" xml:space="preserve"><value>Active minutes</value></data>
+  <data name="Log.BackToLog" xml:space="preserve"><value>Close</value></data>
+  <data name="Log.Chart.AxisHour" xml:space="preserve"><value>{0}h</value></data>
+  <data name="Log.Chart.Baseline" xml:space="preserve"><value>Your normal: {0}</value></data>
+  <data name="Log.Chart.Caption" xml:space="preserve"><value>{0} nights with data · {1} logged by you · {2} sample</value></data>
+  <data name="Log.Chart.LegendBaseline" xml:space="preserve"><value>Your normal</value></data>
+  <data name="Log.Chart.LegendManual" xml:space="preserve"><value>You logged it</value></data>
+  <data name="Log.Chart.LegendMock" xml:space="preserve"><value>Sample data</value></data>
+  <data name="Log.Chart.NoData" xml:space="preserve"><value>No sleep values yet — log a night to start the chart.</value></data>
+  <data name="Log.Chart.Placeholder" xml:space="preserve"><value>Chart unavailable</value></data>
+  <data name="Log.Chart.Title" xml:space="preserve"><value>Last 14 nights</value></data>
+  <data name="Log.CheckIn.Section" xml:space="preserve"><value>Log a day</value></data>
+  <data name="Log.CheckIn.Title" xml:space="preserve"><value>Daily check-in</value></data>
+  <data name="Log.Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="Log.Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Log.DeleteConfirm.Body" xml:space="preserve"><value>The values you logged for {0} will be removed from this device.</value></data>
+  <data name="Log.DeleteConfirm.Title" xml:space="preserve"><value>Delete this check-in?</value></data>
+  <data name="Log.DeleteEntry" xml:space="preserve"><value>Delete</value></data>
+  <data name="Log.DeleteFailed" xml:space="preserve"><value>Couldn't delete this check-in. Try again.</value></data>
+  <data name="Log.Deleted" xml:space="preserve"><value>Removed your check-in for {0}.</value></data>
+  <data name="Log.Energy" xml:space="preserve"><value>Energy</value></data>
+  <data name="Log.EntryCount" xml:space="preserve"><value>{0} days logged</value></data>
+  <data name="Log.Error.ActiveRange" xml:space="preserve"><value>Active minutes must be between 0 and 1,440.</value></data>
+  <data name="Log.Error.DateTooOld" xml:space="preserve"><value>Only the last 60 days can be logged.</value></data>
+  <data name="Log.Error.FutureDate" xml:space="preserve"><value>You can only log a day that has already happened.</value></data>
+  <data name="Log.Error.NoteTooLong" xml:space="preserve"><value>Keep the note under 240 characters.</value></data>
+  <data name="Log.Error.NothingToSave" xml:space="preserve"><value>Nothing to save yet; enter at least one value.</value></data>
+  <data name="Log.Error.SleepRange" xml:space="preserve"><value>Sleep must be between 0 and 24 hours.</value></data>
+  <data name="Log.Error.SliderRange" xml:space="preserve"><value>Ratings must stay between 0 and 100%.</value></data>
+  <data name="Log.Error.StepsRange" xml:space="preserve"><value>Steps must be between 0 and 100,000.</value></data>
+  <data name="Log.ExistingEntry" xml:space="preserve"><value>You already logged this day. Your saved values are loaded — edit them or remove the entry.</value></data>
+  <data name="Log.Hint.Active" xml:space="preserve"><value>e.g. 45</value></data>
+  <data name="Log.Hint.Minutes" xml:space="preserve"><value>e.g. 30</value></data>
+  <data name="Log.Hint.Sleep" xml:space="preserve"><value>e.g. 7</value></data>
+  <data name="Log.Hint.Steps" xml:space="preserve"><value>e.g. 8500</value></data>
+  <data name="Log.HonestyNote" xml:space="preserve"><value>You entered these values yourself. LIVORA cannot verify them — they are a self-report, not a measurement.</value></data>
+  <data name="Log.Hours" xml:space="preserve"><value>Hours</value></data>
+  <data name="Log.Minutes" xml:space="preserve"><value>Minutes</value></data>
+  <data name="Log.Mood" xml:space="preserve"><value>Mood</value></data>
+  <data name="Log.NDaysAgo" xml:space="preserve"><value>{0} days ago</value></data>
+  <data name="Log.NewEntry" xml:space="preserve"><value>Log today</value></data>
+  <data name="Log.NotSet" xml:space="preserve"><value>not set</value></data>
+  <data name="Log.Note.Label" xml:space="preserve"><value>Note</value></data>
+  <data name="Log.OptionalHint" xml:space="preserve"><value>Optional — anything worth remembering</value></data>
+  <data name="Log.Recent.Empty" xml:space="preserve"><value>No check-ins yet</value></data>
+  <data name="Log.Recent.EmptySub" xml:space="preserve"><value>Log a night in the form above and it will show up here.</value></data>
+  <data name="Log.Recent.Title" xml:space="preserve"><value>Recent check-ins</value></data>
+  <data name="Log.Save" xml:space="preserve"><value>Save check-in</value></data>
+  <data name="Log.SaveFailed" xml:space="preserve"><value>Couldn't save. Your values are still on screen — try again.</value></data>
+  <data name="Log.Saved" xml:space="preserve"><value>Saved your check-in for {0}.</value></data>
+  <data name="Log.Section.Activity" xml:space="preserve"><value>Activity</value></data>
+  <data name="Log.Section.Feelings" xml:space="preserve"><value>How you feel</value></data>
+  <data name="Log.Section.Sleep" xml:space="preserve"><value>Sleep</value></data>
+  <data name="Log.SleepQuality" xml:space="preserve"><value>Sleep quality</value></data>
+  <data name="Log.Steps" xml:space="preserve"><value>Steps</value></data>
+  <data name="Log.Stress" xml:space="preserve"><value>Stress</value></data>
+  <data name="Log.Subtitle" xml:space="preserve"><value>Your own numbers, one day at a time</value></data>
+  <data name="Log.Title" xml:space="preserve"><value>Log</value></data>
+  <data name="Log.Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Log.Yesterday" xml:space="preserve"><value>Yesterday</value></data>
+  <data name="Notification.State.Allowed" xml:space="preserve"><value>Notifications allowed</value></data>
+  <data name="Notification.State.Denied" xml:space="preserve"><value>Notifications denied</value></data>
+  <data name="Notification.State.NotRequested" xml:space="preserve"><value>Not asked yet</value></data>
+  <data name="Notification.State.SystemManaged" xml:space="preserve"><value>Managed by the system</value></data>
+  <data name="Notification.State.Unsupported" xml:space="preserve"><value>Not supported on this platform</value></data>
+  <data name="Notification.Test.Body" xml:space="preserve"><value>This is a test reminder from LIVORA. If you can see it, notifications work on this device.</value></data>
+  <data name="Notification.Title" xml:space="preserve"><value>LIVORA reminders</value></data>
+  <data name="Onboarding.Goals.Max" xml:space="preserve"><value>Three is the limit — remove one first.</value></data>
+  <data name="Onboarding.Goals.Min" xml:space="preserve"><value>Keep at least one area selected.</value></data>
+  <data name="Onboarding.Goals.Required" xml:space="preserve"><value>Choose at least one area to continue.</value></data>
+  <data name="Privacy.Item.ManualEntries" xml:space="preserve"><value>Manual check-ins (your own numbers)</value></data>
+  <data name="Privacy.Item.Reminders" xml:space="preserve"><value>Reminder settings</value></data>
+  <data name="Privacy.Item.Snoozed" xml:space="preserve"><value>Snoozed suggestions</value></data>
+  <data name="Privacy.Item.UpdateFeed" xml:space="preserve"><value>Update check history</value></data>
+  <data name="Privacy.Origin.AppGenerated" xml:space="preserve"><value>Created by the app</value></data>
+  <data name="Privacy.Presence.Empty" xml:space="preserve"><value>Nothing stored yet</value></data>
+  <data name="Privacy.Presence.Stored" xml:space="preserve"><value>Stored on this device</value></data>
+  <data name="Profile.PrimaryGoalsMax" xml:space="preserve"><value>Three is the limit — remove one first.</value></data>
+  <data name="Profile.PrimaryGoalsMin" xml:space="preserve"><value>At least one area stays.</value></data>
+  <data name="Reminders.Text.Bootcamp" xml:space="preserve"><value>Today's program day is still open.</value></data>
+  <data name="Reminders.Text.Habit" xml:space="preserve"><value>A streak you care about is about to break tonight.</value></data>
+  <data name="Reminders.Text.Log" xml:space="preserve"><value>You haven't logged anything today — two minutes is enough.</value></data>
+  <data name="Reminders.Text.Winddown" xml:space="preserve"><value>You're behind on sleep tonight — consider winding down earlier.</value></data>
+  <data name="Update.Error.NoConnection" xml:space="preserve"><value>No internet connection, so the update check failed.</value></data>
+  <data name="Update.Error.NoRelease" xml:space="preserve"><value>The releases page answered but nothing in it names a version.</value></data>
+  <data name="Update.Error.RateLimited" xml:space="preserve"><value>The update server is busy answering requests; try again a little later.</value></data>
+  <data name="Update.Error.VersionUnreadable" xml:space="preserve"><value>The installed version couldn't be compared with the published one.</value></data>
+  <data name="Update.Headline.Disabled" xml:space="preserve"><value>Update checks are off in this build</value></data>
+  <data name="Update.Headline.NewerThanFeed" xml:space="preserve"><value>You're running something newer than anything published</value></data>
+  <data name="Update.Headline.NoConnection" xml:space="preserve"><value>Couldn't check for updates</value></data>
+  <data name="Update.Headline.Prerelease" xml:space="preserve"><value>A pre-release of {0} is available</value></data>
+  <data name="Update.Headline.RateLimited" xml:space="preserve"><value>The update server is busy</value></data>
+  <data name="Update.Headline.UpToDate" xml:space="preserve"><value>You're up to date</value></data>
+  <data name="Update.Headline.UpdateAvailable" xml:space="preserve"><value>{0} is available</value></data>
+  <data name="Update.Status.Disabled" xml:space="preserve"><value>Checks off</value></data>
+  <data name="Update.Status.Error" xml:space="preserve"><value>Check failed</value></data>
+  <data name="Update.Status.NewerThanFeed" xml:space="preserve"><value>Newer build</value></data>
+  <data name="Update.Status.NoConnection" xml:space="preserve"><value>Couldn't check</value></data>
+  <data name="Update.Status.Prerelease" xml:space="preserve"><value>Pre-release</value></data>
+  <data name="Update.Status.RateLimited" xml:space="preserve"><value>Server busy</value></data>
+  <data name="Update.Status.UpToDate" xml:space="preserve"><value>Up to date</value></data>
+  <data name="Update.Status.UpdateAvailable" xml:space="preserve"><value>Update available</value></data>
+  <data name="WeeklySummary.Bars.ActiveMinutes" xml:space="preserve"><value>Active minutes (average)</value></data>
+  <data name="WeeklySummary.Bars.Activity" xml:space="preserve"><value>Steps (average)</value></data>
+  <data name="WeeklySummary.Bars.Recovery" xml:space="preserve"><value>Recovery (average)</value></data>
+  <data name="WeeklySummary.Bars.Sleep" xml:space="preserve"><value>Sleep (average)</value></data>
+  <data name="WeeklySummary.Bars.Stress" xml:space="preserve"><value>Stress (average)</value></data>
+  <data name="WeekProgress.GoalSoFar" xml:space="preserve"><value>{0} so far</value></data>
+  <data name="WeekProgress.ProgramDone" xml:space="preserve"><value>day done</value></data>
+  <data name="Health.DataSource.ManualOverlay" xml:space="preserve"><value>Your own entries</value></data>
 
 </root>

@@ -138,6 +138,19 @@ public partial class App : Microsoft.Maui.Controls.Application, INavigateToMainA
         try
         {
             Debug.WriteLine($"[LIVORA.fatal] {ex?.GetType().Name}: {ex?.Message}");
+#if DEBUG
+            // Debug-build crash forensics (Wave 3 merge): a file the tester can read when the
+            // process dies inside native XAML before any dialog can show. Debug-only by design.
+            try
+            {
+                System.IO.File.AppendAllText(
+                    System.IO.Path.Combine(
+                        System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData),
+                        "livora_crash.log"),
+                    DateTime.Now.ToString("O") + " FATAL " + ex?.GetType().FullName + ": " + ex?.Message + "\n" + ex?.ToString() + "\n----\n");
+            }
+            catch { }
+#endif
         }
         catch { /* logging must never take the app down */ }
 

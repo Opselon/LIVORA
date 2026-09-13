@@ -64,7 +64,14 @@ public sealed class TrExtension : IMarkupExtension<object>, INotifyPropertyChang
         // Subscribe through the weak hook, NOT the singleton's event: a strong event subscription
         // from a singleton to an extension would keep every inflated page alive for the app's life.
         // The hook's weak entry dies exactly when this extension (and thus its page) is collected.
-        LanguageHook.Subscribe(_languageHandler = () => Raise());
+        //
+        // IMPORTANT - the handler must keep THIS extension alive. The hook stores it in a
+        // WeakReference<Action>, and the only other reference to the handler lives in this
+        // instance's field, so without capturing `self` here the collector can free the extension
+        // (and its handler) the moment a GC runs - which silently freezes that label in whatever
+        // language it first rendered. Observed live after a real language switch on Windows.
+        var self = this;
+        LanguageHook.Subscribe(_languageHandler = () => { GC.KeepAlive(self); Raise(); });
 
         var provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
         var target = provideValueTarget?.TargetObject as BindableObject;

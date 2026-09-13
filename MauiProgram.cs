@@ -14,6 +14,7 @@ using LIVORA.Infrastructure.Persistence;
 using LIVORA.Infrastructure.Security;
 using LIVORA.Presentation;
 using Plugin.LocalNotification;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LIVORA;
@@ -27,6 +28,10 @@ public static class MauiProgram
             // Wave 3 (lane 09): local reminders. Must be configured before the notification
             // center is first touched (registration order is enforced by this call site).
             .UseLocalNotification()
+            // Wave 3 (lane 03): the Log tab hosts a SkiaSharp chart (SKCanvasView). Without the
+            // handler registration the control throws at render time on Windows and the process
+            // dies inside native XAML (0xc000027b) — verified during the merge's launch walk.
+            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
