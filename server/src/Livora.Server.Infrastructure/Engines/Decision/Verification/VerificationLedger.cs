@@ -97,7 +97,10 @@ public sealed class EfVerificationLedger(DbContext db)
     {
         var q = Claims.Where(c => c.UserId == userId && c.DeletedAtUtc == null);
         long total = await q.CountAsync(ct);
-        var items = await q.OrderByDescending(c => c.CreatedAtUtc).ThenBy(c => c.Id, StringComparer.Ordinal)
+        // ThenBy carries no comparer: an in-memory StringComparer is not translatable to SQL and
+        // threw InvalidOperationException at runtime. SQLite's BINARY collation on the text `Id`
+        // is ordinal ordering, so the deterministic tie-break the contract asks for is identical.
+        var items = await q.OrderByDescending(c => c.CreatedAtUtc).ThenBy(c => c.Id)
             .Skip(offset).Take(limit).ToListAsync(ct);
         return (items, total);
     }

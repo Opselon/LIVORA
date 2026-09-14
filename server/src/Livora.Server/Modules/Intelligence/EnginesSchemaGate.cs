@@ -26,9 +26,24 @@ public static class EnginesSchemaGate
     public static bool IsEnabled(IConfiguration configuration) =>
         string.Equals(configuration[ConfigKey], "true", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>Set once by <see cref="EnsureRegistered"/>: the handlers answer
-    /// provider_unavailable (never a model exception) while schema contributions are gated off.</summary>
+    /// <summary>Set by <see cref="EnsureRegistered"/> when THIS registration call lands: the
+    /// ledger/pattern endpoints answer provider_unavailable (never a model exception) while schema
+    /// contributions are gated off. Read it through <see cref="EnginesSchemaStatus"/> in a handler
+    /// — the DI instance is the host's own answer; this static is only the process-wide fact that
+    /// the contributions were registered at least once.</summary>
     public static bool Active { get; private set; }
+
+    /// <summary>Per-host view of the gate. A test host that turns the contribution on must not
+    /// make a later host (with the key off) believe its ledger tables exist: the old static-only
+    /// read leaked across hosts in one process and answered 500 "no such table" where the honest
+    /// degradation was 503. Registered as a singleton by both engines modules.</summary>
+    public sealed class EnginesSchemaStatus(bool active)
+    {
+        public bool Active { get; } = active;
+    }
+
+    public static EnginesSchemaStatus StatusFor(IConfiguration configuration) =>
+        new(IsEnabled(configuration));
 
     /// <summary>Register BOTH of the lane's contributions (intelligence dismissals + verification
     /// ledger). Safe to call from either module — the registry membership check makes it once-only.</summary>

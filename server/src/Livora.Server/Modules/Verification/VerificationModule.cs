@@ -43,6 +43,8 @@ public sealed class VerificationModule : IFlivoraModule
         // Entity contributions are registered through the shared schema gate (off by default
         // until the lead's Wave4P1Schema migration lands — see EnginesSchemaGate).
         Livora.Server.Modules.Intelligence.EnginesSchemaGate.EnsureRegistered(seed.Configuration, seed.Logger);
+        seed.Services.AddSingleton(
+            Livora.Server.Modules.Intelligence.EnginesSchemaGate.StatusFor(seed.Configuration));
         seed.Services.AddScoped(sp => new EfVerificationLedger(
             sp.GetRequiredService<LivoraDbContext>()));
     }
@@ -53,7 +55,8 @@ public sealed class VerificationModule : IFlivoraModule
 
         // ---------------- verify a claim ------------------------------------------------------
         group.MapPost("/claims", async (HttpContext http, LivoraDbContext db,
-            VerifyClaimRequest request, CancellationToken ct) =>
+            VerifyClaimRequest request,
+            Livora.Server.Modules.Intelligence.EnginesSchemaGate.EnginesSchemaStatus schema, CancellationToken ct) =>
         {
             var userId = http.User.UserId();
             if (userId is null)
@@ -83,7 +86,7 @@ public sealed class VerificationModule : IFlivoraModule
             }
 
             // async by contract; the ladder itself is pure CPU
-            if (Livora.Server.Modules.Intelligence.EnginesSchemaGate.Active)
+            if (schema.Active)
                 await PersistAsync(db, userId, request, verdict, ct);
             // Ledger gated off: the verdict is still computed honestly (pure engine) but nothing
             // is stored — GET/list/review answer 503 with the reason, so no fake persistence.
@@ -92,17 +95,21 @@ public sealed class VerificationModule : IFlivoraModule
 
         // ---------------- list ----------------------------------------------------------------
         group.MapGet("/claims", async (HttpContext http, LivoraDbContext db,
-            int offset, int limit, CancellationToken ct) =>
+            Livora.Server.Modules.Intelligence.EnginesSchemaGate.EnginesSchemaStatus schema,
+            int? offset, int? limit, CancellationToken ct) =>
         {
             var userId = http.User.UserId();
             if (userId is null)
                 return Problems.Of(http, ProblemCodes.Unauthenticated, "a signed-in identity is required");
 
-            if (!Livora.Server.Modules.Intelligence.EnginesSchemaGate.Active)
+            if (!schema.Active)
                 return Problems.Of(http, ProblemCodes.ProviderUnavailable,
                     "the verification ledger schema is not applied on this server (Modules:Intelligence:SchemaContribution)");
 
-            var page = new PageRequest { Offset = offset, Limit = limit };
+            // offset/limit are OPTIONAL query params (Identity module parity, IdentityModule.cs:81):
+            // required ints made a bare GET throw BadHttpRequestException -> 500 before the handler
+            // could state the honest degradation. Absent means page 1 at the default size.
+            var page = new PageRequest { Offset = offset ?? 0, Limit = limit ?? PageRequest.DefaultLimit };
             var (items, total) = await new EfVerificationLedger(db).ListAsync(userId, page.Offset, page.SafeLimit, ct);
             var views = items.Select(i => new ClaimListItem(
                 i.ClaimId, i.ClaimType, i.SourceKind, i.TrustLevel, i.Status, i.Confidence,
@@ -112,13 +119,13 @@ public sealed class VerificationModule : IFlivoraModule
 
         // ---------------- one claim (+ IDOR gate) ----------------------------------------------
         group.MapGet("/claims/{claimId}", async (HttpContext http, LivoraDbContext db,
-            string claimId, CancellationToken ct) =>
+            Livora.Server.Modules.Intelligence.EnginesSchemaGate.EnginesSchemaStatus schema, string claimId, CancellationToken ct) =>
         {
             var userId = http.User.UserId();
             if (userId is null)
                 return Problems.Of(http, ProblemCodes.Unauthenticated, "a signed-in identity is required");
 
-            if (!Livora.Server.Modules.Intelligence.EnginesSchemaGate.Active)
+            if (!schema.Active)
                 return Problems.Of(http, ProblemCodes.ProviderUnavailable,
                     "the verification ledger schema is not applied on this server (Modules:Intelligence:SchemaContribution)");
             var ledger = new EfVerificationLedger(db);
@@ -135,7 +142,7 @@ public sealed class VerificationModule : IFlivoraModule
 
         // ---------------- staff review ----------------------------------------------------------
         group.MapPost("/claims/{claimId}/review", async (HttpContext http, LivoraDbContext db,
-            string claimId, ReviewRequest review, CancellationToken ct) =>
+            Livora.Server.Modules.Intelligence.EnginesSchemaGate.EnginesSchemaStatus schema, string claimId, ReviewRequest review, CancellationToken ct) =>
         {
             var userId = http.User.UserId();
             if (userId is null)
@@ -145,7 +152,7 @@ public sealed class VerificationModule : IFlivoraModule
             if (review is null || review.Decision is not ("confirm" or "reject"))
                 return Problems.Of(http, ProblemCodes.ValidationFailed, "decision must be confirm or reject");
 
-            if (!Livora.Server.Modules.Intelligence.EnginesSchemaGate.Active)
+            if (!schema.Active)
                 return Problems.Of(http, ProblemCodes.ProviderUnavailable,
                     "the verification ledger schema is not applied on this server (Modules:Intelligence:SchemaContribution)");
             // Staff review reaches any claim (Moderator policy already passed); a non-staff caller
