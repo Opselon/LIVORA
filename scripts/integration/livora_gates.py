@@ -79,9 +79,13 @@ def _load_legacy_inputs(root: str) -> tuple[list, dict, dict, str]:
     changed_p = os.path.join(root, "changed.txt")
     meta_p = os.path.join(root, "meta.json")
     diff_p = os.path.join(root, "additions.diff")
-    if not os.path.isfile(changed_p):
-        raise FileNotFoundError(changed_p)
-    lines = [l.strip() for l in open(changed_p, encoding="utf-8") if l.strip()]
+    if not os.path.isfile(meta_p):
+        raise FileNotFoundError(meta_p)
+    # changed.txt/changed.json are optional ONLY because _changeset_from_lines
+    # can derive richer evidence from local git + meta SHAs; an empty result
+    # still fails closed later (EMPTY_CHANGESET / MISSING_EVIDENCE).
+    lines = ([l.strip() for l in open(changed_p, encoding="utf-8") if l.strip()]
+             if os.path.isfile(changed_p) else [])
     meta = json.load(open(meta_p, encoding="utf-8"))
     diff_text = open(diff_p, encoding="utf-8", errors="replace").read() \
         if os.path.isfile(diff_p) else ""
@@ -110,12 +114,14 @@ def _changeset_from_lines(lines: list[str], input_dir: str, meta: dict) -> list:
             pass  # corrupt rich input: fall back to weaker evidence
     base, head = meta.get("base_sha"), meta.get("head_sha")
     mb = meta.get("merge_base")
-    if base and head and os.path.isdir(".git"):
+    if base and head:
         try:
-            cs = gite.read_name_status_diff(".", mb or base, head)
-            if cs:
-                return cs
-        except (gite.GitError, OSError):
+            chk = subprocess.run(["git", "rev-parse", "--git-dir"], capture_output=True, text=True)
+            if chk.returncode == 0:
+                cs = gite.read_name_status_diff(".", mb or base, head)
+                if cs:
+                    return cs
+        except (gite.GitError, OSError, FileNotFoundError):
             pass
     seen = set()
     out = []
@@ -141,7 +147,12 @@ def _branch_evidence(reg_repo_root: str, contract: dict, reg, lane) -> gite.Bran
     """Derive branch topology from a local git checkout if available. When the
     checkout cannot answer, return evidence WITH gaps (fail-closed), not None,
     unless there is no git at all — then None (engine records MISSING_EVIDENCE)."""
-    if not os.path.isdir(os.path.join(reg_repo_root, ".git")):
+    try:
+        chk = subprocess.run(["git", "-C", reg_repo_root, "rev-parse", "--git-dir"],
+                             capture_output=True, text=True)
+        if chk.returncode != 0:
+            return None
+    except OSError:
         return None
     branch = contract.get("lane_branch") or (lane.branch if lane else None)
     base = (reg.policy or {}).get("base_branch", "master")
@@ -217,6 +228,20 @@ def run_classify(args) -> tuple[int, dict]:
         be = _branch_evidence(os.getcwd(), contract, reg, lane)
         if be is None:
             be = _branch_evidence_from_meta(meta)
+        else:
+            # merge GitHub-meta values where local git could not answer
+            meta_be = _branch_evidence_from_meta(meta)
+            if not be.merge_base:
+                be.merge_base = meta_be.merge_base
+                be.gaps = [g for g in be.gaps if not g.startswith("NO_MERGE_BASE")]
+            if be.commits_behind < 0 and meta_be.commits_behind >= 0:
+                be.commits_behind = meta_be.commits_behind
+                be.gaps = [g for g in be.gaps if not g.startswith("COMMITS_BEHIND")]
+            if be.commits_ahead < 0 and meta_be.commits_ahead >= 0:
+                be.commits_ahead = meta_be.commits_ahead
+            if not be.architecture_changed_after_fork:
+                be.architecture_changed_after_fork = bool(
+                    meta.get("architecture_changed_after_fork"))
     added = diff_text.count("\n+")
     deleted = diff_text.count("\n-")
     gi = GovernanceInput(
