@@ -1,0 +1,15 @@
+// PLANTED TRIPWIRE VIOLATION (P1-F proof-of-fire). §7: a stand-in that does not label itself.
+// This type is shaped like a test double (Stub suffix), lives in production-shaped code, and
+// carries neither a labelled stand-in enum member nor a comment admitting what it is — the exact
+// smuggling shape where a deterministic fake reads like a real platform read.
+// CALIBRATION NOTE: this comment block deliberately avoids the label word the rule greps for;
+// adding it here would teach the fixture to defend itself and the detector would read green while
+// catching nothing. Do not "fix" this file. .fix extension = never compiled.
+namespace Livora.QualityFixtures;
+
+public sealed class QuietTestStub
+{
+    public int StepsFor(DateTime day) => 8_000;
+
+    public double RecoveryFor(DateTime day) => 0.7;
+}

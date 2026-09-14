@@ -1,0 +1,16 @@
+// HONEST TWIN of the planted T5 violation (P1-F): the same situation logged the lawful way —
+// presence flags, lengths, hashes, correlation ids. If the rule fires here it has become a
+// word-ban instead of a value-ban and will drown real findings.
+namespace Livora.QualityFixtures;
+
+public sealed class CarefulLips
+{
+    public void OnReuse(string correlationId, string refreshToken, string accessToken,
+        Account account, HealthRow row)
+    {
+        logger.LogWarning("refresh token reused for session {CorrelationId}", correlationId);
+        logger.LogInformation("login minted token length {Length}", accessToken.Length);
+        logger.LogError("auth failed: passwordPresent={Present}", account.PasswordHash.Length > 0);
+        logger.LogInformation("sleep recorded count={Count}", row.SleepRecordCount);
+    }
+}

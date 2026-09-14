@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HONEST TWIN pair (P1-F, rule T4): complete EN/FA key sets, matching placeholders, real Persian
+     (ZWNJ present), no empty values. If T4 fires in here, the rule matches everything. -->
+<root>
+  <data name="Sync.Batch.Progress" xml:space="preserve"><value>{0} of {1} operations applied</value></data>
+  <data name="Profile.Language.Note" xml:space="preserve"><value>Both languages ship with every key.</value></data>
+</root>

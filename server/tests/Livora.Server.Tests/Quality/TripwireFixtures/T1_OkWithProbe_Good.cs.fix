@@ -1,0 +1,16 @@
+// HONEST TWIN of the planted T1 violation (P1-F): Ok is claimed only from a real call whose result
+// is checked. If the scanner fires HERE, the rule matches everything — the rule is broken, not this.
+namespace Livora.QualityFixtures;
+
+public sealed class OkWithProbeBehindItModule : IFlivoraModule
+{
+    public string Key => "earner";
+
+    public ModuleHealth Report()
+    {
+        var alive = Gateway.CanConnect();
+        return alive
+            ? new ModuleHealth(Key, DependencyState.Ok, "gateway answered")
+            : new ModuleHealth(Key, DependencyState.Degraded, "gateway silent");
+    }
+}

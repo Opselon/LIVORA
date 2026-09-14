@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PLANTED TRIPWIRE VIOLATION (P1-F proof-of-fire, rule T4). Three defects planted on purpose:
+     (1) Sleep.Debt.Hours exists in EN but NOT in the FA twin -> "no FA counterpart";
+     (2) Plan.Item.Adapted passes {0}{1} in EN but only {0} in FA -> "placeholder drift";
+     (3) Profile.Brand.Name FA value carries Latin-only text with no placeholder -> "no Persian
+         script" (and it is NOT in the allowlist here on purpose).
+     A fourth defect lives on the sibling pair: p1f-missing-twin.en.keys.xml has no .fa file at all
+     -> "no .fa twin manifest". Do not repair this folder: it is detector calibration. -->
+<root>
+  <data name="Cloud.Status.Syncing" xml:space="preserve"><value>Syncing your data…</value></data>
+  <data name="Sleep.Debt.Hours" xml:space="preserve"><value>{0} hours behind</value></data>
+  <data name="Plan.Item.Adapted" xml:space="preserve"><value>{0} adjusted because {1}</value></data>
+  <data name="Profile.Brand.Name" xml:space="preserve"><value>LIVORA</value></data>
+</root>
