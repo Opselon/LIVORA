@@ -92,8 +92,12 @@ public sealed class IdentityAccountService
         var user = gate.Context!.User;
 
         if (user.Status == AccountStatus.DeletionPending && user.DeletionRequestedAtUtc is not null)
+            // §5c pins THIS response at 409. The frozen Problems.StatusFor maps the code to 403 by
+            // default, so the handler states the contract status explicitly — the more specific
+            // frozen contract (§5c's line) wins over the general code table, without editing it.
             return Problems.Of(ctx, ProblemCodes.DeletionPending,
-                "A deletion request is already pending for this account.");
+                "A deletion request is already pending for this account.",
+                status: StatusCodes.Status409Conflict);
 
         var now = _clock.UtcNow;
         var scheduled = now.AddDays(_options.DeletionGraceDays);
