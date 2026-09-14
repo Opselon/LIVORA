@@ -105,3 +105,15 @@ Follow-ups recorded as request lines in `docs/quality/wave4/REQUESTS-P1F.md`:
 parallelism inflate two budgets in StoragePerformanceBudgetTests; the class failed 5 of 26
 full-suite runs (~19%) as one command and 0 of 11 runs when isolated; fix = two-step CI gate
 (proven), budget values stay as written.`
+
+## 5. R3 status note (14 Sep, merged P1 tree)
+
+Still the authoritative flake record — nothing here deleted or contradicted. Additions from the
+merged tree: (a) the client gate ran 1299/1299 green without the retry firing in R3's runs
+(`WAVE4-P1-GATE.md` E1/E8), the narrow `AllowKnownPerfRetry` stays in `Wave4Gate` until the
+two-step split lands (R-P1F-1/R-R3-8 unchanged); (b) the SAME contention family now has a
+server-side twin — `Quality/Wave4PerformanceBudgetTests.Sync_batch…` measures the landed
+POST /sync/batch path and inflates 4-14x under the full-suite disk queue (per-fixture SQLite files
+fsyncing in parallel, p95 56 ms isolated → 235-800 ms contended); its one-disclosed-retry +
+same-bottleneck 1-op witness + 15x scaling-guard policy is documented in that class header and is
+the server-side application of this document's law: **isolate or witness, never widen the budget.**

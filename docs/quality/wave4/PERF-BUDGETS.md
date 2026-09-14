@@ -15,7 +15,7 @@ regression-trip it?* Capacity planning requires a deployed target — which does
 |---|---|---|---|---|---|---|---|
 | GET /healthz | 0.13 ms | 0.20 ms | 0.28 ms | 0.49 ms | p95 < 50 ms | 200 | PASS (250× headroom) |
 | GET /api/v1/platform/capabilities | 2.28 ms | 7.74 ms | 20.48 ms | 21.99 ms | p95 < 50 ms | 200 | PASS (6.5× headroom) |
-| POST /api/v1/sync/batch (50 ops) | — | — | — | — | p95 < 150 ms | — | **NOT_IMPLEMENTED at this HEAD** — the route answers the scaffold's honest `not_found` envelope, `/openapi/v1.json` advertises no sync path, and the capability report lists no sync module; the budget test asserts all three instead of measuring nothing |
+| POST /api/v1/sync/batch (50 ops) | 38 ms | 56 ms | ~60 ms | 58-70 ms | p95 < 150 ms | 30-50 | **PASS, 2.7× headroom — R3 UPDATE: endpoint landed (P1-B), budget now MEASURED not asserted-absent.** Same code, contended windows: full-suite p95 235-470 ms, sibling-lane-saturating box 630-800 ms (1-op witness 540 ms) — disk-queue contention (fsync/WAL), not algorithmic; the test's retry + same-bottleneck witness + 15× scaling guard + hang ceilings encode that honestly (class header). CI's serial step (gate 3a shape) is where the tight 150 ms is enforced |
 
 Method (as coded in `Quality/Wave4PerformanceBudgetTests.cs`, serialised with the gate harness via
 `Wave4SerialCollection`): 10 warm-up requests, then 200 SEQUENTIAL requests sampled with
