@@ -1,402 +1,491 @@
 #!/usr/bin/env python3
-"""LIVORA integration controller — gate evaluator.
+"""LIVORA governance CLI — registry validation, PR classification, audits.
 
-Deterministic, fail-safe. Classifies a PR diff against the ownership registry:
-  RED    -> block merge, print actionable diagnostics (exit 2)
-  YELLOW -> block auto-merge, request coordinator review (exit 1)
-  GREEN  -> eligible for automatic merge (exit 0)
+Subcommands
+  validate-registry  registry self-validation (schema + lifecycle + conflicts)
+  classify           governance classification of a PR from evidence files
+  inspect-pr         classify + full manifest (JSON) for CI artifacts
+  explain            human-readable explanation of the last classification
+  audit              workspace/branch drift audit (lanes vs git state)
+  benchmark          synthetic scaling benchmark (1..N lanes)
 
-Input files (prepared by the workflow, not by this script):
-  changed.txt     one path per line (PR vs base, rename/add/delete already flattened)
-  additions.diff  unified diff of the PR (context may be absent; only + lines matter)
-  meta.json       {"pr": N, "title": str, "body": str, "base_sha": str, "head_sha": str,
-                   "merge_sha": str, "mergeable": "clean|dirty|unknown",
-                   "commits": N, "author": str}
+Exit codes (stable contract for CI):
+  classify/inspect-pr: 0 GREEN, 1 YELLOW, 2 RED
+  validate-registry:   0 valid, 2 invalid
+  audit/benchmark:     0 on success (findings are data, not exit codes)
 
-The script NEVER merges and NEVER trusts agent claims: it re-derives everything
-from files GitHub produced. On any error or missing input it exits 2 (RED) —
-uncertainty blocks, by design.
+Security: git is invoked with argument arrays only; registry/diff inputs are
+untrusted; every failure path exits 2 (fail-closed). No shell interpolation.
 """
-import fnmatch
+from __future__ import annotations
+
+import argparse
 import json
 import os
-import re
+import subprocess
 import sys
 
-ROOT = os.getcwd()
-REG_PATH = os.path.join(ROOT, ".github", "OWNERSHIP.yaml")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from governance import git_evidence as gite                      # noqa: E402
+from governance.engine import (GovernanceInput, classify,           # noqa: E402
+                               parse_pr_contract)
+from governance.model import Reason, Severity                       # noqa: E402
+from governance.paths import PathError, normalize_repo_path         # noqa: E402
+from governance.registry import (RegistryError, canonical_task_hash,  # noqa: E402
+                                 load_registry)
+from governance.report import build_manifest, dump_json, render_human  # noqa: E402
+
+LEGACY_CONTRACT_FIELDS = ("task_id", "agent_id", "wave", "base_commit", "tests_run")
 
 
-def fail_hard(msg: str) -> None:
-    print("::error::" + msg)
-    print("\nVERDICT: RED (controller error — fail-safe stop)")
-    sys.exit(2)
+def _red(reason: Reason, msg: str) -> int:
+    print("RED   | " + reason.value + ": " + msg)
+    print("\nVERDICT: RED")
+    return 2
 
 
-# ---------------------------------------------------------------- registry load
-def load_registry(path: str) -> dict:
-    """Parse the subset of OWNERSHIP.yaml we enforce. PyYAML if present, else a
-    small indentation parser that understands this file's shapes only."""
+# ---------------------------------------------------------------- registry cmd
+def cmd_validate_registry(args) -> int:
     try:
-        text = open(path, encoding="utf-8").read()
-    except OSError:
-        fail_hard(f"registry missing: {path}")
-    try:
-        import yaml  # type: ignore
-        return yaml.safe_load(text)
-    except ImportError:
-        return _mini_yaml(text)
-
-
-def _mini_yaml(text: str) -> dict:
-    """Enough YAML for OWNERSHIP.yaml: maps, scalar lists, list-of-maps, comments."""
-    root: dict = {}
-    # stack of (indent, container)
-    stack: list[tuple[int, object]] = [(-1, root)]
-
-    def close_to(indent: int):
-        while stack and stack[-1][0] >= indent:
-            stack.pop()
-
-    lines = [l.rstrip("\n") for l in text.splitlines()]
-    i = 0
-    while i < len(lines):
-        raw = lines[i]
-        i += 1
-        if not raw.strip() or raw.strip().startswith("#"):
-            continue
-        indent = len(raw) - len(raw.lstrip(" "))
-        line = raw.strip()
-        close_to(indent)
-        parent = stack[-1][1]
-        if line.startswith("- "):
-            item = line[2:].strip()
-            if not isinstance(parent, list):
-                fail_hard(f"registry parse: list item outside list at: {raw}")
-            if ":" in item and not item.startswith('"'):
-                # list-of-maps entry
-                d: dict = {}
-                parent.append(d)
-                stack.append((indent, d))
-                _kv(d, item)
-            else:
-                parent.append(_scalar(item))
-            continue
-        if isinstance(parent, dict):
-            m = re.match(r"^([\w./-]+):\s*(.*)$", line)
-            if not m:
-                fail_hard(f"registry parse: bad line: {raw}")
-                return root
-            key, val = m.group(1), m.group(2).strip()
-            if val == "":
-                # container: peek next non-comment line to pick list vs map
-                nxt = next((l for l in lines[i:] if l.strip() and not l.strip().startswith("#")), "")
-                nind = len(nxt) - len(nxt.lstrip(" "))
-                if nind > indent and nxt.strip().startswith("- "):
-                    child: list = []
-                    parent[key] = child
-                    stack.append((indent, child))
-                elif nind > indent:
-                    child_d: dict = {}
-                    parent[key] = child_d
-                    stack.append((indent, child_d))
-                else:
-                    parent[key] = {}
-            else:
-                parent[key] = _scalar(val)
-        else:
-            # list of scalars under a key
-            m = re.match(r"^([\w./-]+):\s*(.*)$", line)
-            if m:
-                key, val = m.group(1), m.group(2).strip()
-                holder = parent  # the dict that owns this list
-                if val == "":
-                    nxt = next((l for l in lines[i:] if l.strip() and not l.strip().startswith("#")), "")
-                    nind = len(nxt) - len(nxt.lstrip(" "))
-                    if nind > indent and nxt.strip().startswith("- "):
-                        child = []
-                        holder[key] = child
-                        stack.append((indent, child))
-                    else:
-                        holder[key] = {}
-                else:
-                    holder[key] = _scalar(val)
-    return root
-
-
-def _kv(d: dict, item: str) -> None:
-    m = re.match(r"^([\w-]+):\s*(.*)$", item)
-    if not m:
-        return
-    k, v = m.group(1), m.group(2).strip()
-    if v.startswith("[") and v.endswith("]"):
-        inner = v[1:-1].strip()
-        d[k] = [ _scalar(x.strip()) for x in inner.split(",") ] if inner else []
-    elif v:
-        d[k] = _scalar(v)
+        reg = load_registry(args.registry)
+    except RegistryError as e:
+        for c in e.constraints:
+            print(f"{c.severity.value:11s} | {c.reason.value} | {c.message}")
+        print("\nREGISTRY: INVALID")
+        return 2
+    except (OSError, PathError) as e:
+        print(f"REGISTRY_CORRUPTION | {e}")
+        return 2
+    info = {
+        "version": reg.version, "sha256": reg.sha256,
+        "lanes": len(reg.lanes), "claims": len(reg.claims),
+        "frozen": len(reg.frozen), "architecture": len(reg.architecture),
+        "integration": len(reg.integration_owned),
+        "overlap_groups": len(reg.overlap_groups),
+    }
+    if args.json:
+        print(json.dumps(info, sort_keys=True))
     else:
-        d[k] = None
+        for k, v in info.items():
+            print(f"{k:16s} = {v}")
+    print("\nREGISTRY: VALID (schema + lifecycle + exclusive-conflict scan passed)")
+    return 0
 
 
-def _scalar(v: str):
-    v = v.strip()
-    if v.startswith("["):                      # inline list: [a, b] / []
-        inner = v.strip("[]").strip()
-        return [_scalar(x) for x in inner.split(",")] if inner else []
-    v = re.split(r"\s+#", v, 1)[0].strip()    # strip trailing inline comment
-    v = v.strip('"').strip("'")
-    if v.isdigit():
-        return int(v)
-    if v.lower() in ("true", "false"):
-        return v.lower() == "true"
-    return v
+# --------------------------------------------------------------- classify cmd
+def _load_legacy_inputs(root: str) -> tuple[list, dict, dict, str]:
+    """changed.txt / meta.json / additions.diff — the workflow-produced inputs."""
+    changed_p = os.path.join(root, "changed.txt")
+    meta_p = os.path.join(root, "meta.json")
+    diff_p = os.path.join(root, "additions.diff")
+    if not os.path.isfile(changed_p):
+        raise FileNotFoundError(changed_p)
+    lines = [l.strip() for l in open(changed_p, encoding="utf-8") if l.strip()]
+    meta = json.load(open(meta_p, encoding="utf-8"))
+    diff_text = open(diff_p, encoding="utf-8", errors="replace").read() \
+        if os.path.isfile(diff_p) else ""
+    return lines, meta, diff_text
 
 
-# ---------------------------------------------------------------- PR contract
-REQUIRED_META = [
-    ("task_id", r"Task-Id:\s*(\S+)"),
-    ("agent_id", r"Agent-Id:\s*(\S+)"),
-    ("wave", r"Wave:\s*(\S+)"),
-    ("base_commit", r"Base-Commit:\s*([0-9a-f]{7,40})"),
-    ("owned_scope", r"Owned-Scope:\s*(.+)"),
-    ("tests_run", r"Tests-Run:\s*(.+)"),
-]
-FAKE_CLAIM = re.compile(r"Tests-Run:\s*\d+\s*(?:passed|green|/)", re.I)
-
-
-def parse_pr_contract(body: str) -> dict:
-    out = {}
-    for key, pat in REQUIRED_META:
-        m = re.search(pat, body)
-        out[key] = m.group(1).strip() if m else None
+def _changeset_from_lines(lines: list[str], input_dir: str, meta: dict) -> list:
+    """Build the changeset from the strongest available evidence:
+    1. changed.json in input_dir (workflow-derived name-status with ops + renames)
+    2. local git diff base...head (when both SHAs exist in this checkout)
+    3. legacy changed.txt flattened list -> operation UNKNOWN (engine fails closed)
+    """
+    rich_p = os.path.join(input_dir, "changed.json")
+    if os.path.isfile(rich_p):
+        try:
+            data = json.load(open(rich_p, encoding="utf-8"))
+            out = []
+            for e in data:
+                out.append(gite.ChangedFile(
+                    path=e.get("path", ""), old_path=e.get("old_path"),
+                    operation=_op(e.get("operation", "unknown")),
+                    binary=bool(e.get("binary", False))))
+            if out:
+                return out
+        except (json.JSONDecodeError, OSError):
+            pass  # corrupt rich input: fall back to weaker evidence
+    base, head = meta.get("base_sha"), meta.get("head_sha")
+    mb = meta.get("merge_base")
+    if base and head and os.path.isdir(".git"):
+        try:
+            cs = gite.read_name_status_diff(".", mb or base, head)
+            if cs:
+                return cs
+        except (gite.GitError, OSError):
+            pass
+    seen = set()
+    out = []
+    for l in lines:
+        if l in seen:
+            continue
+        seen.add(l)
+        # flattened name-only evidence cannot prove the operation: UNKNOWN ops
+        # fail closed in the engine (UNKNOWN_OPERATION) — by design.
+        out.append(gite.ChangedFile(path=l, operation=_op("unknown"), old_path=None))
     return out
 
 
-# ---------------------------------------------------------------- matching
-def norm(p: str) -> str:
-    p = p.replace("\\", "/")
-    while p.startswith("./"):
-        p = p[2:]
-    return p.lstrip("/")
-
-
-def matches_any(path: str, patterns: list[str]) -> bool:
-    for pat in patterns:
-        pat = norm(pat)
-        if pat == "**":
-            return True
-        if pat.endswith("/**"):
-            base = pat[:-3]
-            if path == base or path.startswith(base + "/"):
-                return True
-        elif fnmatch.fnmatch(path, pat):
-            return True
-        elif pat == path:
-            return True
-    return False
-
-
-def lane_for_path(path: str, reg: dict):
-    """Return (lane_id, owns) for the registered lane whose owns cover path, else (None, ...)."""
-    for lane in reg.get("lanes") or []:
-        if not isinstance(lane, dict):
-            continue
-        owns = [norm(o) for o in (lane.get("owns") or [])]
-        if lane.get("id") == "lead":
-            continue
-        if matches_any(path, owns):
-            return lane.get("id"), owns
-    return None, []
-
-
-# ---------------------------------------------------------------- scanners
-SECRET_PATTERNS = [
-    re.compile(r"(?i)\bsk-[A-Za-z0-9][A-Za-z0-9._-]{16,}"),   # full API keys, not stubs like sk-1cd...7367
-    re.compile(r"(?i)api[_-]?key\s*[:=]\s*['\"][^'\"]{16,}['\"]"),
-    re.compile(r"(?i)bearer\s+[A-Za-z0-9._-]{32,}"),
-    re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
-    re.compile(r"(?i)(password|passwd|secret)\s*[:=]\s*['\"][^'\"]{8,}['\"]"),
-]
-BAD_XAML_COMMENT = re.compile(r"\{" + chr(47) + r"\*")
-DI_HOLLOW = re.compile(r"services\.Add(Singleton|Scoped|Transient)<(\w+)>\(\);")
-BRUSH_ON_COLOR = re.compile(r"(TextColor|BackgroundColor|FieldBackgroundColor)\s*=\s*\"\{StaticResource\s+\w*Brush\}\"\s*")
-
-
-def scan_added_lines(additions_path: str):
-    hits = {"secret": [], "brace_xaml": [], "hollow_di": [], "brush": []}
-    cur = ""
+def _op(name: str):
+    from governance.model import Operation
     try:
-        with open(additions_path, encoding="utf-8", errors="replace") as f:
-            for ln in f:
-                if ln.startswith("diff --git ") or ln.startswith("--- "):
-                    continue
-                if ln.startswith("+++ b/"):
-                    cur = norm(ln[6:].strip())
-                    continue
-                if not ln.startswith("+") or ln.startswith("+++"):
-                    continue
-                code = ln[1:]
-                loc = f"{cur}: {ln!r}"[:160]
-                for pat in SECRET_PATTERNS:
-                    if pat.search(code):
-                        hits["secret"].append(loc)
-                        break
-                if cur.endswith(".xaml") and BAD_XAML_COMMENT.search(code):
-                    hits["brace_xaml"].append(loc)
-                if cur.endswith(".cs") and DI_HOLLOW.search(code):
-                    hits["hollow_di"].append(loc)
-                if cur.endswith(".xaml") and BRUSH_ON_COLOR.search(code):
-                    hits["brush"].append(loc)
-    except OSError:
-        fail_hard("additions.diff not readable")
-    return hits
+        return Operation(name)
+    except ValueError:
+        return Operation.UNKNOWN
 
 
-def main() -> None:
-    reg = load_registry(REG_PATH)
-    policy = reg.get("policy") or {}
-
+def _branch_evidence(reg_repo_root: str, contract: dict, reg, lane) -> gite.BranchEvidence | None:
+    """Derive branch topology from a local git checkout if available. When the
+    checkout cannot answer, return evidence WITH gaps (fail-closed), not None,
+    unless there is no git at all — then None (engine records MISSING_EVIDENCE)."""
+    if not os.path.isdir(os.path.join(reg_repo_root, ".git")):
+        return None
+    branch = contract.get("lane_branch") or (lane.branch if lane else None)
+    base = (reg.policy or {}).get("base_branch", "master")
+    declared_base = contract.get("base_commit")
+    frozen_prefixes = tuple(sorted({m.literal_prefix[0] for m in reg.frozen
+                                    if m.literal_prefix}))
     try:
-        changed = [norm(l.strip()) for l in open("changed.txt") if l.strip()]
-    except OSError:
-        fail_hard("changed.txt not readable (diff step did not run?)")
+        return gite.branch_evidence(reg_repo_root, branch or "", base,
+                                    declared_base, frozen_prefixes)
+    except gite.GitError as e:
+        ev = gite.BranchEvidence()
+        ev.gaps.append(f"GIT_ERROR: {e}")
+        return ev
+
+
+def _branch_evidence_from_meta(meta: dict) -> gite.BranchEvidence:
+    """Branch evidence derived from GitHub-computed meta (workflow proves the
+    head SHA exists by fetching it; merge_base is git-topology from CI)."""
+    ev = gite.BranchEvidence()
+    ev.head_sha = meta.get("head_sha") or None
+    ev.base_sha = meta.get("base_sha") or None
+    ev.merge_base = meta.get("merge_base") or None
+    ev.branch_exists = bool(ev.head_sha)
+    ev.commits_behind = int(meta.get("commits_behind", -1))
+    ev.commits_ahead = int(meta.get("commits_ahead", -1))
+    if not ev.merge_base:
+        ev.gaps.append("NO_MERGE_BASE_IN_META")
+    if ev.commits_behind < 0:
+        ev.gaps.append("COMMITS_BEHIND_UNKNOWN")
+    arch = bool(meta.get("architecture_changed_after_fork"))
+    ev.architecture_changed_after_fork = arch
+    return ev
+
+
+def run_classify(args) -> tuple[int, dict]:
+    reg_path = args.registry
     try:
-        meta = json.load(open("meta.json", encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        fail_hard("meta.json not readable")
-
-    red: list[str] = []
-    yellow: list[str] = []
-
-    frozen = [norm(p) for p in ((reg.get("frozen") or {}).get("paths") or []) if isinstance(p, str)]
-    arch = [norm(p) for p in ((reg.get("architecture_owned") or {}).get("paths") or []) if isinstance(p, str)]
-    integ = [norm(p) for p in (reg.get("integration_owned") or []) if isinstance(p, str)]
-
-    # 1. mergeability
-    mg = meta.get("mergeable", "unknown")
-    if mg == "dirty":
-        red.append(f"CONFLICT: GitHub reports mergeable=dirty against current master ({meta.get('base_sha','?')[:8]}). Rebase branch onto master HEAD and re-open.")
-    elif mg == "unknown":
-        yellow.append("MERGEABILITY UNKNOWN (GitHub still computing) — controller will not guess; re-run gate.")
-
-    # 2. PR contract metadata
-    contract = parse_pr_contract(meta.get("body") or "")
-    for k in ("task_id", "agent_id", "wave", "base_commit", "tests_run"):
-        if not contract.get(k):
-            red.append(f"INVALID METADATA: PR body missing '{k}' line (use .github/pull_request_template.md).")
-    if contract.get("tests_run") and FAKE_CLAIM.search(meta.get("body") or ""):
-        print("INFO  | AGENT CLAIM: Tests-Run numbers are claims, not proof. Only the gate job's executed tests count.")
-
-    # 3. declared base vs actual fork point (merge-base computed from git, not claims)
-    mb = meta.get("merge_base")
-    if mb and contract.get("base_commit"):
-        if not mb.startswith(contract["base_commit"]):
-            yellow.append(f"BASE METADATA MISMATCH: PR declares Base-Commit {contract['base_commit'][:8]} but its actual merge-base with master is {mb[:8]} (branch history rewritten or wrong declaration).")
-        elif mb != meta.get("base_sha"):
-            print(f"INFO  | behind master: forked at {mb[:8]}, master is at {meta.get('base_sha','')[:8]} — merge-state build/test still validates the combination.")
-
-    # 4. per-path classification (per-rule findings aggregated so a 45-file PR
-    #    reports one drift line, not 45)
-    declared = [norm(x.strip()) for x in re.split(r"[,;]", contract.get("owned_scope") or "") if x.strip()]
-    # lead-amendment exception: a PR declaring the registry lead's Agent-Id may touch
-    # frozen/architecture/integration-owned paths, but only as YELLOW (never auto-GREEN).
-    lead_agent = next((l.get("agent") for l in (reg.get("lanes") or [])
-                       if isinstance(l, dict) and l.get("id") == "lead"), None)
-    acting_as_lead = bool(lead_agent) and contract.get("agent_id") == lead_agent
-    lead_yellow: list[str] = []
-    shared_hits: list[str] = []
-    drift_hits: list[str] = []
-    red_path_hits = 0
-    for path in changed:
-        if matches_any(path, frozen) or matches_any(path, arch) or matches_any(path, integ):
-            if acting_as_lead:
-                lead_yellow.append(path)
-            elif matches_any(path, frozen):
-                red.append(f"FROZEN CONTRACT EDIT: {path} — Application/Abstractions/** + Domain/Enums/** are lead-only; ask the lead to amend via a separate PR.")
-            else:
-                red.append(f"ARCHITECTURE-OWNED EDIT: {path} — workflows/registry/scripts/integration-owned files are lead-only.")
-            continue
-        lane_id, _owns = lane_for_path(path, reg)
-        if lane_id is None:
-            if red_path_hits < 6:
-                red.append(f"UNREGISTERED SCOPE: {path} matches no lane 'owns' in .github/OWNERSHIP.yaml — register the lane before opening the PR.")
-            red_path_hits += 1
-        elif declared and not matches_any(path, declared):
-            drift_hits.append(path)
-    if lead_yellow:
-        yellow.append(f"LEAD AMENDMENT ({len(lead_yellow)} files): frozen/architecture/integration-owned paths touched by the lead lane itself ({lead_yellow[:6]}...) — human/coordinator review required, never auto-GREEN.")
-    if shared_hits:
-        yellow.append(f"SHARED FILE ({len(shared_hits)}): {shared_hits[:6]}{'...' if len(shared_hits) > 6 else ''} "
-                      f"— integration-owned; deliver APPEND blocks instead of editing.")
-    if drift_hits:
-        yellow.append(f"SCOPE DRIFT ({len(drift_hits)} files inside the lane but outside declared Owned-Scope): {drift_hits[:6]}")
-    if red_path_hits > 6:
-        red.append(f"(+{red_path_hits - 6} more frozen/architecture/unregistered path violations)")
-
-    # 5. duplicate implementation: two NEW type definitions of the same name
-    iface_counter: dict[str, list[str]] = {}
-    try:
-        with open("additions.diff", encoding="utf-8", errors="replace") as f:
-            cur = ""
-            for ln in f:
-                if ln.startswith("+++ b/"):
-                    cur = norm(ln[6:].strip())
-                    continue
-                if not ln.startswith("+"):
-                    continue
-                m = re.match(r"^\+\s*(?:public|internal|sealed|abstract|static|\s)*(?:interface|class|record|enum)\s+(\w+)", ln)
-                if m and cur.endswith(".cs"):
-                    iface_counter.setdefault(m.group(1), []).append(cur)
-    except OSError:
-        fail_hard("additions.diff not readable")
-    for name, files in iface_counter.items():
-        if len(set(os.path.basename(f) for f in files)) > 1 or len(set(files)) > 1:
-            yellow.append(f"POSSIBLE DUPLICATE TYPE: '{name}' defined in {sorted(set(files))}")
-
-    # 6. overlap groups: PR touching paths owned by more than one registered lane
-    touched_lanes = set()
-    for path in changed:
-        lid, _ = lane_for_path(path, reg)
-        if lid:
-            touched_lanes.add(lid)
-    for grp in reg.get("overlap_groups") or []:
-        if not isinstance(grp, dict):
-            continue
-        members = set(grp.get("lanes") or [])
-        if len(touched_lanes & members) > 1:
-            yellow.append(f"OVERLAP GROUP '{grp.get('name')}': change set spans lanes {sorted(touched_lanes & members)} — one lane must win; lead arbitration.")
-
-    # 7. size gate
-    max_files = int(policy.get("auto_merge_max_changed_files") or 40)
-    if len(changed) > max_files:
-        yellow.append(f"OVERSIZED CHANGE: {len(changed)} files > {max_files} auto-merge cap.")
-
-    # 8. content scanners
-    hits = scan_added_lines("additions.diff")
-    if hits["secret"]:
-        red.append(f"SECRET IN DIFF: {len(hits['secret'])} hit(s) — purge from history before any merge. samples: {hits['secret'][:3]}")
-    if hits["brace_xaml"]:
-        red.append(f"XAML BRACE-COMMENT (MAUIX2002 tripwire): {hits['brace_xaml'][:2]} — use <!-- --> anchors.")
-    if hits["hollow_di"]:
-        yellow.append(f"SUSPECT HOLLOW DI: interface registered with no instance ({hits['hollow_di'][:2]}).")
-    if hits["brush"]:
-        yellow.append(f"BRUSH-ON-COLOR PATTERN ({hits['brush'][:2]}) — known MAUI runtime trap; verify at app build.")
-
-    # ---- verdict (fail-safe: any doubt stops the merge) -----------------------
-    print(f"CHANGED FILES: {len(changed)}")
-    for r in red:
-        print("RED   | " + r)
-    for y in yellow:
-        print("YELLOW| " + y)
-    if red:
+        reg = load_registry(reg_path)
+    except RegistryError as e:
+        for c in e.constraints:
+            print(f"{c.severity.value:11s} | {c.reason.value} | {c.message}")
         print("\nVERDICT: RED")
-        sys.exit(2)
-    if yellow:
-        print("\nVERDICT: YELLOW — held for coordinator review")
-        sys.exit(1)
-    print("\nVERDICT: GREEN — eligible for automatic merge (build/tests still must pass)")
-    sys.exit(0)
+        return 2, {"final_decision": "RED", "reason_codes":
+                   sorted({c.reason.value for c in e.constraints})}
+    except OSError as e:
+        print(f"REGISTRY_CORRUPTION | {e}")
+        return 2, {"final_decision": "RED"}
+    except Exception as e:  # any parser escape is RED, never a crash-through
+        print(f"PARSER_FAILURE | {type(e).__name__}: {e}")
+        return 2, {"final_decision": "RED"}
+
+    try:
+        lines, meta, diff_text = _load_legacy_inputs(args.input_dir or ".")
+    except FileNotFoundError as e:
+        print(f"MISSING_EVIDENCE | required input file not found: {e.filename}")
+        print("\nVERDICT: RED")
+        return 2, {"final_decision": "RED"}
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"EVIDENCE_CORRUPTION | {e}")
+        print("\nVERDICT: RED")
+        return 2, {"final_decision": "RED"}
+
+    contract = parse_pr_contract(meta.get("body") or "")
+    if not contract.get("task_id"):
+        m = LEGACY_CONTRACT_FIELDS and _legacy_task_id(meta)
+        if m:
+            contract["task_id"] = m
+    changeset = _changeset_from_lines(lines, args.input_dir or ".", meta)
+    lane = reg.lanes.get(contract.get("task_id") or "")
+    if args.no_git:
+        be = _branch_evidence_from_meta(meta)
+    else:
+        be = _branch_evidence(os.getcwd(), contract, reg, lane)
+        if be is None:
+            be = _branch_evidence_from_meta(meta)
+    added = diff_text.count("\n+")
+    deleted = diff_text.count("\n-")
+    gi = GovernanceInput(
+        registry=reg, changeset=changeset, contract=contract, meta=meta,
+        branch_evidence=be, diff_text=diff_text, added=added, deleted=deleted,
+        timestamp=args.as_of)
+    res = classify(gi)
+    manifest = build_manifest(
+        gi, res, repo=os.environ.get("GH_REPO", os.path.basename(os.getcwd())),
+        base_sha=meta.get("base_sha", ""), head_sha=meta.get("head_sha", ""),
+        merge_base=meta.get("merge_base"), pr=meta.get("pr"))
+    code = {"GREEN": 0, "YELLOW": 1, "RED": 2}[res.decision.value]
+    return code, manifest
+
+
+def _legacy_task_id(meta: dict) -> str | None:
+    """Accept the v1 PR-body convention when Task-Id is a raw lane slug."""
+    body = meta.get("body") or ""
+    for lane_hint in ("Task-Id",):
+        pass
+    import re
+    m = re.search(r"Task-Id:\s*(\S+)", body)
+    return m.group(1) if m else None
+
+
+def cmd_classify(args) -> int:
+    code, manifest = run_classify(args)
+    if args.json:
+        print(dump_json(manifest))
+    else:
+        print(render_human(manifest))
+    if args.manifest_out and manifest:
+        with open(args.manifest_out, "w", encoding="utf-8") as f:
+            f.write(dump_json(manifest))
+    verdict = manifest.get("final_decision", "RED")
+    if not args.json:
+        note = {"GREEN": "— eligible for automatic merge (build/tests are separate gates)",
+                "YELLOW": "— held for coordinator review",
+                "RED": "— blocked"}[verdict]
+        print(f"\nVERDICT: {verdict} {note}")
+    return code
+
+
+def cmd_inspect_pr(args) -> int:
+    return cmd_classify(args)
+
+
+def cmd_explain(args) -> int:
+    try:
+        manifest = json.load(open(args.manifest, encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"MISSING_EVIDENCE | {e}")
+        return 2
+    print(f"decision={manifest['final_decision']} lane={manifest.get('lane_id')} "
+          f"task={manifest.get('task_id')}@rev{manifest.get('task_revision')} "
+          f"registry@{str(manifest.get('registry_sha256'))[:12]}")
+    by_file: dict[str, list] = {}
+    for c in manifest.get("hard_constraints", []):
+        by_file.setdefault(c.get("path") or "-", []).append(c)
+    for fd in manifest.get("per_file_decisions", []):
+        hc = by_file.get(fd["path"], [])
+        print(f"\n[{fd['decision']:6s}] {fd['operation']:6s} {fd['path']}")
+        print(f"   class={fd['policy_class']} owners={fd['owners']} "
+              f"rules={fd['matched_rules']} relevance=L{fd['relevance_level']}")
+        for c in fd.get("hard_constraints", []):
+            print(f"   -> {c['severity']}: {c['reason']}")
+            print(f"      {c['message']}")
+    for path, cons in sorted(by_file.items()):
+        if path == "-":
+            for c in cons:
+                print(f"\n[PR-level] {c['reason']}: {c['message']}")
+    failed = sorted(k for k, v in manifest.get("green_predicates", {}).items() if not v)
+    if failed:
+        print("\nGREEN predicates NOT proven: " + ", ".join(failed))
+    return 0
+
+
+def cmd_audit(args) -> int:
+    """Drift audit: registry lanes vs real git branches (local checkout)."""
+    try:
+        reg = load_registry(args.registry)
+    except RegistryError as e:
+        for c in e.constraints:
+            print(f"{c.severity.value:11s} | {c.reason.value} | {c.message}")
+        print("\nAUDIT: registry invalid — cannot audit against git")
+        return 2
+    root = args.repo or os.getcwd()
+    try:
+        out = subprocess.run(["git", "-C", root, "for-each-ref", "--format=%(refname)",
+                              "refs/heads", "refs/remotes/origin"],
+                             capture_output=True, text=True, check=True).stdout
+    except (subprocess.SubprocessError, OSError) as e:
+        print(f"MISSING_EVIDENCE | git not available: {e}")
+        return 2
+    refs = {l.replace("refs/heads/", "").replace("refs/remotes/origin/", "").strip()
+            for l in out.splitlines() if l.strip()}
+    report = {"registry_sha256": reg.sha256, "lanes": {}, "unreferenced_branches": []}
+    lane_branch_stems = set()
+    for lane in reg.lanes.values():
+        if not lane.branch:
+            continue
+        stem = lane.branch.rstrip("*").rstrip("/")
+        lane_branch_stems.add(stem)
+    for lane in reg.lanes.values():
+        pat = lane.branch or ""
+        if not pat:
+            continue
+        if "*" in pat:
+            exists = sorted(r for r in refs if r.startswith(pat.rstrip("*")))
+        else:
+            exists = [r for r in refs if r == pat]
+        report["lanes"][lane.id] = {
+            "branch_pattern": pat, "status": lane.status.value,
+            "matching_branches": exists,
+            "task_hash": lane.task_hash,
+        }
+    for r in sorted(refs):
+        if r in ("master", "main", "HEAD"):
+            continue
+        if not any(r == p or r.startswith(p.rstrip("*").rstrip("/") + "/") or
+                   p.rstrip("*").rstrip("/") == r for p in
+                   (l.branch or "" for l in reg.lanes.values()) if p):
+            report["unreferenced_branches"].append(r)
+    print(json.dumps(report, indent=1, sort_keys=True, ensure_ascii=False))
+    return 0
+
+
+def cmd_benchmark(args) -> int:
+    """Scaling benchmark: build synthetic registries of N lanes, classify an
+    F-file changeset, report timing. Deterministic (fixed seed-free construction)."""
+    import time
+    from governance.registry import Claim, Lane
+    from governance.model import Lifecycle
+    from governance.paths import Matcher
+    rows = []
+    for n_lanes in (1, 10, 50, 100, 500):
+        reg = _synthetic_registry(n_lanes)
+        changeset = _synthetic_changeset(reg, args.files)
+        gi = GovernanceInput(registry=reg, changeset=changeset,
+                             contract=_synthetic_contract(reg),
+                             meta={"mergeable": "clean", "author": "bench"},
+                             branch_evidence=None, diff_text="",
+                             added=args.files * 40, deleted=args.files * 10)
+        t0 = time.perf_counter()
+        res = classify(gi)
+        dt = time.perf_counter() - t0
+        rows.append({"lanes": n_lanes, "rules": len(reg.claims), "files": len(changeset),
+                     "seconds": round(dt, 4), "decision": res.decision.value})
+    if args.json:
+        print(json.dumps({"benchmark": rows, "engine": "livora-governance/1"}, indent=1))
+    else:
+        print(f"{'lanes':>6} {'rules':>7} {'files':>6} {'seconds':>9}  decision")
+        for r in rows:
+            print(f"{r['lanes']:>6} {r['rules']:>7} {r['files']:>6} {r['seconds']:>9.4f}  {r['decision']}")
+    return 0
+
+
+def _synthetic_registry(n: int):
+    from governance.model import Lifecycle
+    from governance.paths import Matcher
+    from governance.registry import Claim, Lane, Registry
+    lanes = {}
+    claims = []
+    for i in range(n):
+        lid = f"bench-lane{i:03d}"
+        pat = f"bench/src/mod{i:03d}/**"
+        m = Matcher(pat)
+        lane = Lane(id=lid, agent=f"agent-{i}", wave="bench",
+                    branch=f"bench/{lid}",
+                    task=f"synthetic module {i}", task_id=lid, task_revision=1,
+                    task_hash=canonical_task_hash(f"synthetic module {i}"),
+                    owns=[m], status=Lifecycle.ACTIVE, exclusive=True, raw_index=i)
+        lanes[lid] = lane
+        claims.append(Claim(subject=lid, pattern=pat,
+                            operations={"create", "modify", "delete", "rename", "copy"},
+                            kind="lane", priority=700, exclusive=True,
+                            authority=lane.agent, lifecycle="active", expiry=None,
+                            reason=lane.task, matcher=m, rule_id=f"lane:{lid}:{pat}"))
+    pol = Matcher("bench/policy/**")
+    claims.append(Claim(subject="frozen", pattern="bench/policy/**",
+                        operations={"create", "modify", "delete", "rename", "copy"},
+                        kind="frozen", priority=900, exclusive=True, authority="lead",
+                        lifecycle=None, expiry=None, reason="frozen family",
+                        matcher=pol, rule_id="frozen:bench/policy/**"))
+    return Registry(version=2, policy={"auto_merge_max_changed_files": 10_000},
+                    integration_owned=[Matcher("bench/shared/root.cs")],
+                    frozen=[pol], architecture=[Matcher("bench/.ci/**")],
+                    generated=[Matcher("bench/**/obj/**")], lanes=lanes,
+                    claims=claims, overlap_groups=[], sha256="0" * 64,
+                    validation_findings=[])
+
+
+def _synthetic_changeset(reg: Registry, files: int):
+    out = []
+    lids = sorted(reg.lanes)
+    for i in range(files):
+        lane = lids[i % len(lids)]
+        mod = lane.replace("bench-lane", "mod")
+        out.append(gite.ChangedFile(path=f"bench/src/{mod}/File{i:05d}.cs",
+                                    operation=gite.Operation.CREATE))
+    return out
+
+
+def _synthetic_contract(reg):
+    first = sorted(reg.lanes)[0]
+    lane = reg.lanes[first]
+    return {"task_id": first, "agent_id": lane.agent, "wave": "bench",
+            "base_commit": "0" * 40, "tests_run": "engine-benchmark",
+            "task_hash": lane.task_hash, "task_revision": str(lane.task_revision),
+            "lane_branch": lane.branch,
+            "owned_scope": ",".join(m.pattern for m in lane.owns),
+            "drift_ack": None}
+
+
+# ---------------------------------------------------------------------- main
+def build_parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(prog="livora_gates.py", description=__doc__)
+    ap.add_argument("--registry", default=".github/OWNERSHIP.yaml",
+                    help="path to OWNERSHIP.yaml (policy)")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser("validate-registry", help="self-validate the governance registry")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_validate_registry)
+
+    for name, help_ in (("classify", "classify a PR from evidence files"),
+                        ("inspect-pr", "classify + emit full JSON manifest")):
+        p = sub.add_parser(name, help=help_)
+        p.add_argument("--input-dir", default=".",
+                       help="directory holding changed.txt / meta.json / additions.diff")
+        p.add_argument("--json", action="store_true")
+        p.add_argument("--manifest-out", default=None)
+        p.add_argument("--no-git", action="store_true",
+                       help="skip local git branch evidence (CI passes this; the "
+                            "workflow supplies meta-derived evidence instead)")
+        p.add_argument("--as-of", default="FROZEN",
+                       help="explicit timestamp for the manifest (never read the clock)")
+        p.set_defaults(fn=cmd_classify)
+
+    p = sub.add_parser("explain", help="explain a governance-manifest.json")
+    p.add_argument("manifest", nargs="?", default="governance-manifest.json")
+    p.set_defaults(fn=cmd_explain)
+
+    p = sub.add_parser("audit", help="registry-vs-git drift audit")
+    p.add_argument("--repo", default=None)
+    p.set_defaults(fn=cmd_audit)
+
+    p = sub.add_parser("benchmark", help="scaling benchmark over synthetic registries")
+    p.add_argument("--files", type=int, default=200)
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_benchmark)
+    return ap
+
+
+def main(argv=None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        return args.fn(args)
+    except RegistryError as e:
+        for c in e.constraints:
+            print(f"{c.severity.value:11s} | {c.reason.value} | {c.message}")
+        return 2
+    except PathError as e:
+        return _red(Reason.MALFORMED_PATH, str(e))
+    except Exception as e:  # fail-closed: any unexpected crash is RED
+        import traceback
+        traceback.print_exc()
+        return _red(Reason.PARSER_FAILURE, f"unexpected {type(e).__name__}: {e}")
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
