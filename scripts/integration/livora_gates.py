@@ -499,8 +499,26 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
+_SUBCOMMANDS = ("validate-registry", "classify", "inspect-pr", "explain", "audit", "benchmark")
+
+
+def _normalize_argv(argv: list[str]) -> list[str]:
+    """Backward compatibility (requirement 41): the v1 workflow invoked
+    `livora_gates.py` with NO subcommand from the workspace root, reading
+    changed.txt / meta.json / additions.diff from CWD and exiting 0/1/2.
+    That exact contract stays alive: no subcommand => classify --input-dir .
+    Stricter engine semantics then apply to the legacy path (Task-Hash and
+    Lane-Branch are required, '**' scope is RED, ...); see
+    docs/architecture/governance/ for the adoption impact."""
+    argv = list(argv)
+    if not any(a in _SUBCOMMANDS for a in argv):
+        argv = argv + ["classify", "--input-dir", "."]
+    return argv
+
+
 def main(argv=None) -> int:
-    args = build_parser().parse_args(argv)
+    args = build_parser().parse_args(_normalize_argv(
+        list(sys.argv[1:] if argv is None else argv)))
     try:
         return args.fn(args)
     except RegistryError as e:
