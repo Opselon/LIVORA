@@ -16,7 +16,7 @@ namespace Livora.Server.Tests.Identity;
 /// OWNER: Agent 03 (identity lane); harness added by repair lane R2. Lives in the identity test
 ///          folder; the frozen fixture owns the host, this file only adds verbs and a reader.
 /// CONSUMES: <see cref="LivoraWebFixture"/> exactly as frozen — Http, Json, DbDir.
-/// A REAL-PLATFORM FACT the identity tests must state (filed as R-r2-2 in
+/// A REAL-PLATFORM FACT the identity tests must state (filed as R-r2-1 in
 /// docs/architecture/wave4/requests/r2.md): the fixture injects its per-test connection string via
 /// <c>ConfigureAppConfiguration</c>, which runs AFTER <c>Program.cs:31</c> has already read
 /// <c>GetConnectionString("Livora")</c> and handed the appsettings default (<c>livora.db</c>) to
@@ -152,7 +152,7 @@ public abstract class IdentityApiHarness : LivoraApiTest
     private static string ResolveLiveDatabase(string fixtureDbDir)
     {
         // Candidates in priority order: the fixture's intended per-test file (wins the moment the
-        // lead fixes R-r2-2), then the appsettings default resolved the way Microsoft.Data.Sqlite
+        // lead fixes R-r2-1), then the appsettings default resolved the way Microsoft.Data.Sqlite
         // resolves it (base directory, then CWD). A file QUALIFIES only if its schema has `users`.
         var candidates = new[]
         {
