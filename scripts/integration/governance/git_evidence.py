@@ -28,7 +28,9 @@ class ChangedFile:
 
     @property
     def eval_paths(self) -> list[str]:
-        return [p for p in (self.old_path, self.path) if p]
+        # include empty strings on purpose: normalization must reject them
+        # (MALFORMED_PATH RED) instead of the file silently skipping checks.
+        return [p for p in (self.old_path, self.path) if p is not None]
 
 
 @dataclass

@@ -23,20 +23,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CLI = os.path.join(HERE, "livora_gates.py")
 
 
-def _fail(msg: str) -> int:
-    """Fail-closed exit: 2 == the engine's RED code."""
-    print(msg, file=sys.stderr)
-    sys.exit(2)
-
-
 def git(*args: str, binary: bool = False) -> str | bytes:
     """Run git in the current repo; any failure is fatal (fail-closed, exit 2)."""
     try:
         p = subprocess.run(("git",) + args, capture_output=True, check=True)
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        err = getattr(e, "stderr", b"") or b""
-        _fail(f"RED: git {' '.join(args)} failed: "
-              f"{err.decode(errors='replace').strip() or 'git unavailable'}")
+        err = (getattr(e, "stderr", b"") or b"").decode(errors="replace").strip()
+        sys.exit(f"RED: git {' '.join(args)} failed: {err or 'git unavailable'}")
     return p.stdout if binary else p.stdout.decode("utf-8", "surrogateescape")
 
 
@@ -61,9 +54,9 @@ def name_status(base: str, head: str) -> list[dict]:
 
 
 def arch_patterns(registry: str) -> list[str]:
-    """Frozen + architecture_owned 'paths' entries from the registry. A minimal
-    indentation scan — this helper stays stdlib-only, and the engine's own
-    PyYAML loader is the authoritative parser (we only need a drift hint here)."""
+    """Frozen + architecture_owned 'paths' from the registry via a minimal
+    indentation scan (stdlib only). The engine's PyYAML loader stays
+    authoritative — this only feeds the architecture-drift hint in meta.json."""
     pats, section, in_paths = [], None, False
     for line in open(registry, encoding="utf-8"):
         s = line.rstrip("\r\n")
@@ -103,10 +96,9 @@ def main(argv=None) -> int:
     ap.add_argument("--input-dir", default="gate-inputs")
     args = ap.parse_args(argv)
 
-    if not os.path.isfile(CLI):
-        _fail(f"RED: governance CLI not found at {CLI}")
-    if not os.path.isfile(args.registry):
-        _fail(f"RED: registry not found at {args.registry}")
+    for what, path in (("governance CLI", CLI), ("registry", args.registry)):
+        if not os.path.isfile(path):
+            sys.exit(f"RED: {what} not found at {path}")
 
     head = git("rev-parse", "--verify", "-q", f"{args.ref}^{{commit}}").strip()
     base = git("rev-parse", "--verify", "-q", f"{args.base}^{{commit}}").strip()
@@ -123,11 +115,10 @@ def main(argv=None) -> int:
     w("changed.json", json.dumps(cs))
     w("changed.txt", "\n".join(dict.fromkeys(names)) + ("\n" if names else ""))
     w("additions.diff", git("diff", f"{mb}..{head}"))
-
-    body = git("log", "-1", "--format=%B", head)
     drift = [l for l in git("diff", "--name-only", f"{mb}..{base}").splitlines() if l.strip()]
     w("meta.json", json.dumps({
-        "pr": 0, "title": git("log", "-1", "--format=%s", head).strip(), "body": body,
+        "pr": 0, "title": git("log", "-1", "--format=%s", head).strip(),
+        "body": git("log", "-1", "--format=%B", head),
         "base_sha": base, "head_sha": head, "merge_base": mb,
         "mergeable": "clean" if git("status", "--porcelain") == "" else "unknown",
         "commits": int(git("rev-list", "--count", f"{mb}..{head}").strip() or 0),

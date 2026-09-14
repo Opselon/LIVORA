@@ -104,9 +104,13 @@ class Registry:
 
 
 def canonical_task_hash(task_text: str) -> str:
-    """SHA-256 over a canonicalized (casefolded, whitespace-collapsed) task text."""
+    """SHA-256 over a canonicalized (casefolded, whitespace-collapsed) task text.
+
+    surrogatepass: hostile/mojibake task text (lone surrogates from a bad
+    decode) must never crash the gate — hashing stays deterministic and total.
+    """
     canon = re.sub(r"\s+", " ", (task_text or "").strip()).casefold()
-    return hashlib.sha256(canon.encode("utf-8")).hexdigest()
+    return hashlib.sha256(canon.encode("utf-8", errors="surrogatepass")).hexdigest()
 
 
 def _load_yaml(path: str) -> dict:

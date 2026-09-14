@@ -71,7 +71,7 @@ YELLOW_REASONS = frozenset({
     Reason.INTEGRATION_FILE_CHANGED, Reason.LEAD_AMENDMENT, Reason.CROSS_LANE_IMPACT,
     Reason.OVERSIZED_CHANGE, Reason.STALE_BASE, Reason.ARCHITECTURE_STALE_BASE,
     Reason.TASK_DRIFT_MEDIUM, Reason.TASK_DRIFT_LOW, Reason.SCOPE_DRIFT,
-    Reason.DECLARED_SCOPE_TOO_BROAD, Reason.DUPLICATE_TYPE_SUSPECTED,
+    Reason.DUPLICATE_TYPE_SUSPECTED,
     Reason.GENERATED_FILE_COMMITTED, Reason.LANE_STALE, Reason.MERGEABILITY_UNKNOWN,
     Reason.SOFT_TRIPWIRE_PATTERN, Reason.BASE_METADATA_MISMATCH, Reason.EMPTY_CHANGESET,
     Reason.WEAK_TASK_RELEVANCE, Reason.LIFECYCLE_CHANGED,
@@ -343,8 +343,21 @@ def classify(gi: GovernanceInput) -> GovernanceResult:
     if bad_declared:
         con.append(_hc(Reason.MALFORMED_PATH, f"Owned-Scope has unparseable entries: {bad_declared[:3]}"))
     if any(m.is_universal for m in declared):
-        con.append(_hc(Reason.DECLARED_SCOPE_TOO_BROAD,
-                       "Owned-Scope '**' self-disarms the drift check — declare your lane's own globs"))
+        if acting_as_lead:
+            # lead legitimately owns '**': drift is disarmed by policy, so the
+            # lead keeps the drift-code on record but at YELLOW severity
+            # (review-required, never auto-GREEN).
+            con.append(HardConstraint(Reason.DECLARED_SCOPE_TOO_BROAD,
+                                      Severity.HARD_YELLOW,
+                                      "lead declared Owned-Scope '**' — drift check inert by "
+                                      "policy for the lead; every lead file folds to review",
+                                      lane_id="lead"))
+            con.append(_hc(Reason.LEAD_AMENDMENT,
+                           "lead amendments are always human-reviewed, never auto-GREEN"))
+        else:
+            con.append(_hc(Reason.DECLARED_SCOPE_TOO_BROAD,
+                           "Owned-Scope '**' self-disarms the drift check — declare your lane's "
+                           "own globs (RED: a lane must never disarm its own scope contract)"))
     if not gi.changeset:
         con.append(_hc(Reason.EMPTY_CHANGESET,
                        "empty changeset — a PR with zero files proves nothing and cannot be GREEN"))

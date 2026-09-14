@@ -97,6 +97,18 @@ jobs:
           } >> "$GITHUB_ENV"
           echo "base=$base head=$head merge_base=$mb"
 
+      # The PR itself is UNTRUSTED and may rewrite .github/OWNERSHIP.yaml
+      # (the v1 self-grant bypass). ALL policy reads — validation, drift
+      # detection, classification — use this BASE copy exported from the
+      # merge-base commit, never the PR-head working tree.
+      - name: Export BASE registry (policy from merge-base, not PR head)
+        env:
+          MERGE_BASE: ${{ env.MERGE_BASE }}
+        run: |
+          set -euo pipefail
+          git show "$MERGE_BASE:$REGISTRY" > "$INPUT_DIR/OWNERSHIP.base.yaml"
+          echo "BASE_REGISTRY=$INPUT_DIR/OWNERSHIP.base.yaml" >> "$GITHUB_ENV"
+
       - name: Compute changed.txt + changed.json (git-derived, with operations)
         env:
           BASE_SHA: ${{ env.BASE_SHA }}
@@ -144,6 +156,7 @@ jobs:
           BASE_SHA: ${{ env.BASE_SHA }}
           HEAD_SHA: ${{ env.HEAD_SHA }}
           MERGE_BASE: ${{ env.MERGE_BASE }}
+          BASE_REGISTRY: ${{ env.BASE_REGISTRY }}
           GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         run: |
           set -euo pipefail
@@ -153,7 +166,7 @@ jobs:
           d = os.environ["INPUT_DIR"]
           pr = json.load(open(os.path.join(d, "pr.json"), encoding="utf-8"))
           base = os.environ["BASE_SHA"]; head = os.environ["HEAD_SHA"]; mb = os.environ["MERGE_BASE"]
-          reg_path = os.environ["REGISTRY"]
+          reg_path = os.environ["BASE_REGISTRY"]
 
           def git(*args):
               return subprocess.run(("git",) + args, capture_output=True, text=True, check=True).stdout
@@ -189,6 +202,16 @@ jobs:
           master_drift = [l for l in git("diff", "--name-only", f"{mb}..{base}").splitlines() if l.strip()]
           arch_changed = any(matches(p, f) for f in master_drift for p in patterns)
 
+          # GitHub's mergeable enum -> the engine's evidence vocabulary.
+          # gh pr view --json mergeable returns MERGEABLE | CONFLICTING | UNKNOWN.
+          MERGEABLE = {"MERGEABLE": "clean", "CLEAN": "clean", "CONFLICTING": "dirty",
+                       "HAS_BLOCKS": "dirty", "DIRTY": "dirty", "BLOCKED": "dirty",
+                       "UNSTABLE": "dirty", "DRAFT": "unknown", "UNKNOWN": "unknown",
+                       "BEHIND": "unknown"}
+          gh_mergeable = (pr.get("mergeable") or "UNKNOWN").upper()
+          if gh_mergeable not in MERGEABLE:
+              print(f"::warning::unmapped mergeable state '{gh_mergeable}' -> unknown (fail-closed)")
+
           changed = [l for l in open(os.path.join(d, "changed.txt"), encoding="utf-8")
                      if l.strip()]
           meta = {
@@ -198,7 +221,7 @@ jobs:
               "base_sha": base,
               "head_sha": head,
               "merge_base": mb,
-              "mergeable": (pr.get("mergeable") or "unknown").lower(),
+              "mergeable": MERGEABLE[gh_mergeable],
               "commits": len(pr.get("commits") or []),
               "author": (pr.get("author") or {}).get("login", "?"),
               "commits_behind": behind,
@@ -211,12 +234,15 @@ jobs:
                 f"ahead={ahead} files={len(changed)} arch_drift_after_fork={arch_changed}")
           PY
 
-      # Registry first: if OWNERSHIP.yaml itself is broken, every classification is
-      # meaningless. Fail the job with the engine's own constraint list.
+      # Registry FIRST, and specifically the BASE registry: the PR itself is
+      # untrusted and may rewrite .github/OWNERSHIP.yaml (self-grant bypass in
+      # v1). Policy is loaded from the merge-base commit, never from PR head;
+      # a PR touching the registry is classified as an architecture-owned edit
+      # against the base policy (RED for lanes, YELLOW review for the lead).
       - name: Validate governance registry
         run: |
           set -euo pipefail
-          if ! python3 scripts/integration/livora_gates.py --registry "$REGISTRY" validate-registry; then
+          if ! python3 scripts/integration/livora_gates.py --registry "$BASE_REGISTRY" validate-registry; then
             echo "::error::OWNERSHIP.yaml is invalid — governance gate cannot classify. Fix the registry (see the constraint list above) or revert the registry PR."
             exit 1
           fi
@@ -225,10 +251,12 @@ jobs:
         id: classify
         env:
           GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          GATE_AS_OF: ${{ github.event.head_commit.timestamp || github.run_started_at }}
+          # Deterministic evidence timestamp for the manifest: the engine never reads
+          # the clock itself, so CI supplies it explicitly (--as-of, UTC ISO-8601).
+          GATE_AS_OF: ${{ github.run_started_at }}
         run: |
           set +e
-          python3 scripts/integration/livora_gates.py --registry "$REGISTRY" classify \
+          python3 scripts/integration/livora_gates.py --registry "$BASE_REGISTRY" classify \
             --input-dir "$INPUT_DIR" --no-git --json \
             --manifest-out "$MANIFEST" --as-of "$GATE_AS_OF" | tee gate-output.json
           rc=${PIPESTATUS[0]}
@@ -267,13 +295,17 @@ jobs:
           set -euo pipefail
           v="${{ steps.classify.outputs.verdict }}"
           if [ -z "$v" ]; then v=RED; fi
-          reasons=$(python3 -c 'import json,sys
+          reasons=$(python3 <<'PY' || true
+          import json
           try:
-              m=json.load(open("gate-output.json",encoding="utf-8"))
+              m = json.load(open("gate-output.json", encoding="utf-8"))
           except Exception:
-              print("(manifest unavailable)"); sys.exit(0)
-          print(", ".join(m.get("reason_codes") or []) or "-")' 2>/dev/null || echo "-")
-          gh pr comment "$PR" --body "controller gate v2 verdict: **$v** — reasons: ${reasons:-} (manifest attached to the run)" || true
+              print("(manifest unavailable)")
+          else:
+              print(", ".join(m.get("reason_codes") or []) or "-")
+          PY
+          )
+          gh pr comment "$PR" --body "controller gate v2 verdict: **$v** — reasons: ${reasons} (manifest attached to the run)" || true
 
       - name: Hard stop on RED (YELLOW proceeds so the coordinator sees build results)
         if: steps.classify.outputs.verdict == 'RED'
@@ -302,8 +334,11 @@ jobs:
       - name: App build (Windows head — test project cannot see XAML/DI breaks)
         run: dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release
 
-      # Governance CI gate: the Python suite under Tests/Governance must pass on
-      # Linux as well as Windows, so it runs here as an explicit cross-platform step.
+      # GOVERNANCE CI GATE: the engine's Python suite (Tests/Governance) must pass on
+      # Linux as well as Windows, so it runs here as an explicit cross-platform step
+      # rather than only inside the Windows MAUI job. Until that suite lands on master
+      # this step fails the build job — see
+      # docs/architecture/governance/workflow-integration-notes.md ("Known blockers").
       - name: Governance engine test suite
         shell: bash
         run: |

@@ -42,6 +42,34 @@ MERGED → REVERIFIED`  (failure: `BLOCKED`, `RECOVERY_REQUIRED`, `REASSIGNED`)
 Use the template (`.github/pull_request_template.md`); every `Key:` line is parsed.
 One PR per lane. Draft PRs are skipped by the controller until ready.
 
+### Governance contract (v2 engine — wave 5)
+The gate now runs the layered governance engine
+(`scripts/integration/governance/`, docs in
+`docs/architecture/governance/GOVERNANCE_MODEL.md`). What changed for you:
+
+- **Task identity is proven, not claimed.** `Task-Hash:` must carry the sha256
+  (≥8 hex chars) of your lane's canonical task text from `OWNERSHIP.yaml`
+  (`task` field, whitespace-collapsed + case-folded). Missing = RED. Changed
+  task text under an unchanged lane id = TASK_DRIFT (YELLOW), or RED when the
+  drift note mentions ownership/security/architecture responsibilities without
+  lead re-authorization.
+- **`Lane-Branch:` is required** and must match your lane's registered branch
+  glob (e.g. `agent/w3c/lane03-*`). Branch spoofing = RED.
+- **Lifecycle is enforced.** `merged`/`released`/`superseded`/`abandoned` lanes
+  cannot deliver code (RED). `stalled` = YELLOW hold.
+- **`Owned-Scope: **` is RED for lanes** — declare your lane's own globs.
+- **Policy is read from the base commit**, so editing the registry inside your
+  own PR can never re-authorize that PR; `.github/**` + `scripts/**` remain RED.
+- Renames/deletes/copies are evaluated on BOTH sides of the rename; case
+  variants and `..`-traversal of frozen/architecture paths are RED (paths are
+  normalized formally — no substring matching anywhere).
+- Every gate run publishes `governance-manifest.json` (per-file decisions,
+  reason codes, hard constraints, GREEN predicates). Read the reason codes
+  instead of guessing: `explain governance-manifest.json`.
+- Self-check before pushing:
+  `python3 scripts/integration/governance_local.py <your-branch> --base origin/master`
+  (same engine, local git, no GitHub API).
+
 ## What the controller does on every push to your PR
 1. `gate` job (ubuntu): re-derives changed files + mergeability from GitHub against
    **current** master, runs `scripts/integration/livora_gates.py`:

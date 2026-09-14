@@ -157,8 +157,11 @@ def _branch_evidence(reg_repo_root: str, contract: dict, reg, lane) -> gite.Bran
     branch = contract.get("lane_branch") or (lane.branch if lane else None)
     base = (reg.policy or {}).get("base_branch", "master")
     declared_base = contract.get("base_commit")
-    frozen_prefixes = tuple(sorted({m.literal_prefix[0] for m in reg.frozen
-                                    if m.literal_prefix}))
+    # FULL literal directory prefixes: 'Application/Abstractions/**' guards
+    # Application/Abstractions, not all of 'Application'.
+    frozen_prefixes = tuple(sorted({"/".join(m.literal_prefix) for m in
+                                    list(reg.frozen) + list(reg.architecture)
+                                    if m.literal_prefix and not m.is_universal}))
     try:
         return gite.branch_evidence(reg_repo_root, branch or "", base,
                                     declared_base, frozen_prefixes)
