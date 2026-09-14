@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# governance local runner artifacts (never commit evidence scratch)
+gate-inputs/
+**/__pycache__/
+.pytest_cache/
+governance-manifest.json

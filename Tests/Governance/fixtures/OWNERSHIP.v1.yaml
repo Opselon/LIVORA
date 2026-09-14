@@ -1,11 +1,8 @@
-# LIVORA ownership registry — SOURCE OF TRUTH for agent scope (POLICY layer).
-# Enforced by .github/workflows/pr-gates.yml (scope job) and
-# scripts/integration/livora_gates.py + scripts/integration/governance/ engine.
-# Version 2: lifecycle model, explicit precedence, exclusivity, self-validation.
-# The engine validates THIS file on every gate run; an invalid registry is RED.
-# Governance model: docs/architecture/governance/GOVERNANCE_MODEL.md
+# LIVORA ownership registry — SOURCE OF TRUTH for agent scope.
+# Enforced by .github/workflows/pr-gates.yml (scope job) and scripts/integration/livora_gates.py.
+# Classification result order: RED > YELLOW > GREEN. First matching rule wins, most-specific path first.
 
-version: 2
+version: 1
 
 # ---- Global policy -----------------------------------------------------------
 policy:
@@ -13,14 +10,7 @@ policy:
   rebase_policy: safe_only             # never force-push a foreign branch; merge-candidate tested instead
   auto_merge_max_changed_files: 40     # bigger -> YELLOW (oversized change needs review)
   squash_merge: true                   # one commit per lane on master, ledger records PR head SHA
-  base_branch: master                  # staleness + ancestry are computed against this
-  stale_commits_threshold: 25          # branch-only topology: master commits since merge-base
-  # GitHub actor -> lane binding. An open PR by actor X may only carry Task-Id of
-  # the bound lane (PR_AUTHOR_IDENTITY_MISMATCH otherwise). coordinator == the
-  # integration lead account (Opselon). Lanes missing here are UNBOUND: the
-  # declared Agent-Id check still applies, binding is a strengthening layer.
-  agent_bindings:
-    opselon: lead
+  stale_base_seconds: 86400            # base older than master HEAD@T by more than this -> refresh required
 
 # ---- Integration-owned (shared) files: any lane edit -> YELLOW ----------------
 # These are the files every wave wants to touch. Lanes deliver APPEND blocks;
@@ -47,8 +37,6 @@ integration_owned:
   - docs/agents/**
 
 # ---- Frozen contracts: lane edits -> RED (amendment = lead-only PR) ----------
-# Case-variant and rename-landing attempts are caught by the engine
-# (paths normalize; protected families match case-insensitively).
 frozen:
   owner: lead
   paths:
@@ -68,25 +56,10 @@ architecture_owned:
     - docs/LANES*.md
     - docs/WAVE3*.md
     - docs/architecture/**
-    - docs/agents/WORKFLOW.md
-
-# ---- Generated files: committed generated output -> YELLOW; engine floor
-#      patterns (obj/**, bin/**, *.Designer.cs, ...) apply automatically.
-generated:
-  paths:
-    - obj/**
-    - bin/**
-    - "**/*.Designer.cs"
-    - "**/*.g.cs"
-    - "**/*AssemblyInfo.cs"
 
 # ---- Lane registry ------------------------------------------------------------
-# Each active lane/agent registers here BEFORE opening a PR.
-# lifecycle: planned | active | paused | stalled | superseded | merged | released | abandoned
-# exclusive: v2 default true — two ACTIVE lanes with intersecting exclusive
-#            claims make the REGISTRY invalid (RED) unless reconciled by an
-#            overlap group or shared_branch. lead is the '**' catch-all default:
-#            it never makes a path GREEN for non-lead lanes (LEAD_AMENDMENT).
+# Each active lane/agent registers here BEFORE opening a PR. No registration -> YELLOW.
+# status: active | merged | released | stalled
 lanes:
   - id: w3b-lane02
     agent: agent-b
@@ -100,8 +73,7 @@ lanes:
       - Tests/Tests/Wave3b*
       - Tests/Tests/Wave3b*/**
       - wave3b-keys/**
-    status: stalled
-    expiry: "2026-12-31"
+    status: active
   - id: w3b-lane03
     agent: agent-b
     wave: 3b
@@ -110,7 +82,7 @@ lanes:
     owns:
       - Application/Activities/**
       - wave3b-keys/**
-    status: stalled
+    status: active
   - id: w3b-lane04
     agent: agent-b
     wave: 3b
@@ -119,7 +91,7 @@ lanes:
     owns:
       - Application/Normalization/**
       - wave3b-keys/**
-    status: stalled
+    status: active
   - id: w3b-lane05
     agent: agent-b
     wave: 3b
@@ -128,14 +100,14 @@ lanes:
     owns:
       - Application/State/Wave3b/**
       - wave3b-keys/**
-    status: stalled
+    status: active
   - id: w3c-lane01
     agent: agent-c
     wave: 3c
     branch: agent/w3c/lane01-*
-    task: (per WAVE3C brief) engine lane 01 — never activated
+    task: (per WAVE3C brief) engine lane 01
     owns: []
-    status: superseded
+    status: planned
   - id: w3c-lane02
     agent: agent-c
     wave: 3c
@@ -143,8 +115,7 @@ lanes:
     task: gateway config service + obfuscated key blob (the ONLY key owner)
     owns:
       - Infrastructure/Security/Gateway/**
-    status: superseded
-    exclusive: false
+    status: planned
   - id: w3c-lane03
     agent: agent-c
     wave: 3c
@@ -153,7 +124,7 @@ lanes:
     owns:
       - Application/Intelligence/**
       - Infrastructure/IntelligenceProviders/Wave3c/**
-    status: superseded
+    status: planned
   - id: w3c-lane04
     agent: agent-c
     wave: 3c
@@ -162,12 +133,11 @@ lanes:
     owns:
       - Application/Accounts/**
       - Infrastructure/Persistence/Wave3c/**
-    status: superseded
+    status: planned
   - id: w3c-lane05
     agent: agent-c
     wave: 3c
     branch: wave3c/integration
-    shared_branch: true          # historical lanes delivered on the wave integration branch
     task: adaptive plan engine + recommendation ranker + decision log
     owns:
       - Application/Planning/Adaptive/**
@@ -177,7 +147,6 @@ lanes:
     agent: agent-c
     wave: 3c
     branch: wave3c/integration
-    shared_branch: true
     task: durable local-first storage, sync queue, migrations, perf budgets
     owns:
       - Application/Sync/**
@@ -187,7 +156,6 @@ lanes:
     agent: agent-c
     wave: 3c
     branch: wave3c/integration
-    shared_branch: true
     task: AI settings / Data Studio / Lock UI, motion, RTL/a11y, i18n fragments
     owns:
       - Presentation/Views/AiSettings/**
@@ -204,7 +172,6 @@ lanes:
     agent: agent-c
     wave: 3c
     branch: wave3c/integration
-    shared_branch: true
     task: consent store + secure storage (DPAPI) + passcode + catalog + honest cloud stub
     owns:
       - Infrastructure/Security/**
@@ -215,7 +182,6 @@ lanes:
     agent: coordinator
     wave: 3c
     branch: wave3c/integration
-    shared_branch: true
     task: wave-3c integration docs + lead-applied gate amendments + the completion merge
     owns:
       - docs/wave3c/**
@@ -223,7 +189,9 @@ lanes:
       - Tests/Tests/Wave3c/**
       - Application/Patterns/**
       - Application/Planning/RecommendationService.cs
-    status: released
+      - Application/Planning/Adaptive/**
+      - Application/Planning/Wave3b/**
+    status: active
   - id: lead
     agent: coordinator
     wave: all
@@ -241,12 +209,11 @@ lanes:
       - Tests/QA/**
     status: active
 
-# ---- Overlap groups: lanes whose product areas intersect; a PR spanning two
-#      members -> CROSS_LANE_IMPACT (YELLOW), lead arbitrates merge order.
+# ---- Overlap groups: two active lanes owning intersecting patterns -> YELLOW -
 overlap_groups:
-  - name: planning-domain
-    lanes: [w3b-lane05, integration-w3c, w3c-lane05]
-    note: baselines vs adaptive planning — both feed Application/Planning; reconcile via lead
-  - name: security-keys
-    lanes: [w3c-lane01b, w3c-lane02]
-    note: key blob ownership — exactly one key implementation may win
+  - name: ai-gateway
+    lanes: [w3b-lane08, w3c-lane02, w3c-lane03]
+    note: one AI gateway implementation must win; see docs/agents/WORKFLOW.md merge order
+  - name: sync-accounts
+    lanes: [w3b-lane09, w3c-lane04]
+    note: persistence/sync metadata vs accounts/portability — reconcile ILocalDataCatalogService ownership
