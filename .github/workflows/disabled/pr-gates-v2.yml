@@ -343,7 +343,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          pip3 install pyyaml pytest
+          pip3 install pyyaml pytest hypothesis
           python3 -m pytest Tests/Governance -q
 
   report:
