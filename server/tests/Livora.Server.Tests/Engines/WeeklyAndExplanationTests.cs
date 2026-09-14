@@ -141,6 +141,7 @@ public sealed class WeeklyAndExplanationTests
     {
         "Rule.Reason.SleepBelowBaseline" => [2.3],
         "Rule.Reason.RecoveryBelowBaseline" => [44],
+        "Rule.Reason.StressAboveUsual" => [0.72],           // template carries {0} — arity must match
         "Rule.Reason.StepsBelowBaseline" => [3_200.0, 9_000.0],
         "Rule.Reason.HabitStreakAtRisk" => ["Walk", 4],
         "Rule.Reason.SleepDataStale" => [3],
@@ -152,6 +153,7 @@ public sealed class WeeklyAndExplanationTests
         "Plan.Change.SkipWorkout" => [60, 44],
         "Fusion.ProtectOneFocusBlock" => [300, 1],
         "Fusion.NoExtraDemandToday" => [300],
+        "Rec.CompleteHabit" => ["Walk", 4],                 // the engine emits it with habit+streak (DeterministicExplanationRenderer.cs:44)
         "Weekly.Focus.Momentum" => [5],
         "pattern.evidence.late-nights" => [3, 7, 60],
         "pattern.evidence.weekday-dip" => [0, 47, 6],
