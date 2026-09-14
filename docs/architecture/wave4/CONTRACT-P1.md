@@ -57,8 +57,9 @@ Read these scaffold files first (they define your world):
 ## 2. Hard rules
 
 - **FROZEN files** (table in §1 layout + OWNERSHIP `integration_owned`): you may READ, never EDIT.
-  Need a change? Append to `C:/Users/Capsizer/AppData/Local/Temp/livora_w4/INTEGRATION_REQUESTS-P1.md`
-  under your own heading (APPEND-ONLY, format inside). The lead resolves at merge. A lane that edits
+  Need a change? Write YOUR OWN file `docs/architecture/wave4/requests/<lane-id>.md` (one file per
+  lane, so six lanes never fight over one ledger). Format per request:
+  `R-<lane>-<n> | target file | what you need | why | blocking? yes/no`. Lead resolves at merge. A lane that edits
   a frozen file is reverted in full.
 - **Module keys** are fixed per lane (OWNERSHIP rows): `sync`, `identity`, `intelligence`, `verification`.
   A duplicate key throws at startup on purpose.
@@ -81,19 +82,27 @@ dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo
   windows-TFM build with `BaseIntermediateOutputPath`/`BaseOutputPath` redirected into your own
   worktree; on infra failure, report and stop — do not "fix" shared files.
 - If you kill a `dotnet`/test process you started, kill only your own PIDs.
+- **Known flake (P1-F owns it):** `LIVORA.Tests.Wave3c.Perf.StoragePerformanceBudgetTests` failed once
+  under parallel load at base and passed on rerun. Investigate and tighten or document it; do not
+  delete the budget. Every other gate must be deterministic.
+- External providers in this wave, decided by the human: **Google OAuth + Google Calendar are the
+  approved real paths, but no client_id/secret exists yet** — implement the real verifier/converter
+  code behind config and report `unconfigured` until the secret arrives (then flip to real by probe).
+  Payments: no provider token exists ⇒ real provider client + signature-verification path coded,
+  test double driving the flow, status `BLOCKED (no merchant credentials)`. The repo's existing AI
+  gateway stays as Wave 3c shipped it; do not add new live-LLM dependencies to CI.
 
 ## 4. Persistence rules (server)
 
 - One `LivoraDbContext`. **You do not add DbSets** (that file is frozen). Extend the model via
   `IModelContribution` + `ModelContributionRegistry.Add(...)` called from YOUR module's
   `ConfigureServices`, and declare your entity classes in your own Infrastructure folder.
-- Migrations: **only P1-B generates migration files**, and only for the core entities + its own
-  contributions, at the END of its work (`dotnet ef migrations add <Name>` in ITS worktree). Other
-  lanes must NOT run `dotnet ef` and must NOT write migration files: instead, prove your contribution
-  builds a valid model by calling `new ModelBuilder(...)`/`new DbContext` with your contribution in a
-  unit test (`LivoraDbContextModelSnapshot` regeneration for lane tables happens in Phase 2 merge, or
-  in Phase 1 by a P1-B request — see §2). Lanes never migrate a shared database.
-- Conventions: text `Guid.NewGuid().ToString("N")` keys; UTC `DateTimeOffset` with `…AtUtc` names;
+- Migrations: **no lane runs `dotnet ef` or writes migration files.** The lead generates ONE
+  `Wave4P1Schema` migration at integration time from the merged contributions. In Phase 1 you
+  prove your slice works by building the model with your contribution and calling
+  `EnsureCreated()` on an isolated temp SQLite file (unit test), then file a request line
+  `migration-ready | <entity types>` so the lead can verify your types appear in the model.
+  Lanes never migrate a shared database.- Conventions: text `Guid.NewGuid().ToString("N")` keys; UTC `DateTimeOffset` with `…AtUtc` names;
   explicit `HasMaxLength`; unique indexes where idempotency matters; no secrets/PII in audit metadata
   columns; soft delete (`DeletedAtUtc`) for evidence/audit rows, hard delete only via the documented
   account-deletion path.
@@ -114,6 +123,76 @@ dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo
 - DTOs: records in your own `Modules/<Feature>/` folder (Phase 1) — snake_case JSON names are NOT
   used; the shared serializer option is camelCase (`Problems.Json`, `JsonSerializerDefaults.Web`).
 - No synchronous `.Result`/`.Wait()` anywhere; `async Task` handlers with `CancellationToken`.
+
+## 5b. Auth is ALREADY wired (read before writing any protected route)
+
+The lead pre-wired `server/src/Livora.Server/Platform/LivoraAuth.cs` (frozen):
+
+- `AddLivoraAuthentication` runs before module service registration; JWT bearer + all
+  `Policies.All` are registered; `UseAuthentication`/`UseAuthorization` are in the pipeline.
+- Signing key: config `Identity:TokenSigningKey` (base64 ≥ 32 bytes). **Absent ⇒ an ephemeral
+  per-process key** and `LivoraSigningKey.Ephemeral == true`. Never commit a key. P1-C must surface
+  `Ephemeral` in its capability report as `degraded`/`unconfigured`, never as production-ready.
+- Access-token claims: `livora.uid` (account id), `livora.sid` (session id), `ClaimTypes.Role`.
+  Read them ONLY via `ctx.User.UserId()`, `.SessionId()`, `.RolesOf()`, `.IsStaff()`.
+- Mint a token: `AccessTokenMint.Create(key, userId, sessionId, roles)` (inject `LivoraSigningKey`).
+- A protected route answers anonymous/forbidden with the shared envelope automatically
+  (`AuthEnvelopeMiddleware` → code `unauthenticated` / `forbidden`) — no lane writes its own 401 body.
+- `/api/v1/platform/me` is a live protected endpoint proving this contract (4 tests, all real).
+- `Policies.OwnsResource` proves a token, NOT ownership: every handler must still compare the row's
+  owner id against `ctx.User.UserId()`. An IDOR test is part of every lane's own test set.
+
+Fixture helpers (use them, don't rebuild): `Fixture.MintAccessToken(userId, roles)`,
+`Fixture.CreateAuthenticatedClient(userId, roles)`, `Fixture.ReadProblemAsync(res)`,
+`AssertHasCorrelation(res)`.
+
+## 5c. Frozen P1 API contract (the rendezvous point for P1-B/C/D)
+
+These exact shapes are the contract. **P1-B and P1-C must implement them verbatim; P1-D codes
+against them and must not invent extra required fields.** JSON is camelCase. All authenticated
+routes require `Policies.SignedIn` and a `livora.uid` claim. Errors always use the shared envelope.
+
+```
+POST /api/v1/auth/register        {email, password, displayName?, locale?}
+     201 -> {userId, accessToken, refreshToken, expiresAtUtc, sessionId}
+     409 code=email_already_registered | 400 code=validation_failed (Errors dict per field)
+POST /api/v1/auth/login           {email, password, deviceLabel?, platform?}
+     200 -> {userId, accessToken, refreshToken, expiresAtUtc, sessionId}
+     401 code=invalid_credentials (identical body whether the email or the password was wrong)
+     429 code=rate_limited | 403 code=account_locked
+POST /api/v1/auth/google          {idToken, deviceLabel?, platform?}
+     200 -> same as login | 503 code=provider_unconfigured when Identity:Google:ClientId is empty
+POST /api/v1/auth/refresh         {refreshToken}
+     200 -> {userId, accessToken, refreshToken, expiresAtUtc, sessionId}   (token ROTATED)
+     401 code=token_revoked | 401 code=token_expired
+POST /api/v1/auth/logout          {}                       -> 204 (revokes THIS session only)
+GET  /api/v1/auth/sessions        -> [{sessionId, deviceLabel, platform, createdAtUtc,
+                                       lastUsedAtUtc, expiresAtUtc, isCurrent}]
+DELETE /api/v1/auth/sessions/{id} -> 204 (403 forbidden if the session belongs to another account)
+GET  /api/v1/account              -> {userId, email, displayName, locale, tier, status,
+                                      createdAtUtc, lastLoginAtUtc}
+POST /api/v1/account/delete-requests {}   -> {deletionRequestedAtUtc, scheduledForUtc,
+                                             reversibleUntilUtc}   (or 409 code=deletion_pending)
+DELETE /api/v1/account/delete-requests {}  -> 204 (cancels a pending request)
+GET  /api/v1/account/export       -> {exportedAtUtc, profile, goals, habits, plans, history,
+                                      connectedDataMetadata, purchases, communityContent}
+                                      (no secrets, no tokens, no provider credentials)
+POST /api/v1/sync/batch           header Idempotency-Key: <client uuid>; body
+     {operations:[{operationId, entityType, entityId, kind, baseRevision, payload}]}
+     200 -> {results:[{operationId, outcome:applied|conflict|rejected|duplicate,
+              resultRevision, conflict?}], serverTimeUtc}
+GET  /api/v1/sync/changes?since=<rev>&limit=  -> {changes:[...], latestRevision, hasMore}
+```
+
+Notes every lane must honour:
+- `refreshToken` is returned ONCE, in plaintext, and stored only as a SHA-256 hash server-side.
+- A reused/rotated-out refresh token revokes the whole session family and is logged as a theft signal.
+- `/account/export` may return empty arrays for domains that do not exist yet in Phase 1 (goals,
+  habits, plans, purchases, community). **Empty is honest; a fabricated fixture is not.** Mark each
+  section's provenance with `"source": "server" | "not_implemented"` per top-level key.
+- `Idempotency-Key` on `POST /sync/batch` must match the per-operation `operationId` set; a replay of
+  the same key returns the ORIGINAL result body, and a different body under the same key answers
+  409 `idempotency_key_reuse_mismatch`.
 
 ## 6. Client rules (P1-D only)
 
@@ -154,7 +233,7 @@ GATES: <three §4 commands, verbatim last lines; failing gate stated plainly, no
 SURFACE: <endpoints/keys/classes you registered that actually exist>
 AUDIT: <(audit lanes) claims -> evidence file:line -> verdict REAL/PARTIAL/MOCK/BROKEN/MISSING>
 REAL vs MOCK: <what is real, what is a labelled double, what is BLOCKED and on what external dependency>
-REQUESTS: <exact lines appended to INTEGRATION_REQUESTS-P1.md>
+REQUESTS: <exact lines written into docs/architecture/wave4/requests/<lane-id>.md>
 NOT-VERIFIED: <assumptions you could not prove>
 FOLLOW-UPS: <what Phase 2 must finish, per capability>
 ```
