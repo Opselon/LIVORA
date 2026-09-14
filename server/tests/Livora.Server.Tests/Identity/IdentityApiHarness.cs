@@ -59,12 +59,27 @@ public abstract class IdentityApiHarness : LivoraApiTest
         HttpMethod method, string path, string? body = null, string? bearer = null,
         string? correlationId = null)
     {
+        var (status, text, _) = await SendFullAsync(method, path, body, bearer, correlationId);
+        return (status, text);
+    }
+
+    /// <summary>The same call with the X-Correlation-Id response header attached — tests that must
+    /// prove the envelope is the PLATFORM's (correlation rides end-to-end) use this.</summary>
+    protected async Task<(HttpStatusCode Status, string Text, string? Correlation)> PostFullAsync(
+        string path, string body, string? bearer = null)
+        => await SendFullAsync(HttpMethod.Post, path, body, bearer, correlationId: null);
+
+    protected async Task<(HttpStatusCode Status, string Text, string? Correlation)> SendFullAsync(
+        HttpMethod method, string path, string? body = null, string? bearer = null,
+        string? correlationId = null)
+    {
         using var req = new HttpRequestMessage(method, path);
         if (body is not null) req.Content = Json(body);
         if (bearer is not null) req.Headers.TryAddWithoutValidation("Authorization", "Bearer " + bearer);
         if (correlationId is not null) req.Headers.TryAddWithoutValidation("X-Correlation-Id", correlationId);
         var res = await Fixture.Http.SendAsync(req);
-        return (res.StatusCode, await res.Content.ReadAsStringAsync());
+        return (res.StatusCode, await res.Content.ReadAsStringAsync(),
+            res.Headers.TryGetValues("X-Correlation-Id", out var v) ? string.Join("", v) : null);
     }
 
     protected static JsonElement Parse(string text) => JsonDocument.Parse(text).RootElement.Clone();
