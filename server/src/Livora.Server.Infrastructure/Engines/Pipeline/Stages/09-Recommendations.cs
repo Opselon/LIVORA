@@ -66,7 +66,15 @@ public static class RecommendationStage
                 DirectiveSet.Empty(), trail);
         }
 
-        foreach (var s in scored)
+        // Selection order mirrors the client: RecommendationService.cs:27-33 builds `visible` by
+        // dedupe + OrderByDescending(Priority) and ONLY THEN applies the 1-high + 2-rest cap, so
+        // a Low-tier candidate is dropped before a Medium one regardless of score. Ranking the
+        // budget by score alone let a Low-tier "moderate screens" card evict a Medium-tier plan
+        // adjustment it exists to explain.
+        foreach (var s in scored
+                     .OrderByDescending(x => (int)x.Candidate.BasePriority)
+                     .ThenByDescending(x => x.Score)
+                     .ThenBy(x => x.ActionKey, StringComparer.Ordinal))
         {
             var c = s.Candidate;
             (string, string)? suppression = Suppress(c, s, state, constraints, chosen);

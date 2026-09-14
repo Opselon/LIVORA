@@ -47,7 +47,9 @@ public static class PipelineRunner
                  EngineMath.Factor("gate", DataQualityStage.MinCompletenessToDecide)]));
             return new PipelineResult(
                 input.AsOfUtc, quality, null, Array.Empty<PatternFinding>(), null, null, null,
-                new RecommendationBundle(Array.Empty<Recommendation>(), Array.Empty<SuppressedAction>(),
+                new RecommendationBundle(Array.Empty<Recommendation>(),
+                    [new SuppressedAction("(all)", "p1e.budget.insufficient_data",
+                        "data quality below the decision gate: LIVORA states what is missing instead of recommending")],
                     DirectiveSet.Empty(), Array.Empty<TrailEntry>()),
                 null, Array.Empty<PlanChange>(), trail, Refused: true);
         }
@@ -104,7 +106,9 @@ public static class PipelineRunner
         if (input.ConflictingItemIds.Count > 0)
         {
             adaptation = AdaptationStage.Resolve(schedule, state, constraints,
-                input.ConflictingItemIds, likelihood, input.ProtectedItemIds, input.AlreadyAppliedRuleKeys);
+                input.ConflictingItemIds, likelihood, input.ProtectedItemIds, input.AlreadyAppliedRuleKeys,
+                // the decision moment in local minutes-of-day — a moved block must land in the future
+                Math.Clamp((int)(input.AsOfUtc - input.DayStartUtc).TotalMinutes, 0, 1440));
             trail.AddRange(adaptation.Trail);
         }
 
@@ -115,8 +119,13 @@ public static class PipelineRunner
              EngineMath.Factor("adaptations", (adaptation?.Changes.Count ?? 0)),
              EngineMath.Factor("evidence_ceiling", state.EvidenceCeiling.Token())]));
 
+        // The schedule the caller sees is the ADAPTED one: reporting the pre-adaptation grid
+        // alongside "this block moved/shrank/was skipped" changes would describe a day the
+        // engine did not actually produce.
+        var finalSchedule = adaptation?.Plan ?? schedule;
+
         return new PipelineResult(input.AsOfUtc, quality, baselines, patterns, state, goals,
-            constraints, bundle, schedule, adaptation?.Changes ?? Array.Empty<PlanChange>(), trail,
+            constraints, bundle, finalSchedule, adaptation?.Changes ?? Array.Empty<PlanChange>(), trail,
             Refused: false);
     }
 }

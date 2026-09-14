@@ -49,7 +49,10 @@ public static class AdaptationStage
         IReadOnlyList<string> conflictingItemIds,
         ExecutionLikelihoodModel likelihood,
         IReadOnlySet<string> protectedItemIds,
-        IReadOnlyList<string> alreadyAppliedRuleKeys)
+        IReadOnlyList<string> alreadyAppliedRuleKeys,
+        // Never earlier than the decision moment (local minutes-of-day), supplied by the caller:
+        // moving a block into a time the person has already lived through is a lie about the day.
+        int earliestStartMinutesOfDay = ScheduleStage.MorningStartMinutes)
     {
         ArgumentNullException.ThrowIfNull(plan);
         ArgumentNullException.ThrowIfNull(conflictingItemIds);
@@ -79,7 +82,7 @@ public static class AdaptationStage
             bool moveFirst = (lever == "move" || !recoveryLow) && licensed(RuleMove);
             if (moveFirst)
             {
-                int start = FindFreeStart(items, item, wanted, constraints);
+                int start = FindFreeStart(items, item, wanted, constraints, earliestStartMinutesOfDay);
                 if (start >= 0)
                 {
                     int old = item.StartMinutesOfDay;
@@ -97,40 +100,56 @@ public static class AdaptationStage
 
             // ---------- 2) SHORTEN along the recovery ladder ------------------------------------
             int shortened = licensed(RuleShorten) ? ShortenTarget(wanted, recoveryLow) : wanted;
+            bool shortenedApplied = false;
             if (shortened < wanted)
             {
                 bool protectedItem = protectedItemIds.Contains(item.ItemId);
                 if (!protectedItem || shortened >= Math.Min(ShrinkFloorMinutes, wanted))
                 {
                     items[idx] = item with { PlannedMinutes = shortened };
-                    Emit(RuleShorten, "shortened",
-                        [EngineMath.Factor("from_min", wanted), EngineMath.Factor("to_min", shortened),
-                         EngineMath.Factor("ladder", string.Join("/", RecoveryLadderMinutes)),
-                         EngineMath.Factor("floor", EngineMath.Num(Math.Min(ShrinkFloorMinutes, wanted)))],
-                        (recoveryLow
-                            ? "recovery_low: the ladder steps down (ported PlanAdaptationEngine.RecoveryLadderMinutes) and never raises"
-                            : "the day cannot hold the full block; a shorter block preserves the habit") +
-                        (protectedItem ? "; the deadline floor keeps it at or above the 15-minute protection" : ""),
-                        item.ItemId);
                     wanted = shortened;
-                    // the list now holds the shortened record: read it back so the move below
+                    shortenedApplied = true;
+                    // the list now holds the shortened record: read it back so the relocation below
                     // mutates the LIVE entry, not the stale one (the old code looked the original
                     // record up by reference after replacing it and threw IndexOutOfRange).
                     item = items[idx];
                 }
             }
 
-            // after shortening, try to move the smaller block into a free window
-            int slotAfter = licensed(RuleMove) ? FindFreeStart(items, item, wanted, constraints) : -1;
-            if (slotAfter >= 0 && slotAfter != item.StartMinutesOfDay)
+            // after shortening, the original slot may still be owned by the fixed block: relocate
+            // the smaller block into a free window. Stated as ONE resolution per conflict — the
+            // change line carries both the ladder numbers and the new start, because two trail
+            // lines for one decision let a reader count one conflict as two actions.
+            if (shortenedApplied)
             {
-                int old = item.StartMinutesOfDay;
-                items[idx] = item with { StartMinutesOfDay = slotAfter };
-                Emit(RuleMove, "moved",
-                    [EngineMath.Factor("from", ScheduleStage.RenderMinutes(old)),
-                     EngineMath.Factor("to", ScheduleStage.RenderMinutes(slotAfter)),
-                     EngineMath.Factor("minutes", wanted)],
-                    "the shortened block fits a free window — conflict cleared by shorten+move",
+                int slotAfter = FindFreeStart(items, item, wanted, constraints, earliestStartMinutesOfDay);
+                if (slotAfter >= 0 && slotAfter != item.StartMinutesOfDay)
+                {
+                    int old = item.StartMinutesOfDay;
+                    items[idx] = item with { StartMinutesOfDay = slotAfter };
+                    Emit(RuleShorten, "shortened",
+                        [EngineMath.Factor("from_min", originalWanted), EngineMath.Factor("to_min", wanted),
+                         EngineMath.Factor("ladder", string.Join("/", RecoveryLadderMinutes)),
+                         EngineMath.Factor("floor", EngineMath.Num(Math.Min(ShrinkFloorMinutes, originalWanted))),
+                         EngineMath.Factor("moved_from", ScheduleStage.RenderMinutes(old)),
+                         EngineMath.Factor("moved_to", ScheduleStage.RenderMinutes(slotAfter))],
+                        (recoveryLow
+                            ? "recovery_low: the ladder steps down (ported PlanAdaptationEngine.RecoveryLadderMinutes) and never raises"
+                            : "the day cannot hold the full block; a shorter block preserves the habit") +
+                        $"; the shortened block moves to a free window at {ScheduleStage.RenderMinutes(slotAfter)}",
+                        item.ItemId);
+                    continue;
+                }
+
+                Emit(RuleShorten, "shortened",
+                    [EngineMath.Factor("from_min", originalWanted), EngineMath.Factor("to_min", wanted),
+                     EngineMath.Factor("ladder", string.Join("/", RecoveryLadderMinutes)),
+                     EngineMath.Factor("floor", EngineMath.Num(Math.Min(ShrinkFloorMinutes, originalWanted)))],
+                    (recoveryLow
+                        ? "recovery_low: the ladder steps down (ported PlanAdaptationEngine.RecoveryLadderMinutes) and never raises"
+                        : "the day cannot hold the full block; a shorter block preserves the habit") +
+                    (protectedItemIds.Contains(item.ItemId)
+                        ? "; the deadline floor keeps it at or above the 15-minute protection" : ""),
                     item.ItemId);
                 continue;
             }
@@ -192,8 +211,11 @@ public static class AdaptationStage
     }
 
     /// <summary>Earliest free grid slot for <paramref name="minutes"/> of the given item, ignoring
-    /// the item's own current occupancy (so "move" can evaluate alternatives). -1 = none exists.</summary>
-    private static int FindFreeStart(List<PlannedItem> items, PlannedItem self, int minutes, ConstraintSet constraints)
+    /// the item's own current occupancy (so "move" can evaluate alternatives), never before
+    /// <paramref name="earliest"/> (the decision moment: a block moved into a past hour is a lie
+    /// about the day). -1 = none exists.</summary>
+    private static int FindFreeStart(List<PlannedItem> items, PlannedItem self, int minutes,
+        ConstraintSet constraints, int earliest)
     {
         int g = ScheduleStage.GridMinutes;
         var grid = new bool[1440 / g];
@@ -208,7 +230,8 @@ public static class AdaptationStage
                 Occupy(it.StartMinutesOfDay, it.StartMinutesOfDay + it.PlannedMinutes);
 
         int cells = (int)Math.Ceiling(minutes / (double)g);
-        int from2 = Math.Max(ScheduleStage.MorningStartMinutes, constraints.Availability.StartMinutesOfDay);
+        int from2 = Math.Max(Math.Max(ScheduleStage.MorningStartMinutes, earliest),
+            constraints.Availability.StartMinutesOfDay);
         int to2 = Math.Min(constraints.Availability.EndMinutesOfDay, ScheduleStage.EveningCutoffTotalMinutes);
         for (int start = from2; start + cells * g <= to2; start += g)
         {
