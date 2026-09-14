@@ -226,7 +226,7 @@ public sealed class VerificationModule : IFlivoraModule
         row.Status = v.Status;
         row.Confidence = v.Confidence;
         row.AttemptedRulesJson = JsonSerializer.Serialize(
-            v.AttemptedRules.Select(o => new { ruleKey = o.RuleKey, result = o.Result, detail = o.Detail }));
+            v.AttemptedRules.Select(o => new { ruleKey = o.RuleKey, status = o.StatusToken, detail = o.Detail }));
         row.ContributingRuleKeysJson = JsonSerializer.Serialize(v.ContributingRuleKeys);
         row.RefusalReason = v.RefusalReason;
         row.UpdatedAtUtc = DateTimeOffset.UtcNow;
@@ -241,12 +241,12 @@ public sealed class VerificationModule : IFlivoraModule
             new JsonSerializerOptions(JsonSerializerDefaults.Web)) ?? [];
         return new VerificationVerdict(
             row.ClaimId, row.ClaimType, row.TrustLevel, row.Status, row.Confidence,
-            attempted.Select(a => new RuleOutcome(a.RuleKey, a.Result, a.Detail)).ToList(),
+            attempted.Select(a => new RuleOutcome(a.RuleKey, a.Status, a.Detail)).ToList(),
             contributing, row.Evidence.Select(e => e.EvidenceId).ToList(),
             row.RefusalReason, row.UpdatedAtUtc.UtcDateTime);
     }
 
-    private sealed record SavedRuleOutcome(string RuleKey, string Result, string Detail);
+    private sealed record SavedRuleOutcome(string RuleKey, string Status, string Detail);
 
     /// <summary>
     /// PURPOSE: honest live report. The verification ladder is in-process deterministic code, so
