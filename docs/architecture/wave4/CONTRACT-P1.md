@@ -4,7 +4,9 @@
 It is the only shared source of truth between lanes. Nothing else about this wave is implicit.
 
 - Repo: `Opselon/LIVORA` (GitHub). Base branch for your worktree: `wave4/base`.
-- Base SHA you start from: **a2b6b97** (backend scaffold + frozen contracts; 1188 client tests + 17 server tests green, verified by execution).
+- Base SHA you start from: **e7579a3** (backend scaffold + frozen contracts + pre-wired auth;
+  1188 client tests + 21 server tests green, re-verified by execution at this SHA — see
+  `docs/audit/wave4/AUDIT-P1-BASELINE.md` §C).
 - Your worktree path and branch are given in your brief. Never work in another worktree.
 - Phase 2 (10 build lanes) will implement the 13 Wave-4 capabilities on top of what YOU land.
   Your job: the audit truth, the platform mechanics, the seams, and the quality gates — not the features.
@@ -54,6 +56,13 @@ Read these scaffold files first (they define your world):
 - `server/tests/Livora.Server.Tests/Fixtures/LivoraWebFixture.cs` — the only sanctioned API test host
 - `.github/OWNERSHIP.yaml` — your lane row = your legal write scope (`w4-p1*-*` entries)
 
+Binding Wave-4 docs written at this baseline (read them before designing anything):
+`docs/audit/wave4/AUDIT-P1-BASELINE.md` (truth + state-claim law),
+`docs/architecture/wave4/ARCHITECTURE-P1.md` (module/table ownership, sync+identity protocol),
+`docs/contracts/wave4/CAPABILITY-MAP.md` (13 capability keys), `docs/contracts/wave4/SERVER-CONTRACT-P1.md`,
+`docs/contracts/wave4/CLIENT-CONTRACT-P1.md`, `docs/decisions/wave4/ADR-INDEX.md` (0001-0008),
+`docs/integration/wave4/INTEGRATION-MATRIX-P1.md` (merge order). Re-deciding any of them = a request.
+
 ## 2. Hard rules
 
 - **FROZEN files** (table in §1 layout + OWNERSHIP `integration_owned`): you may READ, never EDIT.
@@ -73,7 +82,7 @@ Read these scaffold files first (they define your world):
 ```bash
 dotnet test Tests/LIVORA.Tests.csproj --nologo -v q                      # client: 1188 baseline
 dotnet build server/src/Livora.Server/Livora.Server.csproj -v q --nologo # backend: 0W 0E (warnings=errors)
-dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q   # server: 17 baseline
+dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q   # server: 21 baseline
 ```
 
 - `server/` has `TreatWarningsAsErrors=true`: build clean or it is red. No `#pragma` suppression.
