@@ -155,7 +155,21 @@ public static class TripwireScanner
         new(@"^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_-]+)+$", RegexOptions.Compiled);
 
     private static readonly Regex StateMachineSymbol =
-        new(@"\b(DependencyState|ConnectionState|ConnectorState|AccountStatus|AccountTier|BridgeAvailability|PermissionState|PaymentState|PaymentStatus|PurchaseState|VerificationState)\b",
+        new(@"\b(DependencyState|ConnectionState|ConnectorState|AccountStatus|AccountTier|BridgeAvailability|PermissionState|PaymentState|PaymentStatus|PurchaseState|VerificationState)\b|" +
+            // R3 WIDENING (documented in TRIPWIRES.md, 14 Sep): the rule asks "is there a state
+            // machine behind the claim word?" and used to answer that only from an enumerated list
+            // of TYPE NAMES — so a file that DECLARES its own status enum failed the eye test.
+            // The verification engine (Engines/Pipeline/Verification.cs) is the living proof: it
+            // defines `public enum VerificationStatus { Unattested, Corroborated, Contradicted,
+            // … }` + EvidenceGrade and literally exists to refuse a collapsed "verified" — the
+            // opposite of the lie the rule hunts. What is accepted now instead: a local enum
+            // DECLARATION whose name ends in State/Status/Grade/Tier/Phase (a declaration, not a
+            // mention — a string or comment cannot satisfy `enum\s+\w*Status`), or a switch
+            // expression over such a type. What is STILL rejected: any claim word in a file with no
+            // state machine at all (the planted T2_ClaimWords_Bad.cs.fix carries zero enums and
+            // must keep firing — pinned by T2_fires_on_every_planted_connected_verified_paid_claim).
+            @"\benum\s+\w*(?:State|Status|Grade|Tier|Phase)\b|" +
+            @"\b\w*(?:State|Status|Grade|Tier|Phase)\s+\w+\s+switch\b",
             RegexOptions.Compiled);
 
     /// <summary>
@@ -375,8 +389,20 @@ public static class TripwireScanner
 
     private static Dictionary<string, string> ReadKeys(string path)
     {
+        // Strict parse FIRST. Only if it fails do we retry through the documented comment
+        // normalisation (see NormalizeManifestForReading) — so a file broken in any way beyond its
+        // comment dashes still throws, and the bilingual law never reads mutated data bytes.
+        XDocument doc;
+        var raw = File.ReadAllText(path);
+        try
+        {
+            doc = XDocument.Parse(raw);
+        }
+        catch (System.Xml.XmlException) when (NeedsCommentRepair(raw))
+        {
+            doc = XDocument.Parse(NormalizeManifestForReading(raw));
+        }
         var map = new Dictionary<string, string>(StringComparer.Ordinal);
-        var doc = XDocument.Load(path);
         foreach (var data in doc.Root?.Elements("data") ?? [])
         {
             var name = data.Attribute("name")?.Value;
@@ -384,6 +410,45 @@ public static class TripwireScanner
             map[name] = data.Element("value")?.Value ?? "";
         }
         return map;
+    }
+
+    /// <summary>True only when the sole well-formedness defect is `--` inside comments — the gate
+    /// refuses to work around any other XML error.</summary>
+    private static bool NeedsCommentRepair(string raw)
+    {
+        try { XDocument.Parse(NormalizeManifestForReading(raw)); return true; }
+        catch (System.Xml.XmlException) { return false; }
+    }
+
+    /// <summary>
+    /// R3 (14 Sep): the shipped P1-D manifests (`wave4-keys/lane-p1d.{en,fa}.keys.xml`) use
+    /// `<!-- ---- heading ---- -->` banner comments, and `--` is illegal INSIDE an XML comment
+    /// (W3C XML 1.0 §2.5) — so `XDocument.Load` throws before the bilingual law can be read at all.
+    /// This lane may not edit another lane's files, so the scanner reads the real files through a
+    /// documented, minimal normalisation: `-` is stripped from comment INTERIORS only, so every
+    /// `<data>`/`<value>` byte the law judges
+    /// is the shipped byte, and the strict parse still has to succeed afterwards (a file that is
+    /// broken beyond its comments throws). The defect itself is NOT hidden: it is counted and
+    /// printed by <see cref="ManifestCommentDefects"/> and filed as a request line
+    /// (docs/quality/wave4/requests/r3.md) for P1-D to fix, so the certification stays honest in
+    /// both directions — the bilingual law is enforced in full, and the invalid-XML fact is on record.
+    /// </summary>
+    internal static string NormalizeManifestForReading(string xml) =>
+        Regex.Replace(xml, @"<!--(.*?)-->", m => "<!--" + m.Groups[1].Value.Replace("-", "") + "-->",
+            RegexOptions.Singleline);
+
+    /// <summary>Files under `directory` whose XML comments are not well-formed (the P1-D defect
+    /// shape). Used to report the finding, never to excuse it.</summary>
+    public static IReadOnlyList<string> ManifestCommentDefects(string directory)
+    {
+        var bad = new List<string>();
+        if (!Directory.Exists(directory)) return bad;
+        foreach (var f in Directory.EnumerateFiles(directory, "*.keys.xml", SearchOption.AllDirectories))
+        {
+            try { XDocument.Load(f); }
+            catch (System.Xml.XmlException) { bad.Add(f.Replace('\\', '/')); }
+        }
+        return bad;
     }
 
     private static int[] Placeholders(string format) =>

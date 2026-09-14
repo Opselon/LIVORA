@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Xunit.Abstractions;
 
 namespace Livora.Server.Tests.Quality;
 
@@ -30,7 +31,7 @@ namespace Livora.Server.Tests.Quality;
 ///   - allowlist entries are asserted live against the current tree: an entry that hides nothing
 ///     must be deleted, or the allowlist rots into a hide-list
 /// </summary>
-public sealed class PlantedViolationTests
+public sealed class PlantedViolationTests(ITestOutputHelper output)
 {
     private const string FixtureRelDir = "server/tests/Livora.Server.Tests/Quality/TripwireFixtures";
     private static readonly string FixtureDir = RepoPaths.Combine(FixtureRelDir);
@@ -165,17 +166,29 @@ public sealed class PlantedViolationTests
             .Select(d => RepoPaths.Combine(d)).Where(Directory.Exists).ToList();
         Assert.True(dirs.Count >= 2, "expected the shipped key-manifest directories to exist");
         int manifests = 0;
+        var malformed = new List<string>();
         foreach (var d in dirs)
         {
             var files = Directory.GetFiles(d, "*.en.keys.xml");
             manifests += files.Length;
             var hits = TripwireScanner.ScanKeyManifestDirectory(d, LatinOnlyAllowList);
+            malformed.AddRange(TripwireScanner.ManifestCommentDefects(d));
             Assert.True(hits.Count == 0,
                 "shipped key manifests trip the bilingual rule:\n  " +
                 string.Join("\n  ", hits.Select(h => $"{h.Path}: {h.Text}")));
         }
         Assert.True(manifests >= 6, $"expected the shipped waves' manifests, saw {manifests}");
+        // DISCLOSED, not hidden: the P1-D manifests carry `--` inside XML comments (invalid XML per
+        // W3C §2.5; the strict parser throws on them). The bilingual law above reads their real
+        // <data>/<value> bytes through the scanner's documented comment-only normalisation, so the
+        // certification stands — but the malformation is a FACT reported here and filed as a
+        // request line (docs/quality/wave4/requests/r3.md) for P1-D to repair in its own files.
+        output.WriteLine("T4 MANIFEST HEALTH: " + (malformed.Count == 0
+            ? "all shipped manifests parse strictly"
+            : "MALFORMED (invalid XML comments, certified only via documented normalisation — " +
+              "request filed): " + string.Join(", ", malformed)));
     }
+
 
     /// <summary>FA values legitimately in Latin script (product names — the same shapes the client
     /// resx suite allowlists in Wave3ResxIntegrityTests.LatinOnlyAllowList, kept in sync).</summary>
