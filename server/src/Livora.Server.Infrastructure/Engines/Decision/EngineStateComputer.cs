@@ -163,14 +163,23 @@ public static class EngineStateComputer
         }
 
         // ---- 4) freshness + completeness + confidence (UserStateService parity)
+        // Freshness is deliberately measured over the FULL input history, not the 28-day baseline
+        // window: "how old is the newest sleep reading the user has" answers a different question
+        // than "what is their normal" (client parity: PersonalStateProjector.DaysSinceFreshData
+        // at :261-269 scans every record, and the baseline window has no say in it). Reading it
+        // off the windowed list made a 42-day-old feed report the 99 no-data sentinel — a lie
+        // about whether any data exists at all.
         int daysSinceFreshSleep;
         if (metrics[EngineMetrics.SleepMinutes].Value is not null) daysSinceFreshSleep = 0;
         else
         {
-            var lastSleep = history.LastOrDefault(r => r.SleepMinutes is > 0);
-            daysSinceFreshSleep = lastSleep is null
+            var sleepDates = input.History
+                .Where(r => r.DateUtc.Date <= asOfDate && r.SleepMinutes is > 0)
+                .Select(r => r.DateUtc.Date)
+                .ToList();
+            daysSinceFreshSleep = sleepDates.Count == 0
                 ? 99                                              // no feed at all — the client's sentinel
-                : Math.Max(0, (int)(asOfDate - lastSleep.DateUtc.Date).TotalDays);
+                : Math.Max(0, (int)(asOfDate - sleepDates.Max()).TotalDays);
         }
 
         double completeness = CompletenessKeys.Count(k => metrics.TryGetValue(k, out var m) && m.Value is not null)
