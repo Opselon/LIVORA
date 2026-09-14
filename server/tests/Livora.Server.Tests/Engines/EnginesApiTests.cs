@@ -57,13 +57,13 @@ public sealed class EnginesApiTests : LivoraApiTest
 
         // never-fabricate over HTTP: every cited fact id exists in the response's fact ledger
         var factIds = body.State.Facts.Select(f => f.FactId).ToHashSet(StringComparer.Ordinal);
-        Assert.Contains(factIds, "fact:sleep-minutes:today");
+        Assert.Contains("fact:sleep-minutes:today", factIds);
         foreach (var item in body.PlanItems)
             foreach (var id in item.EvidenceFactIds)
                 Assert.Contains(id, factIds);
         // provenance vocabulary present on every fact
         Assert.All(body.State.Facts, f => Assert.Contains(f.Provenance,
-            ["observed", "inferred", "user_provided", "assumed"]));
+            new[] { "observed", "inferred", "user_provided", "assumed" }));
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public sealed class EnginesApiTests : LivoraApiTest
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
         var problem = await LivoraWebFixture.ReadProblemAsync(res);
         Assert.Equal(ProblemCodes.ValidationFailed, problem.Code);
-        Assert.True(problem.Errors!.Keys.Any(k => k.StartsWith("calendar", StringComparison.Ordinal)));
+        Assert.Contains(problem.Errors!.Keys, k => k.StartsWith("calendar", StringComparison.Ordinal));
     }
 
     [Fact]

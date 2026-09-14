@@ -99,12 +99,15 @@ public sealed class SyncApiContractTests : LivoraApiTest
     }
 
     [Theory]
-    [InlineData("/api/v1/sync/batch")]
-    [InlineData("/api/v1/sync/changes")]
-    [InlineData("/api/v1/sync/operations")]
-    public async Task Every_sync_route_is_protected(string path)
+    // Each verb is the route's REAL one: batch is POST-only, so a GET there answers the honest
+    // 404 fallback, not the auth challenge (a full catch-all match suppresses the 405 candidate).
+    [InlineData("POST", "/api/v1/sync/batch")]
+    [InlineData("GET", "/api/v1/sync/changes")]
+    [InlineData("GET", "/api/v1/sync/operations")]
+    public async Task Every_sync_route_is_protected(string method, string path)
     {
-        var res = await Fixture.Http.GetAsync(path);
+        using var req = new HttpRequestMessage(new HttpMethod(method), path);
+        var res = await Fixture.Http.SendAsync(req);
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
         var problem = await LivoraWebFixture.ReadProblemAsync(res);
         Assert.Equal(ProblemCodes.Unauthenticated, problem.Code);

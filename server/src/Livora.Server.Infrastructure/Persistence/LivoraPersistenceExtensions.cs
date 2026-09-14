@@ -70,6 +70,29 @@ public static class ModelContributionRegistry
 /// </summary>
 public static class LivoraPersistenceExtensions
 {
+    /// <summary>
+    /// PURPOSE: the DateTimeOffset storage convention (UTC unix-ms on every provider) shared by the
+    ///          host context AND lane probe contexts (test/dev contexts that apply contributions
+    ///          directly without the host). SQLite cannot ORDER BY a DateTimeOffset TEXT column;
+    ///          INTEGER millis sorts and compares natively. Keep every model that maps LIVORA
+    ///          entities calling this from ConfigureConventions.
+    /// OWNER: lead (moved from LivoraDbContext during Wave 4 P1 integration).
+    /// </summary>
+    public static void ApplyLivoraConventions(ModelConfigurationBuilder configurationBuilder)
+        => configurationBuilder.Properties<DateTimeOffset>()
+            .HaveConversion<UnixMillisUtcConverter>();
+
+    /// <summary>Converter used by <see cref="ApplyLivoraConventions"/>; public so lane probe
+    /// contexts can reference the exact same storage semantics.</summary>
+    public sealed class UnixMillisUtcConverter : Microsoft.EntityFrameworkCore.Storage.ValueConversion
+                                     .ValueConverter<DateTimeOffset, long>
+    {
+        public UnixMillisUtcConverter()
+            : base(v => v.ToUnixTimeMilliseconds(),
+                   v => DateTimeOffset.FromUnixTimeMilliseconds(v))
+        { }
+    }
+
     public static IServiceCollection AddLivoraDbContext(
         this IServiceCollection services, string provider, string? connectionString)
     {
@@ -102,6 +125,19 @@ public static class LivoraPersistenceExtensions
             ?? throw new InvalidOperationException("ConnectionStrings:Livora is required when Database:Provider=postgres"),
         _ => connectionString ?? "Data Source=livora.db",
     };
+
+    /// <summary>
+    /// Build the schema straight from the model (no migration history). For TEST hosts and the
+    /// throwaway dev DB only — deployment uses ApplyLivoraMigrationsAsync. Exists because the
+    /// shared API fixture needs real SQLite constraints (unique/FK) that the in-memory provider
+    /// does not enforce, without paying migration time per fixture.
+    /// </summary>
+    public static async Task EnsureLivoraSchemaAsync(this IServiceProvider services, CancellationToken ct = default)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<LivoraDbContext>();
+        await db.Database.EnsureCreatedAsync(ct);
+    }
 
     /// <summary>
     /// Apply pending migrations at startup (opt-in via Database:ApplyMigrationsOnStart=true).

@@ -1,5 +1,6 @@
 using Livora.Server.Infrastructure.Engines.Decision;
 using Livora.Server.Infrastructure.Engines.Decision.Verification;
+using Livora.Server.Infrastructure.Persistence;
 using Livora.Server.Modules.Intelligence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
@@ -27,6 +28,11 @@ public sealed class EnginePersistenceTests : IDisposable
     /// contributions, applied exactly as the module would apply them.</summary>
     private sealed class ProbeDbContext(DbContextOptions<ProbeDbContext> options) : DbContext(options)
     {
+        // Same storage convention as the host context (UTC unix-ms DateTimeOffset) - without it,
+        // ORDER BY on a DateTimeOffset fails on SQLite. Lead-folded during Wave 4 P1 integration.
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+            => LivoraPersistenceExtensions.ApplyLivoraConventions(configurationBuilder);
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var contribution in EnginesSchemaGate.Contributions)

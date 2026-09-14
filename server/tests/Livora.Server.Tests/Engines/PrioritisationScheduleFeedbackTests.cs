@@ -180,7 +180,7 @@ public sealed class PrioritisationScheduleFeedbackTests
         var plan = ScheduleStage.Build(bundle, constraints, Array.Empty<PlannedItem>(), Now, 0);
         var conflict = Assert.Single(plan.Unplaced);
         Assert.Equal("no_slot", conflict.ReasonKey);
-        Assert.Empty(plan.Items.Where(i => i.ItemId == ActionCatalog.ShortWalk));
+        Assert.DoesNotContain(plan.Items, i => i.ItemId == ActionCatalog.ShortWalk);
     }
 
     [Fact]

@@ -2,6 +2,7 @@
 using Livora.Server.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Livora.Server.Infrastructure.Persistence.ModelSnapshots
 {
     [DbContext(typeof(LivoraDbContext))]
-    partial class LivoraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260914140448_Wave4P1Schema")]
+    partial class Wave4P1Schema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.12");

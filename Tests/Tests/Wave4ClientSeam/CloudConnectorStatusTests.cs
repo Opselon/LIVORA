@@ -410,7 +410,7 @@ public class CloudSyncBridgeTests
         using var queue = Wave4SeamHarness.Queue(dir, out var meta);
         var bridge = new CloudSyncBridge(port, options, queue, state, auth, real);
 
-        Wave4SeamHarness.Enqueue(queue, "goal", "g1");
+        Wave4SeamHarness.Enqueue(queue, "goal", "g1", meta: meta);
         var report = await bridge.SyncNowAsync();
 
         Assert.Equal(0, report.Applied);

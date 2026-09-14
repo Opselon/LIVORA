@@ -37,17 +37,29 @@ public sealed class LivoraWebFixture : IAsyncLifetime
             builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(
                 new Dictionary<string, string?>
                 {
-                    ["Database:Provider"] = "inmemory",
+                    // A per-fixture SQLite FILE, not the fake in-memory provider: sync/identity
+                    // lanes assert real unique-index/FK behaviour, which the in-memory provider
+                    // silently does not enforce. File lives in a temp dir, deleted on dispose.
+                    ["Database:Provider"] = "sqlite",
+                    ["Database:EnsureCreatedOnStart"] = "true",
                     ["Database:ApplyMigrationsOnStart"] = "false",
+                    ["ConnectionStrings:Livora"] = $"Data Source={Path.Combine(DbDir, "fixture.db")}",
                 }));
         });
+        Directory.CreateDirectory(DbDir);
         Http = _factory.CreateClient();
         return Task.CompletedTask;
     }
 
+    /// <summary>Isolated temp DB dir for THIS fixture instance (parallel-safe: never shared).</summary>
+    public string DbDir { get; } = Path.Combine(Path.GetTempPath(),
+        "livora-fixture-" + Guid.NewGuid().ToString("N")[..10]);
+
     public async Task DisposeAsync()
     {
         _factory.Dispose();
+        try { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Delete(DbDir, recursive: true); }
+        catch { /* best-effort temp cleanup */ }
         await Task.CompletedTask;
     }
 
@@ -73,12 +85,27 @@ public sealed class LivoraWebFixture : IAsyncLifetime
     /// <summary>
     /// Mint a real access token through the host's own signing key, so an auth test proves the
     /// actual contract (claim names, validation parameters) instead of a hand-written JWT guess.
+    /// Also guarantees the user row EXISTS: the fixture DB enforces real SQLite FKs (the whole
+    /// point of using a file DB), and lane tests mint tokens for synthetic ids without going
+    /// through registration first. Sync-over-async is not needed: SaveChanges() is synchronous EF.
     /// </summary>
     public string MintAccessToken(string userId, IEnumerable<string>? roles = null, string? sessionId = null)
     {
         var key = _factory.Services.GetRequiredService<LivoraSigningKey>();
+        EnsureUserRow(userId);
         return AccessTokenMint.Create(key, userId, sessionId ?? Guid.NewGuid().ToString("N"),
             roles ?? [Roles.User]);
+    }
+
+    private void EnsureUserRow(string userId)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<Livora.Server.Infrastructure.Persistence.LivoraDbContext>();
+        if (!db.Users.Any(u => u.Id == userId))
+        {
+            db.Users.Add(new Livora.Server.Infrastructure.Persistence.UserAccount { Id = userId });
+            db.SaveChanges();
+        }
     }
 
     /// <summary>A client that sends <c>Authorization: Bearer …</c> on every request.</summary>

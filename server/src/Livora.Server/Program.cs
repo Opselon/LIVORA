@@ -62,6 +62,12 @@ if (string.Equals(app.Configuration["Database:ApplyMigrationsOnStart"], "true", 
 {
     await app.Services.ApplyLivoraMigrationsAsync(app.Lifetime.ApplicationStopping);
 }
+// Test/dev hosts may build the schema from the model directly (no migration files). Never the
+// deployment path - documented in the persistence extension.
+if (string.Equals(app.Configuration["Database:EnsureCreatedOnStart"], "true", StringComparison.OrdinalIgnoreCase))
+{
+    await app.Services.EnsureLivoraSchemaAsync();
+}
 
 var endpointCtx = new FlivoraEndpointContext(app, app.Configuration,
     bootLoggers.CreateLogger("livora.modules.endpoints"));

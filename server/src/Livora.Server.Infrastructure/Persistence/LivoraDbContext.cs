@@ -30,6 +30,18 @@ public sealed class LivoraDbContext : DbContext
     public DbSet<ConnectorState> Connectors => Set<ConnectorState>();
     public DbSet<SyncOperation> SyncOperations => Set<SyncOperation>();
 
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        // SQLite (the local/CI default) cannot ORDER BY a DateTimeOffset, and its TEXT format sorts
+        // wrongly across offsets. Store ALL providers' DateTimeOffset as UTC unix milliseconds: one
+        // provider-agnostic model, one migration set, native ordering/comparison, UTC enforced at
+        // the storage layer. (Postgres loses native timestamptz here by deliberate choice - schema
+        // parity across providers matters more; revisit only with a provider-split migration plan.)
+        LivoraPersistenceExtensions.ApplyLivoraConventions(configurationBuilder);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

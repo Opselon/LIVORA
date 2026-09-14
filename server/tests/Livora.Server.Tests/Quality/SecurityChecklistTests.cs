@@ -193,7 +193,7 @@ public sealed class SecurityChecklistTests(LivoraWebFixture fixture, ITestOutput
         Assert.Matches("^[A-Za-z0-9_-]{1,64}$", echoed!); // the sanitiser's alphabet is the contract
         if (incoming == "ok-value_1-2")
             Assert.Equal(incoming, echoed);
-        else if (Regex.Matches(incoming, "^[A-Za-z0-9_-]+$").Success && incoming.Length <= 64)
+        else if (incoming.Length <= 64 && Regex.IsMatch(incoming, "^[A-Za-z0-9_-]+$"))
             Assert.Equal(incoming, echoed); // safe shapes are honoured (a mint-everything bug would fail here)
         else
             Assert.NotEqual(incoming, echoed); // unsafe shape MUST have been replaced, not echoed
