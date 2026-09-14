@@ -16,6 +16,21 @@ policy:
 # These are the files every wave wants to touch. Lanes deliver APPEND blocks;
 # ONLY the integration lead applies them, on an integration branch, via PR.
 integration_owned:
+  # ---- WAVE 4 backend: the host composition root + shared seams (lead applies only) ----
+  - server/src/Livora.Server/Program.cs
+  - server/src/Livora.Server/Modules/IFlivoraModule.cs
+  - server/src/Livora.Server/Modules/ModuleRegistry.cs
+  - server/src/Livora.Server/Platform/**
+  - server/src/Livora.Server/appsettings.json
+  - server/src/Livora.Server.Infrastructure/Persistence/LivoraDbContext.cs
+  - server/src/Livora.Server.Infrastructure/Persistence/Entities.cs
+  - server/src/Livora.Server.Infrastructure/Persistence/ModelSnapshots/**
+  - server/src/Livora.Server.Application/ApiProblem.cs
+  - server/src/Livora.Server.Application/Authorization.cs
+  - server/src/Livora.Server.Application/Paging.cs
+  - server/tests/Livora.Server.Tests/Fixtures/**
+  - server/tests/Livora.Server.Tests/GlobalUsings.cs
+  - server/**/Directory.Build.props
   - MauiProgram.cs
   - AppShell.xaml
   - AppShell.xaml.cs
@@ -207,6 +222,79 @@ lanes:
     task: verification lanes, adversarial checks (read-mostly; tests only under Tests/QA/**)
     owns:
       - Tests/QA/**
+    status: active
+
+  # ---- WAVE 4, Phase 1 lanes (audit + foundation). One row per lane; the gate classifies
+  #      scope from these patterns, so a lane editing outside its row is YELLOW by design.
+  - id: w4-p1a-architecture
+    agent: agent-01
+    wave: 4
+    branch: wave4/p1a/architecture
+    task: Wave 3 audit at e501688, Wave 4 architecture/contracts/ADRs, integration matrix seeds
+    owns:
+      - docs/architecture/wave4/**
+      - docs/contracts/wave4/**
+      - docs/decisions/wave4/**
+      - docs/audit/wave4/**
+    status: active
+  - id: w4-p1b-platform
+    agent: agent-02
+    wave: 4
+    branch: wave4/p1b/platform
+    task: persistence mechanics, migrations, sync module, idempotency, observability
+    owns:
+      - server/src/Livora.Server/Modules/Sync/**
+      - server/src/Livora.Server.Infrastructure/Sync/**
+      - server/src/Livora.Server.Infrastructure/Observability/**
+      - server/src/Livora.Server.Infrastructure/Persistence/**
+      - server/tests/Livora.Server.Tests/Sync/**
+      - server/tests/Livora.Server.Tests/Persistence/**
+      - server/tests/Livora.Server.Tests/Platform/**
+    status: active
+  - id: w4-p1c-identity
+    agent: agent-03
+    wave: 4
+    branch: wave4/p1c/identity
+    task: identity module - register/login/refresh/revoke, Google verifier seam, lockout, deletion
+    owns:
+      - server/src/Livora.Server/Modules/Identity/**
+      - server/src/Livora.Server.Infrastructure/Identity/**
+      - server/tests/Livora.Server.Tests/Identity/**
+    status: active
+  - id: w4-p1d-client-seam
+    agent: agent-15
+    wave: 4
+    branch: wave4/p1d/client-seam
+    task: client-side cloud seam - typed API port, offline queue, auth token store, connector states
+    owns:
+      - Application/Cloud/**
+      - Infrastructure/Cloud/**
+      - Presentation/ViewModels/Cloud/**
+      - Presentation/Views/Cloud/**
+      - Tests/Tests/Wave4ClientSeam/**
+      - wave4-keys/**
+    status: active
+  - id: w4-p1e-engines
+    agent: agent-10
+    wave: 4
+    branch: wave4/p1e/engines
+    task: server-side deterministic engines + verification/evidence model (pure, testable)
+    owns:
+      - server/src/Livora.Server/Modules/Intelligence/**
+      - server/src/Livora.Server/Modules/Verification/**
+      - server/src/Livora.Server.Infrastructure/Engines/**
+      - server/tests/Livora.Server.Tests/Engines/**
+      - server/tests/Livora.Server.Tests/Verification/**
+    status: active
+  - id: w4-p1f-quality
+    agent: agent-16
+    wave: 4
+    branch: wave4/p1f/quality
+    task: server CI job proposal, release-gate harness, honesty tripwires, fixtures, perf budgets
+    owns:
+      - docs/quality/wave4/**
+      - server/tests/Livora.Server.Tests/Quality/**
+      - server/tests/Livora.Server.Tests/Fixtures_Wave4/**
     status: active
 
 # ---- Overlap groups: two active lanes owning intersecting patterns -> YELLOW -
