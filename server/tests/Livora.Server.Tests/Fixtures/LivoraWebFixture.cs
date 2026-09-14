@@ -69,6 +69,26 @@ public sealed class LivoraWebFixture : IAsyncLifetime
             $"a problem response must carry a machine code, got body: {body}");
         return problem;
     }
+
+    /// <summary>
+    /// Mint a real access token through the host's own signing key, so an auth test proves the
+    /// actual contract (claim names, validation parameters) instead of a hand-written JWT guess.
+    /// </summary>
+    public string MintAccessToken(string userId, IEnumerable<string>? roles = null, string? sessionId = null)
+    {
+        var key = _factory.Services.GetRequiredService<LivoraSigningKey>();
+        return AccessTokenMint.Create(key, userId, sessionId ?? Guid.NewGuid().ToString("N"),
+            roles ?? [Roles.User]);
+    }
+
+    /// <summary>A client that sends <c>Authorization: Bearer …</c> on every request.</summary>
+    public HttpClient CreateAuthenticatedClient(string userId, IEnumerable<string>? roles = null)
+    {
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", MintAccessToken(userId, roles));
+        return client;
+    }
 }
 
 /// <summary>Base class so every lane test gets the same real-host fixture semantics.</summary>

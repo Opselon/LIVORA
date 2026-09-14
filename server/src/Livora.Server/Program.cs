@@ -23,6 +23,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddOpenApi();
+// Auth is pre-wired by the lead so no lane invents its own token plumbing (see Platform/LivoraAuth.cs).
+builder.Services.AddLivoraAuthentication(builder.Configuration);
 // FlivoraActivity.Source is self-contained; no global ActivityListener registry needed here.
 
 // ---- persistence: provider switch here, the model lives in Infrastructure ---------------------
@@ -46,6 +48,10 @@ var app = builder.Build();
 
 app.UseFlivoraCorrelation();
 app.UseFlivoraProblemDetails();
+// Auth envelope must wrap the auth handlers so a bare 401/403 becomes the shared problem body.
+app.UseMiddleware<AuthEnvelopeMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi("/openapi/v1.json");

@@ -53,6 +53,21 @@ public sealed class PlatformModule : IFlivoraModule
             version = typeof(PlatformModule).Assembly.GetName().Version?.ToString() ?? "0.0.0",
             apiVersion = "v1",
         }));
+
+        // The smallest protected endpoint on purpose: it lets every lane verify the auth contract
+        // (who am I, which roles, and what an anonymous call actually gets back) without needing a
+        // feature module to exist first. Identity semantics come from Platform/LivoraAuth.cs.
+        group.MapGet("/me", (HttpContext http) =>
+        {
+            var user = http.User;
+            return Results.Ok(new
+            {
+                userId = user.UserId(),
+                sessionId = user.SessionId(),
+                roles = user.RolesOf(),
+                isStaff = user.IsStaff(),
+            });
+        }).RequireAuthorization(Policies.SignedIn);
     }
 
     public ModuleHealth Report() => new(ModuleKey, DependencyState.Ok,
