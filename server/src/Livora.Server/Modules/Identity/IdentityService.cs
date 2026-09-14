@@ -560,15 +560,18 @@ public sealed class IdentityService
         var query = _db.Sessions
             .Where(s => s.UserId == user.Id && s.RevokedAtUtc == null && s.ExpiresAtUtc > now)
             .OrderByDescending(s => s.CreatedAtUtc);
-        var total = await query.CountAsync(ct);
         var rows = await query.Skip(req.Offset).Take(req.SafeLimit).ToListAsync(ct);
 
+        // §5c spells this response as the BARE ARRAY of session rows — and the frozen P1-D client
+        // (LivoraApiPort.GetSessionsAsync) deserializes exactly that shape. §5's PagedResult rule
+        // yields to the more specific frozen contract here (the rendezvous beats the convention);
+        // optional offset/limit still bound the page. Logged as a contract clarification request.
         var items = rows.Select(s => new SessionInfo(
             SessionId: s.Id, DeviceLabel: s.DeviceLabel, Platform: s.ClientPlatform,
             CreatedAtUtc: s.CreatedAtUtc, LastUsedAtUtc: s.LastUsedAtUtc,
             ExpiresAtUtc: s.ExpiresAtUtc, IsCurrent: s.Id == current.Id)).ToArray();
 
-        return Results.Json(PagedResult<SessionInfo>.Of(items, req, total));
+        return Results.Json(items);
     }
 
     public async Task<IResult> RevokeSessionAsync(HttpContext ctx, string id, CancellationToken ct)

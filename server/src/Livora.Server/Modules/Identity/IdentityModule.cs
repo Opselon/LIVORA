@@ -1,4 +1,4 @@
-using Livora.Server.Application;
+﻿using Livora.Server.Application;
 using Livora.Server.Infrastructure.Identity;
 using Livora.Server.Infrastructure.Persistence;
 using Microsoft.Extensions.Options;
@@ -81,7 +81,6 @@ public sealed class IdentityModule : IFlivoraModule
             int? offset, int? limit, CancellationToken ct)
             => await svc.ListSessionsAsync(http, offset, limit, ct))
             .RequireAuthorization(Policies.SignedIn);
-
         auth.MapDelete("/sessions/{id}", async (HttpContext http, IdentityService svc,
             string id, CancellationToken ct)
             => await svc.RevokeSessionAsync(http, id, ct))
@@ -89,7 +88,10 @@ public sealed class IdentityModule : IFlivoraModule
 
         var account = ctx.MapVersionedGroup("account");
 
-        account.MapGet("/", async (HttpContext http, IdentityAccountService svc, CancellationToken ct)
+        // §5c spells this route WITHOUT a trailing slash and the frozen P1-D client calls exactly
+        // that. Inside MapGroup("account"), only the "" template binds the bare /api/v1/account —
+        // "/" would produce the trailing-slash variant and leave the contract path 404.
+        account.MapGet("", async (HttpContext http, IdentityAccountService svc, CancellationToken ct)
             => await svc.GetAccountAsync(http, ct))
             .RequireAuthorization(Policies.SignedIn);
 
@@ -98,12 +100,11 @@ public sealed class IdentityModule : IFlivoraModule
             .RequireAuthorization(Policies.SignedIn);
 
         // §5c spells this DELETE with a body; bodies on DELETE are unreliable across clients, so the
-        // route accepts BOTH (delete-requests and delete-requests/) and the handler needs no body —
-        // the caller IS the subject. Request recorded in the lane ledger.
+        // route answers with no body — the caller IS the subject. Request recorded in the lane ledger.
+        // (A trailing-slash twin used to be mapped here as well; ASP.NET's matcher treats "/x" and
+        // "/x/" as one addressable shape, so two endpoints made every request AMBIGUOUS — 500. One
+        // template, both spellings served.)
         account.MapDelete("/delete-requests", async (HttpContext http, IdentityAccountService svc, CancellationToken ct)
-            => await svc.CancelDeletionAsync(http, ct))
-            .RequireAuthorization(Policies.SignedIn);
-        account.MapDelete("/delete-requests/", async (HttpContext http, IdentityAccountService svc, CancellationToken ct)
             => await svc.CancelDeletionAsync(http, ct))
             .RequireAuthorization(Policies.SignedIn);
 
