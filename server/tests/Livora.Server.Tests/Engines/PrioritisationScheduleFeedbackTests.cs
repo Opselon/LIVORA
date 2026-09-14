@@ -66,20 +66,27 @@ public sealed class PrioritisationScheduleFeedbackTests
         var c = Cand(ActionCatalog.ShortWalk);
         var off = ScoreOf(c, focus: Array.Empty<string>());
         var on = ScoreOf(c, focus: ["activity"]);
-        Assert.Equal(Prioritiser.W1GoalAlignment, Math.Round(on - off, 6));
+        // Precision-6 equality, not bit-identity: the engine rounds each score to 6 decimals, so
+        // the diff can sit one ULP off the 0.35*0.8 product the weight constant folds to. The
+        // falsifiable promise is "flipping W1 moves the score by exactly W1", which precision-6 pins.
+        Assert.Equal(Prioritiser.W1GoalAlignment, Math.Round(on - off, 6), 6);
     }
 
     [Fact]
     public void Effort_penalises_minutes_at_exactly_W5_over_120()
     {
-        var shortBlock = Cand(ActionCatalog.ShortWalk, minutes: 15, conclusion: "p1e.state.activity_low");
-        var longBlock = Cand(ActionCatalog.ShortWalk, minutes: 60, conclusion: "p1e.state.activity_low");
-        // different action keys to dodge dedupe; compare component arithmetic instead
-        var s = Assert.Single(Prioritiser.Rank([Cand(ActionCatalog.TakeBreak, minutes: 30)],
-            EmptyState(), ExecutionLikelihoodModel.Empty(Now), Array.Empty<string>(), NoGoals(), Now));
-        Assert.Equal(30 / 120.0, s.Components.Effort);
-        Assert.Equal(-Prioritiser.W5Effort * 0.25 + 0,
-            Math.Round(Prioritiser.W5Effort * s.Components.Effort, 6) - 2 * Prioritiser.W5Effort * 0.125, 6);
+        // The old form asserted `W5*e - 2*W5*0.125 == -W5*0.25`, which is 0 == -0.05 — an
+        // unsatisfiable tautology, not a weight check. The falsifiable promise is: two candidates
+        // differing ONLY in minutes score apart by exactly W5 × Δminutes/120.
+        var twin30 = Cand(ActionCatalog.TakeBreak, minutes: 30);
+        var twin0 = Cand(ActionCatalog.TakeBreak, minutes: 0);
+        var ranked = Prioritiser.Rank([twin0, twin30], EmptyState(),
+            ExecutionLikelihoodModel.Empty(Now), Array.Empty<string>(), NoGoals(), Now);
+        var longCard = Assert.Single(ranked, r => r.Components.Effort > 0);
+        Assert.Equal(30 / 120.0, longCard.Components.Effort);
+        var zeroCard = Assert.Single(ranked, r => r.Components.Effort == 0);
+        Assert.Equal(Prioritiser.W5Effort * 0.25,
+            Math.Round(zeroCard.Score - longCard.Score, 6), 6);
     }
 
     [Fact]
@@ -89,7 +96,8 @@ public sealed class PrioritisationScheduleFeedbackTests
         var c = Cand(ActionCatalog.ShortWalk, minutes: 60, conclusion: "p1e.state.activity_low");
         var atCutoff = ScoreOf(c, now: new DateTimeOffset(2026, 5, 4, 21, 0, 0, TimeSpan.Zero));
         var safe = ScoreOf(c, now: Now);
-        Assert.Equal(Prioritiser.W4ScheduleFit, Math.Round(safe - atCutoff, 6));
+        // precision-6 for the same ULP reason as the W1 test above
+        Assert.Equal(Prioritiser.W4ScheduleFit, Math.Round(safe - atCutoff, 6), 6);
     }
 
     [Fact]
@@ -174,7 +182,11 @@ public sealed class PrioritisationScheduleFeedbackTests
     [Fact]
     public void No_room_before_the_cutoff_is_a_stated_conflict_not_a_silent_drop()
     {
-        var blocks = Enumerable.Range(7, 14)
+        // 15 hourly blocks cover 07:00–22:00 solid: the whole placement band (MorningStart..cutoff)
+        // is occupied, so no 60-minute slot exists. (14 blocks left 21:00–22:00 free and the walk
+        // fitted legitimately — a fixture off-by-one, not an engine bug: the placement law is
+        // "free window before 22:00", and 21:00–22:00 IS one.)
+        var blocks = Enumerable.Range(7, 15)
             .Select(h => new CalendarBlock($"b{h}", new TimeWindowUser(h * 60, (h + 1) * 60))).ToArray();
         var (bundle, constraints) = Bundle(60, blocks);
         var plan = ScheduleStage.Build(bundle, constraints, Array.Empty<PlannedItem>(), Now, 0);
@@ -264,8 +276,15 @@ public sealed class PrioritisationScheduleFeedbackTests
             new ExecutionFeedback("f2", ActionCatalog.ShortWalk, ExecutionOutcome.Completed,
                 Now.AddHours(-2), EvidenceGrade.DeviceDerived),
         };
-        Assert.Equal(1.0, ExecutionLikelihoodModel.Build(events, Now)
-            .LikelihoodFor(ActionCatalog.ShortWalk), 2 < 3 ? 6 : 6);   // clamped ≤ 1
+        var two = ExecutionLikelihoodModel.Build(events, Now).LikelihoodFor(ActionCatalog.ShortWalk);
+        // The model's own law (stage-12 header + the decay test below): Laplace smoothing toward
+        // the prior means a real estimate NUDGES the number and NEVER pins it to 0 or 1 — so the
+        // falsifiable promise here is the bound (0,1] plus strict movement above the prior, not
+        // bit-exact saturation at 1.0 (which only a zero-pseudo-count model could produce, and
+        // that model would make two completions a fact about the person — product law 1).
+        Assert.InRange(two, ExecutionLikelihoodModel.PriorLikelihood, 1.0);
+        Assert.True(two > ExecutionLikelihoodModel.PriorLikelihood);
+        Assert.True(two < 1.0 + 1e-12);                       // clamp: never above 1
         var emptied = ExecutionLikelihoodModel.Build(
             events.Select(e => e with { DeletedAtUtc = Now }).ToList(), Now);
         Assert.Equal(ExecutionLikelihoodModel.PriorLikelihood,
@@ -281,9 +300,12 @@ public sealed class PrioritisationScheduleFeedbackTests
         Assert.True(skips.LikelihoodFor(ActionCatalog.ProtectFocusBlock)
                     < ExecutionLikelihoodModel.PriorLikelihood);
 
+        // "ancient" = OLDER than the representativeness bound: the offset must subtract days
+        // (the old fixture added them, feeding the estimator a FUTURE event that the age filter
+        // clamps to age 0 instead of dropping).
         var ancient = ExecutionLikelihoodModel.Build(
             [new ExecutionFeedback("f1", ActionCatalog.ProtectFocusBlock, ExecutionOutcome.Skipped,
-                Now.AddDays(ExecutionLikelihoodModel.MaxRepresentativeAgeDays + 1),
+                Now.AddDays(-(ExecutionLikelihoodModel.MaxRepresentativeAgeDays + 1)),
                 EvidenceGrade.SelfReported)], Now);
         Assert.Equal(ExecutionLikelihoodModel.PriorLikelihood,
             ancient.LikelihoodFor(ActionCatalog.ProtectFocusBlock), 6);

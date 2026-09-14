@@ -65,8 +65,9 @@ public static class AdaptationStage
 
         foreach (var id in conflictingItemIds.OrderBy(x => x, StringComparer.Ordinal))
         {
-            var item = items.FirstOrDefault(i => string.Equals(i.ItemId, id, StringComparison.Ordinal));
-            if (item is null) continue;
+            int idx = items.FindIndex(i => string.Equals(i.ItemId, id, StringComparison.Ordinal));
+            if (idx < 0) continue;
+            PlannedItem item = items[idx];
             int wanted = item.PlannedMinutes;
             int originalWanted = wanted;
 
@@ -82,7 +83,7 @@ public static class AdaptationStage
                 if (start >= 0)
                 {
                     int old = item.StartMinutesOfDay;
-                    items[items.IndexOf(item)] = item with { StartMinutesOfDay = start };
+                    items[idx] = item with { StartMinutesOfDay = start };
                     Emit(RuleMove, "moved",
                         [EngineMath.Factor("from", ScheduleStage.RenderMinutes(old)),
                          EngineMath.Factor("to", ScheduleStage.RenderMinutes(start)),
@@ -101,7 +102,7 @@ public static class AdaptationStage
                 bool protectedItem = protectedItemIds.Contains(item.ItemId);
                 if (!protectedItem || shortened >= Math.Min(ShrinkFloorMinutes, wanted))
                 {
-                    items[items.IndexOf(item)] = item with { PlannedMinutes = shortened };
+                    items[idx] = item with { PlannedMinutes = shortened };
                     Emit(RuleShorten, "shortened",
                         [EngineMath.Factor("from_min", wanted), EngineMath.Factor("to_min", shortened),
                          EngineMath.Factor("ladder", string.Join("/", RecoveryLadderMinutes)),
@@ -112,6 +113,10 @@ public static class AdaptationStage
                         (protectedItem ? "; the deadline floor keeps it at or above the 15-minute protection" : ""),
                         item.ItemId);
                     wanted = shortened;
+                    // the list now holds the shortened record: read it back so the move below
+                    // mutates the LIVE entry, not the stale one (the old code looked the original
+                    // record up by reference after replacing it and threw IndexOutOfRange).
+                    item = items[idx];
                 }
             }
 
@@ -120,7 +125,7 @@ public static class AdaptationStage
             if (slotAfter >= 0 && slotAfter != item.StartMinutesOfDay)
             {
                 int old = item.StartMinutesOfDay;
-                items[items.IndexOf(item)] = items[items.IndexOf(item)] with { StartMinutesOfDay = slotAfter };
+                items[idx] = item with { StartMinutesOfDay = slotAfter };
                 Emit(RuleMove, "moved",
                     [EngineMath.Factor("from", ScheduleStage.RenderMinutes(old)),
                      EngineMath.Factor("to", ScheduleStage.RenderMinutes(slotAfter)),
@@ -144,7 +149,7 @@ public static class AdaptationStage
                 continue;
             }
 
-            items.RemoveAll(i => string.Equals(i.ItemId, item.ItemId, StringComparison.Ordinal));
+            items.RemoveAt(idx);
             Emit(RuleSkip, "skipped",
                 [EngineMath.Factor("wanted_min", originalWanted),
                  EngineMath.Factor("free_slot", "none"),
