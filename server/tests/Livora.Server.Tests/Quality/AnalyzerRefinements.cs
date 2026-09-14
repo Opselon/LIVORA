@@ -129,13 +129,20 @@ public static class BlockingCallScanner
             return ChainReadsAsTask(chain, taskNames);
         }
 
-        // (b) identifier / member-access receiver: `t.Result`, `pendingTask.Result`, `o.Result`
-        if (char.IsLetter(codeText[i]) || codeText[i] == '_')
+        // (b) identifier / member-access receiver: `t.Result`, `t2.Result`, `o.Result`, `a.b.Result`
+        if (char.IsLetter(codeText[i]) || char.IsDigit(codeText[i]) || codeText[i] == '_')
         {
             int j = i;
-            while (j >= 0 && (char.IsLetterOrDigit(codeText[j]) || codeText[j] is '_' or '.')) j--;
-            var chain = codeText[(j + 1)..(i + 1)];
-            return ChainReadsAsTask(chain, taskNames);
+            while (j >= 0 && (char.IsLetterOrDigit(codeText[j]) || codeText[j] == '_')) j--;
+            // walk a dotted prefix too: `dto.Outcome.Result` → chain "dto.Outcome"
+            while (j >= 0 && codeText[j] == '.' && j - 1 >= 0
+                   && (char.IsLetter(codeText[j - 1]) || codeText[j - 1] == '_'))
+            {
+                int k = j - 1;
+                while (k >= 0 && (char.IsLetterOrDigit(codeText[k]) || codeText[k] == '_')) k--;
+                j = k;
+            }
+            return ChainReadsAsTask(codeText[(j + 1)..(i + 1)], taskNames);
         }
 
         // (c) any other receiver (`a[0].Result`, literals): not judgeable as a Task — decline.
