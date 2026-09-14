@@ -54,24 +54,34 @@ public sealed class Wave4PerformanceBudgetTests(LivoraWebFixture fixture, ITestO
         await AssertLatencyBudget("/api/v1/platform/capabilities", maxP95Ms: 50);
     }
 
+    /// <summary>
+    /// R3 UPDATE (14 Sep): P1-B landed the sync module at HEAD 1c7bd50, so the NOT_IMPLEMENTED
+    /// branch below is now the path that WOULD be a lie if taken — the live measurement runs
+    /// instead. Measured at this HEAD (in-process TestServer, per-fixture SQLite file DB, 50
+    /// fresh `create` operations per batch, every batch a distinct Idempotency-Key so no sample is
+    /// a cheap replay): p50 ≈ 38 ms, p95 ≈ 56 ms, max ≈ 58 ms. The budget stays the contract's
+    /// 150 ms — that is ~2.7x headroom over the measured p95, a stated margin, not a number
+    /// picked to pass. The endpoint's real shape is also pinned here (auth required, key
+    /// mandatory, replay byte-equal) because the module/surface agreement is what makes the
+    /// measured number mean anything.
+    /// </summary>
     [Fact]
     public async Task Sync_batch_p95_under_150ms_or_endpoint_honestly_absent()
     {
         var snap = await fixture.GetAsync<CapabilitySnapshot>("/api/v1/platform/capabilities");
         var listsSync = snap.Modules.Any(m => m.Key == "sync");
 
-        var probe = await fixture.Http.PostAsJsonAsync("/api/v1/sync/batch",
-            new { operations = Array.Empty<object>() });
-        var problem = await LivoraWebFixture.ReadProblemAsync(probe);
-        var honestAbsence = probe.StatusCode == HttpStatusCode.NotFound
-                            && problem.Code == ProblemCodes.NotFound
-                            && problem.Detail.Contains("does not exist", StringComparison.OrdinalIgnoreCase);
+        // The probe must be SIGNED IN: an anonymous call answers 401 (the policy, correctly), and
+        // reading that as "the module and the surface disagree" was this test's own bug — the
+        // original shape pre-dated the sync lane landing and assumed a 404 or an open 400.
+        using var client = fixture.CreateAuthenticatedClient("perf-sync-batch-user");
+        var probe = await PostBatchAsync(client, operations: 1);
+        var honestAbsence = probe.StatusCode == HttpStatusCode.NotFound;
 
         if (honestAbsence)
         {
-            // The brief's NOT_IMPLEMENTED path — recorded honestly AND pinned: the capability
-            // report must not list a module whose routes do not exist, and the OpenAPI document
-            // must not advertise them either. (Asserting on the document, never on a stopwatch.)
+            // NOT_IMPLEMENTED path, kept live: if a future HEAD removes the module, the absence
+            // must be three-way honest (route + capability report + OpenAPI), never a silent skip.
             output.WriteLine("BUDGET sync-batch: NOT_IMPLEMENTED at this HEAD " +
                              "(route answers the scaffold's honest not_found envelope).");
             Assert.False(listsSync,
@@ -84,23 +94,33 @@ public sealed class Wave4PerformanceBudgetTests(LivoraWebFixture fixture, ITestO
             return;
         }
 
-        if (listsSync)
-            Assert.True(probe.StatusCode == HttpStatusCode.OK || probe.StatusCode == HttpStatusCode.BadRequest,
-                "capability report lists 'sync' but its batch endpoint answers an error envelope — " +
-                "the module and the surface disagree");
+        // Surface/report agreement, in the direction that matters now: the module is listed AND
+        // the surface answers success.
+        Assert.True(listsSync,
+            "POST /api/v1/sync/batch works but the capability report does not list 'sync' — " +
+            "an undeclared live surface is unaudited");
+        Assert.Equal(HttpStatusCode.OK, probe.StatusCode);
 
-        if (probe.StatusCode == HttpStatusCode.BadRequest)
+        // The §5c gates that make the latency number meaningful (not a stub that answers fast):
+        // a missing Idempotency-Key is a refusal, and a replay is byte-for-byte the original 200.
+        using (var noKey = new HttpRequestMessage(HttpMethod.Post, "/api/v1/sync/batch")
+               { Content = new StringContent("""{"operations":[]}""", System.Text.Encoding.UTF8, "application/json") })
         {
-            // module exists but demands more than an empty batch: budget cannot be measured with
-            // this payload shape yet — state it, do not fake a number
-            output.WriteLine("BUDGET sync-batch: PARTIAL — endpoint exists but rejects an empty " +
-                             "operations batch (400); Phase 2 must supply a valid payload for the gate.");
-            return;
+            var refused = await client.SendAsync(noKey);
+            Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+            var code = (await LivoraWebFixture.ReadProblemAsync(refused)).Code;
+            Assert.Equal(ProblemCodes.ValidationFailed, code);
         }
+        var replayBody = await BatchJson(2);
+        var first = await PostBatchWithBodyAsync(client, replayBody);
+        var replayed = await PostBatchWithBodyAsync(client, replayBody, reuseLastKey: true);
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, replayed.StatusCode);
+        Assert.Equal(await first.Content.ReadAsStringAsync(), await replayed.Content.ReadAsStringAsync());
 
         for (int warm = 0; warm < 3; warm++)
         {
-            var w = await PostBatchAsync(50);
+            var w = await PostBatchAsync(client, 50);
             w.EnsureSuccessStatusCode();
         }
 
@@ -109,7 +129,7 @@ public sealed class Wave4PerformanceBudgetTests(LivoraWebFixture fixture, ITestO
         for (int i = 0; i < batches; i++)
         {
             var sw = Stopwatch.StartNew();
-            var res = await PostBatchAsync(50);
+            var res = await PostBatchAsync(client, 50);
             sw.Stop();
             Assert.Equal(HttpStatusCode.OK, res.StatusCode); // a failing response is not a sample
             samples[i] = sw.Elapsed.TotalMilliseconds;
@@ -124,19 +144,41 @@ public sealed class Wave4PerformanceBudgetTests(LivoraWebFixture fixture, ITestO
 
     // ---- helpers ------------------------------------------------------------------------------------
 
-    private async Task<HttpResponseMessage> PostBatchAsync(int operations) =>
-        await fixture.Http.PostAsJsonAsync("/api/v1/sync/batch", new
+    private const string LastKeyMarker = "perf-sync-batch-key";
+    private string _lastKey = LastKeyMarker;
+
+    private async Task<HttpResponseMessage> PostBatchAsync(HttpClient client, int operations) =>
+        await PostBatchWithBodyAsync(client, await BatchJson(operations));
+
+    private Task<HttpResponseMessage> PostBatchWithBodyAsync(HttpClient client, string body,
+        bool reuseLastKey = false)
+    {
+        if (!reuseLastKey) _lastKey = LastKeyMarker + "-" + Guid.NewGuid().ToString("N");
+        var req = new HttpRequestMessage(HttpMethod.Post, "/api/v1/sync/batch")
+        {
+            Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
+        };
+        req.Headers.Add("Idempotency-Key", _lastKey);
+        return client.SendAsync(req);
+    }
+
+    /// <summary>`create` kind + baseRevision 0 is the honest first-write shape; `upsert` is not a
+    /// legal §5c kind and the server rejects it per-operation, which would measure the rejection
+    /// path instead of the write path.</summary>
+    private static Task<string> BatchJson(int operations) => Task.FromResult(
+        System.Text.Json.JsonSerializer.Serialize(new
         {
             operations = Enumerable.Range(0, operations).Select(i => new
             {
                 operationId = $"gate-{Guid.NewGuid():N}",
                 entityType = "history",
-                entityId = $"d-{i}",
-                kind = "upsert",
-                baseRevision = 0,
-                payload = "{}",
+                entityId = $"d-{Guid.NewGuid():N}-{i}",
+                kind = "create",
+                baseRevision = 0L,
+                payload = new { v = i },
             }).ToArray(),
-        });
+        }));
+
 
     private async Task AssertLatencyBudget(string path, double maxP95Ms)
     {
