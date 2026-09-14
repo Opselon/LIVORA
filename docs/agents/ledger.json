@@ -35,10 +35,11 @@
   {
    "pr": 11,
    "head_sha": "b389a005a99b83415f6f1994bd68ae785a420606",
-   "state": "MERGED",
+   "state": "REVERIFIED",
    "run": "34862040454",
-   "override": "coordinator YELLOW override"
+   "override": "coordinator YELLOW override",
+   "verified_master_sha": "4161b37f2b6049eba0df8031b818d86edb3465bc"
   }
  ],
- "verified_master_sha": "5918dd4e44997e049c10ae5f866460f0d9d8e646"
+ "verified_master_sha": "4161b37f2b6049eba0df8031b818d86edb3465bc"
 }
