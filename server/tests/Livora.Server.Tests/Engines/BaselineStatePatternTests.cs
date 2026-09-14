@@ -14,10 +14,17 @@ public sealed class BaselineStatePatternTests
     private static readonly DateTimeOffset Now = new(2026, 5, 4, 9, 0, 0, TimeSpan.Zero);
     private static readonly DateTime AsOf = new(2026, 5, 4, 0, 0, 0, DateTimeKind.Utc);
 
+    /// <summary>History rows ending ON the as-of day. The ported window convention is
+    /// (asOf - windowDays, asOf] — the as-of day itself is inside the window, the day exactly
+    /// windowDays back is not (03-Baseline.cs:155, mirroring client WindowedBaselineService.cs:97
+    /// `r.Date <= today && r.Date > today.AddDays(-days_w)`). Starting at 04-05 therefore makes N
+    /// rows == N real days inside an N-day window.</summary>
+    private static readonly DateTime HistoryStart = new(2026, 4, 5, 0, 0, 0, DateTimeKind.Utc);
+
     private static List<HistoryDay> SleepHistory(double minutes, int days, double step = 0)
         => Enumerable.Range(0, days)
             .Select(i => new HistoryDay(
-                new DateTime(2026, 4, 4, 0, 0, 0, DateTimeKind.Utc).AddDays(i),
+                HistoryStart.AddDays(i),
                 SleepMinutes: minutes + i * step))
             .ToList();
 
@@ -54,8 +61,14 @@ public sealed class BaselineStatePatternTests
     public void Density_gate_boundary_is_pinned(int days, bool usable)
     {
         // As-of 2026-04-10: the 7-day window (04-04 … 04-10) is observable from day one, so only
-        // the DENSITY gate can refuse here — coverage is satisfied by construction.
-        var rows = SleepHistory(450, days);
+        // the DENSITY gate can refuse here — coverage is satisfied by construction. Coverage
+        // demands the earliest row sit on 04-04 exactly (≤ asOf-(7-1), client
+        // WindowedBaselineService.cs:102), so these rows are built from that anchor rather than
+        // from the file-wide HistoryStart.
+        var rows = Enumerable.Range(0, days)
+            .Select(i => new HistoryDay(
+                new DateTime(2026, 4, 4, 0, 0, 0, DateTimeKind.Utc).AddDays(i), SleepMinutes: 450))
+            .ToList();
         var set = BaselineStage.Compute(rows, new DateTime(2026, 4, 10, 0, 0, 0, DateTimeKind.Utc));
         Assert.Equal(usable, set.Find(FactKeys.SleepMinutes)!.Usable);
     }
@@ -63,10 +76,12 @@ public sealed class BaselineStatePatternTests
     [Fact]
     public void A_seven_day_window_can_never_claim_High_confidence()
     {
-        // 21 rows but all clustered in the last 7 days: Days30/Days14 fail coverage, Days7 passes
-        var dense = Enumerable.Range(0, 7).SelectMany(_ => Enumerable.Range(0, 3))
-            .Take(7)
-            .Select(i => new HistoryDay(new DateTime(2026, 4, 27, 0, 0, 0, DateTimeKind.Utc).AddDays(i),
+        // 21 ROWS but all clustered in 7 distinct recent days: Days30/Days14 fail coverage,
+        // Days7 passes. (The original Take(7) of a 7×3 SelectMany left only 3 distinct dates,
+        // contradicting the stated 7-day cluster; and the client gate counts REAL DAYS, not
+        // rows — WindowedBaselineService.cs:81-84 — so the engine now dedups by date too.)
+        var dense = Enumerable.Range(0, 7).SelectMany(day => Enumerable.Repeat(day, 3))
+            .Select(d => new HistoryDay(new DateTime(2026, 4, 27, 0, 0, 0, DateTimeKind.Utc).AddDays(d),
                 SleepMinutes: 450))
             .ToList();
         var set = BaselineStage.Compute(dense, new DateTime(2026, 5, 4, 0, 0, 0, DateTimeKind.Utc));
@@ -99,7 +114,14 @@ public sealed class BaselineStatePatternTests
         var set = BaselineStage.Compute(rows, AsOf);
         var bedtime = set.Find(FactKeys.BedtimeMinutesOfDay)!;
         Assert.True(bedtime.Usable);
-        Assert.InRange(bedtime.Value, 23 * 60 + 45, 24 * 60 + 45);  // post-wrap scale unwrapped
+        // The contract promises the wrap (23:50 and 00:40 average as 50 minutes apart, NOT 1430).
+        // The stored value is the client's clock-face scale — BaselineEngine.cs:274 unwraps via the
+        // single BaselineService.UnwrapBedtime implementation (03-Baseline.cs:244 ports the same
+        // static) — so the result reads as ~00:35 (≈35) or, on the post-noon scale, ~1435. A naive
+        // mean without the wrap would land near 12:15 (≈735) and fail both bands.
+        Assert.True(bedtime.Value is >= 1425 and <= 1485
+                   || bedtime.Value is >= 25 and <= 85,
+            $"bedtime baseline {bedtime.Value} is not near the midnight cluster");
     }
 
     [Fact]

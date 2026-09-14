@@ -114,7 +114,7 @@ public static class BaselineStage
     public static BaselineResult Compute(IReadOnlyList<HistoryDay> history, DateTime asOfDate)
     {
         ArgumentNullException.ThrowIfNull(history);
-        var rows = history.OrderBy(d => d.DateUtc.Date).ToList();
+        var rows = DedupedByDate(history);
         var entries = new Dictionary<string, MetricBaseline>(StringComparer.Ordinal);
         var trail = new List<TrailEntry>();
 
@@ -139,8 +139,23 @@ public static class BaselineStage
     {
         var spec = Specs.FirstOrDefault(s => s.Key == metricKey)
                    ?? throw new ArgumentException($"unknown baseline metric '{metricKey}'", nameof(metricKey));
-        return ComputeForMetric(spec, history.OrderBy(d => d.DateUtc.Date).ToList(), asOfDate);
+        return ComputeForMetric(spec, DedupedByDate(history), asOfDate);
     }
+
+    /// <summary>One real day = one record: duplicate dates (a repo glitch, not a second
+    /// observation) collapse to the most-complete row, so the density gate counts REAL DAYS and
+    /// a duplicated day cannot double its statistical weight (client parity:
+    /// WindowedBaselineService.cs:81-84 + DedupedByDate at :181-185).</summary>
+    private static List<HistoryDay> DedupedByDate(IReadOnlyList<HistoryDay> history) =>
+        history.GroupBy(d => d.DateUtc.Date)
+            .Select(g => g.OrderByDescending(DayCompleteness).ThenByDescending(d => d.DateUtc).First())
+            .OrderBy(d => d.DateUtc.Date)
+            .ToList();
+
+    private static int DayCompleteness(HistoryDay d) =>
+        new[] { d.SleepMinutes, d.SleepQuality, d.BedtimeMinutesOfDay, d.Steps, d.ActiveMinutes,
+                d.RecoveryScore, d.Stress, d.ScreenMinutes, d.MeetingMinutes }
+            .Count(v => v.HasValue);
 
     private static MetricBaseline ComputeForMetric(MetricSpec spec, List<HistoryDay> chronologicalRows, DateTime asOfDate)
     {
