@@ -38,6 +38,9 @@ builder.Services.AddSingleton(registry);
 using var bootLoggers = LoggerFactory.Create(b => b.AddConsole());
 registry.ConfigureServices(new ModuleSeed(builder.Services, builder.Configuration,
     bootLoggers.CreateLogger("livora.modules.services")));
+// Model contributions are frozen here: every module has registered by now, and the first DbContext
+// build must see a stable list (EF caches the model per provider, so late additions would be random).
+Livora.Server.Infrastructure.Persistence.ModelContributionRegistry.Freeze();
 
 var app = builder.Build();
 
