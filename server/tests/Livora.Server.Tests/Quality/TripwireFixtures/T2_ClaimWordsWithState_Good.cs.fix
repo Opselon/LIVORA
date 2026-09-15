@@ -1,0 +1,15 @@
+// HONEST TWIN #2 of the planted T2 violation (P1-F): a positive "paid" claim with a real state
+// machine in the same file — the enum is what makes the word honest (§7 demands exactly this pair).
+namespace Livora.QualityFixtures;
+
+public enum PurchaseState { Pending, Paid, Refunded, Failed }
+
+public static class ReceiptLabel
+{
+    public static string Of(PurchaseState state) => state switch
+    {
+        PurchaseState.Paid => "Paid",
+        PurchaseState.Refunded => "Refunded",
+        _ => "Not paid yet",
+    };
+}

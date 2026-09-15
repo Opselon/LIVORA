@@ -31,6 +31,8 @@ public class ResxIntegrityTests
         // Wave3c merge additions, same reasoning:
         "Ai.Body.Provider",              // pure "{0}" passthrough: validator-cleaned provider sentence
         "DataStudio.Path.Placeholder",   // a Windows file path is Latin by definition
+        // Wave4/p1 integration (lead): lane-p1d added the same shape.
+        "Cloud.Status.Server.ModuleRow", // pure "{0}: {1}" passthrough: server module id + machine state token
     };
 
     [Fact]
@@ -230,6 +232,10 @@ public class ResxIntegrityTests
             "Activity.", "Ai.", "AiSettings.", "Auth.", "Data.", "DataStudio.", "Error.Catalog.",
             "Lock.", "Migration.", "Norm.", "Passcode.", "Pattern.", "pattern.",  // pattern.* lowercase = lane-04 engine keys, kept verbatim so runtime output resolves
             "Sync.",
+            // Added at wave4/p1 integration (lead, deliberately per this test's rule): the P1-D
+            // client-seam vocabulary — §5c machine codes mirrored 1:1 as Api.Error.<code> plus the
+            // connector/status surface — delivered via wave4-keys/lane-p1d.{en,fa}.keys.xml.
+            "Api.", "Cloud.",
         };
         var unknown = Resx.En.Keys
             .Where(k => !prefixes.Any(p => k.StartsWith(p, StringComparison.Ordinal)))

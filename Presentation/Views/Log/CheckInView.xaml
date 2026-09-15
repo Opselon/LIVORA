@@ -35,6 +35,8 @@
                 <Setter Property="StrokeShape" Value="RoundRectangle 12"/>
                 <Setter Property="Padding" Value="12,7"/>
                 <Setter Property="VerticalOptions" Value="Center"/>
+                <!-- date chips are the most-used taps in the app — hold the 44dp mobile floor -->
+                <Setter Property="MinimumHeightRequest" Value="44"/>
             </Style>
             <Style x:Key="ChipNeutral" TargetType="Border" BasedOn="{StaticResource ChipBase}">
                 <Setter Property="Background" Value="{StaticResource OverlayBrush}"/>

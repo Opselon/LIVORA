@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The FA twin of p1f-bad.en.keys.xml with the planted defects (one key deleted, one placeholder
+     dropped, one Latin-only value). Keys present: Cloud.Status.Syncing, Plan.Item.Adapted,
+     Profile.Brand.Name. Sleep.Debt.Hours is deliberately ABSENT -> the missing-counterpart hit. -->
+<root>
+  <data name="Cloud.Status.Syncing" xml:space="preserve"><value>در حال همگام‌سازی داده‌ها…</value></data>
+  <data name="Plan.Item.Adapted" xml:space="preserve"><value>{0} تنظیم شد زیرا</value></data>
+  <data name="Profile.Brand.Name" xml:space="preserve"><value>LIVORA</value></data>
+</root>

@@ -1057,4 +1057,104 @@
   <data name="Settings.DataStudioEntryNote" xml:space="preserve"><value>Advanced: raw entity editing, backup and restore</value></data>
   <data name="Settings.LockEntry" xml:space="preserve"><value>App lock</value></data>
   <data name="Settings.LockEntryNote" xml:space="preserve"><value>4-digit passcode, lock now, remove</value></data>
+  <data name="Api.Error.validation_failed" xml:space="preserve"><value>Some details need to be corrected before this can be saved.</value></data>
+  <data name="Api.Error.not_found" xml:space="preserve"><value>The requested item could not be found on the server.</value></data>
+  <data name="Api.Error.conflict" xml:space="preserve"><value>This action conflicts with the current state on the server.</value></data>
+  <data name="Api.Error.rate_limited" xml:space="preserve"><value>Too many attempts at the moment. Please wait before trying again.</value></data>
+  <data name="Api.Error.idempotency_key_reuse_mismatch" xml:space="preserve"><value>This batch was already sent with different contents. Nothing was changed.</value></data>
+  <data name="Api.Error.internal_error" xml:space="preserve"><value>The server hit an internal error. Nothing was changed on this device.</value></data>
+  <data name="Api.Error.unauthenticated" xml:space="preserve"><value>This device is not signed in, so the server refused the request.</value></data>
+  <data name="Api.Error.invalid_credentials" xml:space="preserve"><value>Email or password is not correct.</value></data>
+  <data name="Api.Error.token_expired" xml:space="preserve"><value>This sign-in has expired. Please sign in again.</value></data>
+  <data name="Api.Error.token_revoked" xml:space="preserve"><value>This session was revoked on the server, so it was cleared here too.</value></data>
+  <data name="Api.Error.forbidden" xml:space="preserve"><value>You are not allowed to change that item.</value></data>
+  <data name="Api.Error.account_locked" xml:space="preserve"><value>This account is temporarily locked after repeated failed sign-ins.</value></data>
+  <data name="Api.Error.email_already_registered" xml:space="preserve"><value>An account with this email already exists. Sign in instead.</value></data>
+  <data name="Api.Error.recovery_token_invalid" xml:space="preserve"><value>This recovery code is not valid or has already been used.</value></data>
+  <data name="Api.Error.deletion_pending" xml:space="preserve"><value>A deletion request is already pending for this account.</value></data>
+  <data name="Api.Error.provider_unconfigured" xml:space="preserve"><value>The server has not been configured for that provider yet.</value></data>
+  <data name="Api.Error.permission_required" xml:space="preserve"><value>The server needs a permission this device has not granted.</value></data>
+  <data name="Api.Error.provider_unavailable" xml:space="preserve"><value>The server could not reach that provider just now.</value></data>
+  <data name="Api.Error.data_stale" xml:space="preserve"><value>The server data is too old to act on. Refresh and try again.</value></data>
+  <data name="Api.Error.ai_unavailable" xml:space="preserve"><value>AI answers are not available right now. Deterministic advice still works.</value></data>
+  <data name="Api.Error.ai_output_rejected" xml:space="preserve"><value>The AI reply failed validation, so it was not applied.</value></data>
+  <data name="Api.Error.context_budget_exceeded" xml:space="preserve"><value>There is too much data to summarise in one request.</value></data>
+  <data name="Api.Error.verification_rule_unknown" xml:space="preserve"><value>The server does not recognise that verification rule.</value></data>
+  <data name="Api.Error.entitlement_required" xml:space="preserve"><value>This needs an entitlement this account does not hold.</value></data>
+  <data name="Api.Error.payment_provider_unconfigured" xml:space="preserve"><value>Payments are not configured on this server yet.</value></data>
+  <data name="Api.Error.webhook_signature_invalid" xml:space="preserve"><value>The server rejected a payment notification signature.</value></data>
+  <data name="Api.Error.purchase_already_exists" xml:space="preserve"><value>This purchase is already recorded for your account.</value></data>
+  <data name="Api.Error.refund_not_permissible" xml:space="preserve"><value>This purchase cannot be refunded.</value></data>
+  <data name="Api.Error.creator_not_approved" xml:space="preserve"><value>This creator is not approved to publish yet.</value></data>
+  <data name="Api.Error.program_not_published" xml:space="preserve"><value>This program is not published on the server.</value></data>
+  <data name="Api.Error.content_removed" xml:space="preserve"><value>This content was removed by moderation.</value></data>
+  <data name="Api.Error.blocked_by_participant" xml:space="preserve"><value>One participant does not allow this interaction.</value></data>
+  <data name="Api.Error.report_already_open" xml:space="preserve"><value>A report for this item is already open.</value></data>
+  <data name="Api.Error.version_conflict" xml:space="preserve"><value>The server has a newer version of this item, so it was not overwritten.</value></data>
+  <data name="Api.Error.sync_too_large" xml:space="preserve"><value>This sync batch is too large for one request. It will be split.</value></data>
+  <data name="Api.Error.network" xml:space="preserve"><value>The server could not be reached. Nothing left this device.</value></data>
+  <data name="Api.Error.timeout" xml:space="preserve"><value>The server did not answer in time. Your data is unchanged.</value></data>
+  <data name="Api.Error.canceled" xml:space="preserve"><value>This request was cancelled.</value></data>
+  <data name="Api.Error.malformed_response" xml:space="preserve"><value>The server answered in a shape this app does not understand, so nothing was applied.</value></data>
+  <data name="Api.Error.not_configured" xml:space="preserve"><value>No cloud server is configured for this install.</value></data>
+  <data name="Api.Error.not_signed_in" xml:space="preserve"><value>This device does not hold a cloud session.</value></data>
+  <data name="Api.Error.invalid_base_url" xml:space="preserve"><value>The configured server address is not usable.</value></data>
+  <data name="Api.Error.unexpected_response" xml:space="preserve"><value>The server sent an unexpected answer, so nothing was applied.</value></data>
+  <data name="Api.Error.unknown" xml:space="preserve"><value>The server refused this request for a reason this build cannot name. Nothing was changed.</value></data>
+  <data name="Cloud.Connector.State.Unconfigured" xml:space="preserve"><value>Not set up: no cloud address is configured, so nothing can sync.</value></data>
+  <data name="Cloud.Connector.State.Unverified" xml:space="preserve"><value>Configured but never verified: this install has not seen a successful server answer yet.</value></data>
+  <data name="Cloud.Connector.State.Offline" xml:space="preserve"><value>Offline: the last attempt never reached the server. Local changes are safe and still queued.</value></data>
+  <data name="Cloud.Connector.State.SignedOut" xml:space="preserve"><value>Not signed in: the server is reachable, but this device holds no session.</value></data>
+  <data name="Cloud.Connector.State.Working" xml:space="preserve"><value>Working: a request is in flight right now.</value></data>
+  <data name="Cloud.Connector.State.Failed" xml:space="preserve"><value>The last request was refused. See the reason below.</value></data>
+  <data name="Cloud.Connector.State.Conflict" xml:space="preserve"><value>Waiting for a decision: local and server versions diverged.</value></data>
+  <data name="Cloud.Connector.State.PendingLocal" xml:space="preserve"><value>Not synced yet: local changes are queued and waiting to go out.</value></data>
+  <data name="Cloud.Connector.State.Degraded" xml:space="preserve"><value>Reachable, but the server reports part of itself unavailable.</value></data>
+  <data name="Cloud.Connector.State.Synced" xml:space="preserve"><value>In sync: the server confirmed every queued change.</value></data>
+  <data name="Cloud.Connector.Reason.Conflicts" xml:space="preserve"><value>{0} items need your decision before syncing continues.</value></data>
+  <data name="Cloud.Connector.Reason.Pending" xml:space="preserve"><value>{0} local changes are waiting to go out.</value></data>
+  <data name="Cloud.Sync.Reason.NotConfigured" xml:space="preserve"><value>Sync is idle: no cloud address is configured.</value></data>
+  <data name="Cloud.Sync.Reason.NoSession" xml:space="preserve"><value>Sync is idle: this device is not signed in, so nothing was uploaded.</value></data>
+  <data name="Cloud.Sync.Reason.NoPayloadSource" xml:space="preserve"><value>Sync is idle: the local data store cannot be read for upload, so nothing was marked as sent.</value></data>
+  <data name="Cloud.Sync.Reason.PushRefused" xml:space="preserve"><value>The server did not accept this batch, so every item stayed queued.</value></data>
+  <data name="Cloud.Sync.Reason.NothingMoved" xml:space="preserve"><value>This cycle moved nothing.</value></data>
+  <data name="Cloud.Sync.Pull.Recorded" xml:space="preserve"><value>{0} server changes were recorded but not applied: the local apply path is not in this build.</value></data>
+  <data name="Cloud.Auth.SignOut.ForcedLocally" xml:space="preserve"><value>Forgotten on this device only — the server never answered, so the session may still be open there.</value></data>
+  <data name="Cloud.Status.Title" xml:space="preserve"><value>Cloud</value></data>
+  <data name="Cloud.Status.Note" xml:space="preserve"><value>Every line here is what the cloud seam actually reported to this device. Nothing is inferred from the app running.</value></data>
+  <data name="Cloud.Status.Section.Connector" xml:space="preserve"><value>Connection</value></data>
+  <data name="Cloud.Status.Section.Queue" xml:space="preserve"><value>Local queue</value></data>
+  <data name="Cloud.Status.Section.Server" xml:space="preserve"><value>Server capabilities</value></data>
+  <data name="Cloud.Status.Section.Session" xml:space="preserve"><value>Session</value></data>
+  <data name="Cloud.Status.Transport" xml:space="preserve"><value>Transport: {0}</value></data>
+  <data name="Cloud.Status.LastProbe" xml:space="preserve"><value>Last answer: {0}</value></data>
+  <data name="Cloud.Status.NeverProbed" xml:space="preserve"><value>This install has never received an answer from the server.</value></data>
+  <data name="Cloud.Status.LastConfirmed" xml:space="preserve"><value>Server confirmed queued changes at {0}</value></data>
+  <data name="Cloud.Status.NeverConfirmed" xml:space="preserve"><value>No batch has ever been confirmed by the server.</value></data>
+  <data name="Cloud.Status.Correlation" xml:space="preserve"><value>Reference for support: {0}</value></data>
+  <data name="Cloud.Status.Queue.Pending" xml:space="preserve"><value>{0} pending</value></data>
+  <data name="Cloud.Status.Queue.Conflicts" xml:space="preserve"><value>{0} conflicting</value></data>
+  <data name="Cloud.Status.Queue.Synced" xml:space="preserve"><value>{0} confirmed</value></data>
+  <data name="Cloud.Status.Session.SignedIn" xml:space="preserve"><value>Signed in on this device</value></data>
+  <data name="Cloud.Status.Session.SignedOut" xml:space="preserve"><value>No session stored on this device</value></data>
+  <data name="Cloud.Status.Session.Expires" xml:space="preserve"><value>Access token valid until {0}, {1}</value></data>
+  <data name="Cloud.Status.Session.Protected" xml:space="preserve"><value>Tokens are protected by the operating system.</value></data>
+  <data name="Cloud.Status.Session.NotProtected" xml:space="preserve"><value>Tokens live only in this app's private folder. The platform provides no encryption here.</value></data>
+  <data name="Cloud.Status.Session.Fingerprint" xml:space="preserve"><value>Session reference: {0}</value></data>
+  <data name="Cloud.Status.Server.NotProbed" xml:space="preserve"><value>Not probed this launch — press Check server to ask the host itself.</value></data>
+  <data name="Cloud.Status.Server.ModuleRow" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="Cloud.Status.Server.MappingFailures" xml:space="preserve"><value>{0} endpoints failed to map at server startup.</value></data>
+  <data name="Cloud.Status.Action.SyncNow" xml:space="preserve"><value>Sync now</value></data>
+  <data name="Cloud.Status.Action.Probe" xml:space="preserve"><value>Check server</value></data>
+  <data name="Cloud.Status.Action.SignOut" xml:space="preserve"><value>Sign out</value></data>
+  <data name="Cloud.Status.Action.SignIn" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Cloud.Status.SignIn.Header" xml:space="preserve"><value>Sign in to this server</value></data>
+  <data name="Cloud.Status.SignIn.Disabled" xml:space="preserve"><value>Sign-in is hidden until a server address exists: there is nowhere to send these credentials, and a form that cannot reach a server is a fake.</value></data>
+  <data name="Cloud.Status.Cycle.Result" xml:space="preserve"><value>Last cycle: {0} confirmed, {1} conflicting, {2} refused, {3} pulled.</value></data>
+  <data name="Cloud.Status.Cycle.Skipped" xml:space="preserve"><value>Last cycle: nothing was attempted.</value></data>
+  <data name="Cloud.Capability.ok" xml:space="preserve"><value>working</value></data>
+  <data name="Cloud.Capability.degraded" xml:space="preserve"><value>degraded</value></data>
+  <data name="Cloud.Capability.unconfigured" xml:space="preserve"><value>not configured</value></data>
+  <data name="Cloud.Capability.not_implemented" xml:space="preserve"><value>not implemented</value></data>
+  <data name="Cloud.Capability.unknown" xml:space="preserve"><value>reported a state this build does not know</value></data>
 </root>

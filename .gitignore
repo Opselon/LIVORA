@@ -361,6 +361,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# --- Wave 4 backend (server/) ---
+server/**/*.db
+server/**/*.db-shm
+server/**/*.db-wal
+server/**/appsettings.Local.json
 # governance local runner artifacts (never commit evidence scratch)
 gate-inputs/
 **/__pycache__/

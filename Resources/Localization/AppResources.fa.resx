@@ -1051,4 +1051,104 @@
   <data name="Settings.DataStudioEntryNote" xml:space="preserve"><value>پیشرفته: ویرایشِ خامِ موجودیت‌ها، پشتیبان و بازیابی</value></data>
   <data name="Settings.LockEntry" xml:space="preserve"><value>قفلِ برنامه</value></data>
   <data name="Settings.LockEntryNote" xml:space="preserve"><value>رمزِ ۴ رقمی، قفلِ فوری، حذفِ رمز</value></data>
+  <data name="Api.Error.validation_failed" xml:space="preserve"><value>پیش از ذخیره، باید چند مورد را اصلاح کنید.</value></data>
+  <data name="Api.Error.not_found" xml:space="preserve"><value>موردِ درخواستی روی سرور پیدا نشد.</value></data>
+  <data name="Api.Error.conflict" xml:space="preserve"><value>این کار با وضعیتِ کنونیِ سرور در تضاد است.</value></data>
+  <data name="Api.Error.rate_limited" xml:space="preserve"><value>کمی صبر کنید؛ تلاش‌ها بیش از حدِ مجاز شده است.</value></data>
+  <data name="Api.Error.idempotency_key_reuse_mismatch" xml:space="preserve"><value>این بسته پیش‌تر با محتوایی دیگر ارسال شده بود؛ چیزی تغییر نکرد.</value></data>
+  <data name="Api.Error.internal_error" xml:space="preserve"><value>سرور به خطای درونی خورد؛ هیچ چیزی روی این دستگاه تغییر نکرد.</value></data>
+  <data name="Api.Error.unauthenticated" xml:space="preserve"><value>این دستگاه وارد نشده است، پس سرور درخواست را نپذیرفت.</value></data>
+  <data name="Api.Error.invalid_credentials" xml:space="preserve"><value>ایمیل یا رمزِعبور درست نیست.</value></data>
+  <data name="Api.Error.token_expired" xml:space="preserve"><value>اعتبارِ این ورود سپری شده است؛ دوباره وارد شوید.</value></data>
+  <data name="Api.Error.token_revoked" xml:space="preserve"><value>این نشست روی سرور باطل شده بود، پس اینجا هم پاک شد.</value></data>
+  <data name="Api.Error.forbidden" xml:space="preserve"><value>شما اجازهٔ تغییرِ این مورد را ندارید.</value></data>
+  <data name="Api.Error.account_locked" xml:space="preserve"><value>پس از چند ورودِ ناموفق، این حساب موقتاً قفل شده است.</value></data>
+  <data name="Api.Error.email_already_registered" xml:space="preserve"><value>حسابی با این ایمیل از پیش وجود دارد؛ به‌جای ثبت‌نام وارد شوید.</value></data>
+  <data name="Api.Error.recovery_token_invalid" xml:space="preserve"><value>این کدِ بازیابی معتبر نیست یا پیش‌تر استفاده شده است.</value></data>
+  <data name="Api.Error.deletion_pending" xml:space="preserve"><value>درخواستِ حذفِ این حساب از پیش در انتظار است.</value></data>
+  <data name="Api.Error.provider_unconfigured" xml:space="preserve"><value>سرور هنوز برای آن سرویسِ بیرونی پیکربندی نشده است.</value></data>
+  <data name="Api.Error.permission_required" xml:space="preserve"><value>سرور به اجازه‌ای نیاز دارد که این دستگاه نداده است.</value></data>
+  <data name="Api.Error.provider_unavailable" xml:space="preserve"><value>سرور اکنون به آن سرویسِ بیرونی دسترسی نداشت.</value></data>
+  <data name="Api.Error.data_stale" xml:space="preserve"><value>داده‌های سرور برای اقدام کردن خیلی کهنه‌اند؛ نوسازی کنید.</value></data>
+  <data name="Api.Error.ai_unavailable" xml:space="preserve"><value>پاسخِ هوش مصنوعی فعلاً ممکن نیست؛ راهنمای قاعده‌محور همچنان کار می‌کند.</value></data>
+  <data name="Api.Error.ai_output_rejected" xml:space="preserve"><value>پاسخِ هوش مصنوعی در اعتبارسنجی رد شد و اعمال نگردید.</value></data>
+  <data name="Api.Error.context_budget_exceeded" xml:space="preserve"><value>برای خلاصه‌سازی در یک درخواست، داده بیش از سقفِ مجاز است.</value></data>
+  <data name="Api.Error.verification_rule_unknown" xml:space="preserve"><value>سرور این قواعدِ راستی‌آزمایی را نمی‌شناسد.</value></data>
+  <data name="Api.Error.entitlement_required" xml:space="preserve"><value>این کار به سطحِ اشتراکی نیاز دارد که حساب شما ندارد.</value></data>
+  <data name="Api.Error.payment_provider_unconfigured" xml:space="preserve"><value>پرداخت روی این سرور هنوز پیکربندی نشده است.</value></data>
+  <data name="Api.Error.webhook_signature_invalid" xml:space="preserve"><value>سرور امضای آن اطلاعیهٔ پرداخت را نپذیرفت.</value></data>
+  <data name="Api.Error.purchase_already_exists" xml:space="preserve"><value>این خرید از پیش برای حساب شما ثبت شده است.</value></data>
+  <data name="Api.Error.refund_not_permissible" xml:space="preserve"><value>این خرید مشمول بازگشت وجه نیست.</value></data>
+  <data name="Api.Error.creator_not_approved" xml:space="preserve"><value>این سازنده هنوز اجازهٔ انتشار ندارد.</value></data>
+  <data name="Api.Error.program_not_published" xml:space="preserve"><value>این برنامه روی سرور منتشر نشده است.</value></data>
+  <data name="Api.Error.content_removed" xml:space="preserve"><value>این محتوا توسطِ ناظم‌ها برداشته شده است.</value></data>
+  <data name="Api.Error.blocked_by_participant" xml:space="preserve"><value>یکی از شرکت‌کنندگان این تعامل را اجازه نداده است.</value></data>
+  <data name="Api.Error.report_already_open" xml:space="preserve"><value>گزارشی دربارهٔ این مورد از پیش باز است.</value></data>
+  <data name="Api.Error.version_conflict" xml:space="preserve"><value>نسخهٔ تازه‌تر روی سرور است، پس بازنویسی نشد.</value></data>
+  <data name="Api.Error.sync_too_large" xml:space="preserve"><value>این بسته برای یک درخواست بزرگ است؛ تقسیم خواهد شد.</value></data>
+  <data name="Api.Error.network" xml:space="preserve"><value>سرور در دسترس نبود؛ هیچ چیزی از این دستگاه بیرون نرفت.</value></data>
+  <data name="Api.Error.timeout" xml:space="preserve"><value>سرور در زمانِ مقرر پاسخ نداد؛ داده‌های شما دست‌نخورده است.</value></data>
+  <data name="Api.Error.canceled" xml:space="preserve"><value>این درخواست لغو شد.</value></data>
+  <data name="Api.Error.malformed_response" xml:space="preserve"><value>پاسخِ سرور با شکلِ موردانتظار این برنامه نمی‌خواند، پس چیزی اعمال نشد.</value></data>
+  <data name="Api.Error.not_configured" xml:space="preserve"><value>برای این نصب هیچ سرورِ ابری پیکربندی نشده است.</value></data>
+  <data name="Api.Error.not_signed_in" xml:space="preserve"><value>این دستگاه هیچ نشستِ ابریِ ذخیره‌شده‌ای ندارد.</value></data>
+  <data name="Api.Error.invalid_base_url" xml:space="preserve"><value>نشانیِ ثبت‌شدهٔ سرور قابل استفاده نیست.</value></data>
+  <data name="Api.Error.unexpected_response" xml:space="preserve"><value>سرور پاسخِ غیرمنتظره‌ای داد، پس چیزی اعمال نشد.</value></data>
+  <data name="Api.Error.unknown" xml:space="preserve"><value>سرور این کار را به دلیلی رد کرد که این نسخه نمی‌تواند نامش را بگوید؛ چیزی تغییر نکرد.</value></data>
+  <data name="Cloud.Connector.State.Unconfigured" xml:space="preserve"><value>راه نیفتاده است: هیچ نشانیِ ابری پیکربندی نشده، پس همگام‌سازی ممکن نیست.</value></data>
+  <data name="Cloud.Connector.State.Unverified" xml:space="preserve"><value>پیکربندی شد اما هرگز تأیید نشد: این نصب هنوز پاسخِ موفقی از سرور نگرفته است.</value></data>
+  <data name="Cloud.Connector.State.Offline" xml:space="preserve"><value>آفلاین: آخرین تلاش به سرور نرسید. تغییرهای محلی سالم و در صف مانده‌اند.</value></data>
+  <data name="Cloud.Connector.State.SignedOut" xml:space="preserve"><value>وارد نشده‌اید: سرور در دسترس است اما این دستگاه نشستی در دست ندارد.</value></data>
+  <data name="Cloud.Connector.State.Working" xml:space="preserve"><value>در حال کار: یک درخواست همین حالا در راه است.</value></data>
+  <data name="Cloud.Connector.State.Failed" xml:space="preserve"><value>درخواستِ پیشین رد شد. دلیلش را در پایین بخوانید.</value></data>
+  <data name="Cloud.Connector.State.Conflict" xml:space="preserve"><value>در انتظارِ تصمیم شما: نسخهٔ محلی و نسخهٔ سرور فرق کرده‌اند.</value></data>
+  <data name="Cloud.Connector.State.PendingLocal" xml:space="preserve"><value>هنوز همگام نشده: تغییرهای محلی در صفِ ارسال مانده‌اند.</value></data>
+  <data name="Cloud.Connector.State.Degraded" xml:space="preserve"><value>سرور پاسخ می‌دهد اما خودش می‌گوید بخشی از خدماتش آماده نیست.</value></data>
+  <data name="Cloud.Connector.State.Synced" xml:space="preserve"><value>همگام: سرور هر تغییرِ در صف را تأیید کرده است.</value></data>
+  <data name="Cloud.Connector.Reason.Conflicts" xml:space="preserve"><value>{0} مورد نیاز به تصمیمِ شما دارد تا همگام‌سازی ادامه یابد.</value></data>
+  <data name="Cloud.Connector.Reason.Pending" xml:space="preserve"><value>{0} تغییرِ محلی در انتظارِ ارسال است.</value></data>
+  <data name="Cloud.Sync.Reason.NotConfigured" xml:space="preserve"><value>همگام‌سازی بیکار است: نشانیِ سرور ثبت نشده است.</value></data>
+  <data name="Cloud.Sync.Reason.NoSession" xml:space="preserve"><value>همگام‌سازی بیکار است: این دستگاه وارد نشده، پس چیزی بارگذاری نشد.</value></data>
+  <data name="Cloud.Sync.Reason.NoPayloadSource" xml:space="preserve"><value>همگام‌سازی بیکار است: دادهٔ محلی برای ارسال خوانده نمی‌شود، پس چیزی «ارسال‌شده» علامت نخورد.</value></data>
+  <data name="Cloud.Sync.Reason.PushRefused" xml:space="preserve"><value>سرور این بسته را نپذیرفت، پس همهٔ موارد در صف ماندند.</value></data>
+  <data name="Cloud.Sync.Reason.NothingMoved" xml:space="preserve"><value>این دور هیچ چیزی جابه‌جا نکرد.</value></data>
+  <data name="Cloud.Sync.Pull.Recorded" xml:space="preserve"><value>{0} تغییرِ سرور ثبت شد اما اعمال نشد: مسیرِ اعمالِ محلی در این نسخه وجود ندارد.</value></data>
+  <data name="Cloud.Auth.SignOut.ForcedLocally" xml:space="preserve"><value>فقط روی این دستگاه فراموش شد؛ سرور پاسخ نداد، پس نشستِ او ممکن است همچنان باز باشد.</value></data>
+  <data name="Cloud.Status.Title" xml:space="preserve"><value>ابر</value></data>
+  <data name="Cloud.Status.Note" xml:space="preserve"><value>هر سطرِ این صفحه همان چیزی است که مسیرِ ابری به این دستگاه گزارش کرده است؛ هیچ چیزی از «برنامه باز است» استنتاج نمی‌شود.</value></data>
+  <data name="Cloud.Status.Section.Connector" xml:space="preserve"><value>اتصال</value></data>
+  <data name="Cloud.Status.Section.Queue" xml:space="preserve"><value>صفِ محلی</value></data>
+  <data name="Cloud.Status.Section.Server" xml:space="preserve"><value>وضعیتِ سرور</value></data>
+  <data name="Cloud.Status.Section.Session" xml:space="preserve"><value>نشست</value></data>
+  <data name="Cloud.Status.Transport" xml:space="preserve"><value>لایهٔ انتقال: {0}</value></data>
+  <data name="Cloud.Status.LastProbe" xml:space="preserve"><value>آخرین پاسخ: {0}</value></data>
+  <data name="Cloud.Status.NeverProbed" xml:space="preserve"><value>این نصب هرگز پاسخی از سرور نگرفته است.</value></data>
+  <data name="Cloud.Status.LastConfirmed" xml:space="preserve"><value>سرور تغییرهای در صف را در {0} تأیید کرد</value></data>
+  <data name="Cloud.Status.NeverConfirmed" xml:space="preserve"><value>هیچ بسته‌ای تاکنون توسطِ سرور تأیید نشده است.</value></data>
+  <data name="Cloud.Status.Correlation" xml:space="preserve"><value>شناسهٔ پیگیری برای پشتیبانی: {0}</value></data>
+  <data name="Cloud.Status.Queue.Pending" xml:space="preserve"><value>{0} در انتظار</value></data>
+  <data name="Cloud.Status.Queue.Conflicts" xml:space="preserve"><value>{0} در تضاد</value></data>
+  <data name="Cloud.Status.Queue.Synced" xml:space="preserve"><value>{0} تأییدشده</value></data>
+  <data name="Cloud.Status.Session.SignedIn" xml:space="preserve"><value>روی این دستگاه وارد شده‌اید</value></data>
+  <data name="Cloud.Status.Session.SignedOut" xml:space="preserve"><value>هیچ نشستی روی این دستگاه ذخیره نشده است</value></data>
+  <data name="Cloud.Status.Session.Expires" xml:space="preserve"><value>توکنِ دسترسی تا {0}، ساعت {1} معتبر است</value></data>
+  <data name="Cloud.Status.Session.Protected" xml:space="preserve"><value>توکن‌ها توسطِ سیستم‌عامل محافظت می‌شوند.</value></data>
+  <data name="Cloud.Status.Session.NotProtected" xml:space="preserve"><value>توکن‌ها فقط در پوشهٔ خصوصیِ همین برنامه‌اند؛ این سامانه رمزگذاری ارائه نمی‌دهد.</value></data>
+  <data name="Cloud.Status.Session.Fingerprint" xml:space="preserve"><value>ارجاعِ نشست: {0}</value></data>
+  <data name="Cloud.Status.Server.NotProbed" xml:space="preserve"><value>در این اجرا پرس‌وجو نشده — با «بررسیِ سرور» خودِ میزبان را بخوانید.</value></data>
+  <data name="Cloud.Status.Server.ModuleRow" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="Cloud.Status.Server.MappingFailures" xml:space="preserve"><value>{0} نشانیِ سرویس در راه‌اندازیِ سرور مسیریابی نشد.</value></data>
+  <data name="Cloud.Status.Action.SyncNow" xml:space="preserve"><value>همگام‌سازی اکنون</value></data>
+  <data name="Cloud.Status.Action.Probe" xml:space="preserve"><value>بررسیِ سرور</value></data>
+  <data name="Cloud.Status.Action.SignOut" xml:space="preserve"><value>خروج</value></data>
+  <data name="Cloud.Status.Action.SignIn" xml:space="preserve"><value>ورود</value></data>
+  <data name="Cloud.Status.SignIn.Header" xml:space="preserve"><value>ورود به این سرور</value></data>
+  <data name="Cloud.Status.SignIn.Disabled" xml:space="preserve"><value>تا نشانیِ سرور ثبت نشود فرمِ ورود نمایش داده نمی‌شود: جایی برای فرستادنِ این اطلاعات نیست و فرمی که به سرور نرسد، نمایشی بیش نیست.</value></data>
+  <data name="Cloud.Status.Cycle.Result" xml:space="preserve"><value>دورِ پیشین: {0} تأیید، {1} تضاد، {2} رد، {3} دریافت.</value></data>
+  <data name="Cloud.Status.Cycle.Skipped" xml:space="preserve"><value>دورِ پیشین: هیچ تلاش انجام نشد.</value></data>
+  <data name="Cloud.Capability.ok" xml:space="preserve"><value>سالم</value></data>
+  <data name="Cloud.Capability.degraded" xml:space="preserve"><value>آسیب‌دیده</value></data>
+  <data name="Cloud.Capability.unconfigured" xml:space="preserve"><value>پیکربندی‌نشده</value></data>
+  <data name="Cloud.Capability.not_implemented" xml:space="preserve"><value>در این نسخه ساخته نشده</value></data>
+  <data name="Cloud.Capability.unknown" xml:space="preserve"><value>وضعیتی گزارش کرد که این نسخه نمی‌شناسد</value></data>
 </root>
