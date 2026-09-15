@@ -106,15 +106,15 @@ public sealed class Wave4Gate
                      : new[] { $"-p:OutDir={gateOut}\\" })],
             Expect.SucceededLine()),
         new("server-tests",
+            // Contract §3 command VERBATIM (pinned by Harness_defines_exactly_the_three_contract_commands_verbatim).
+            // Lead change at the repair merge: `--no-build` dropped — the child must execute the CURRENT
+            // sources; a stale Debug assembly made this gate report 26 already-fixed failures.
             "dotnet", "dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q",
-            ["test", "server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj", "--nologo", "-v", "q",
-             "--no-build"],
-            // R3: the floor was 21 at the P1-F HEAD (e7579a3); the merged P1 tree carries 376 tests
-            // in this assembly (measured at 1c7bd50: 338 passed / 38 failed with the foreign lane
-            // reds this lane may not fix). The floor exists to catch "the suite did not run", not
-            // to police every added/removed test, so it sits at 300 — above any partial-execution
-            // shape, below the honest full count — with the measurement stated in the receipt.
-            Expect.TestPassedLine(minPassed: 300)),
+            ["test", "server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj", "--nologo", "-v", "q"],
+            // Lead (wave4 integration): the floor was 300 at the pre-repair HEAD (376 tests, 38
+            // foreign reds). After the p1r merges the assembly carries 428; the floor sits at 400 —
+            // above any partial-execution shape, below the honest full count.
+            Expect.TestPassedLine(minPassed: 400)),
 
         new("client-tests",
             "dotnet", "dotnet test Tests/LIVORA.Tests.csproj --nologo -v q",
