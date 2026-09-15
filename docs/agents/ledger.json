@@ -42,7 +42,7 @@
   },
   {
    "pr": 14,
-   "head_sha": "7723b2311c394b940fd46266df3cf55242d45f90e",
+   "head_sha": "",
    "state": "MERGED",
    "run": "",
    "override": "coordinator YELLOW override"
