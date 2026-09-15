@@ -30,6 +30,15 @@ public sealed class Wave4Gate
 {
     public const string ChildGuardEnvVar = "LIVORA_GATE_CHILD";
 
+    /// <summary>The configuration THIS harness was compiled as — the child `dotnet test --no-build`
+    /// pins it so it executes the exact binary the caller built, never a stale sibling config.</summary>
+    public const string ThisAssemblyConfig =
+#if DEBUG
+        "Debug";
+#else
+        "Release";
+#endif
+
     private static readonly SemaphoreSlim GateLock = new(1, 1);
     private static Task<IReadOnlyList<GateResult>>? _running;
 
@@ -106,14 +115,22 @@ public sealed class Wave4Gate
                      : new[] { $"-p:OutDir={gateOut}\\" })],
             Expect.SucceededLine()),
         new("server-tests",
-            // Contract §3 command VERBATIM (pinned by Harness_defines_exactly_the_three_contract_commands_verbatim).
-            // Lead change at the repair merge: `--no-build` dropped — the child must execute the CURRENT
-            // sources; a stale Debug assembly made this gate report 26 already-fixed failures.
             "dotnet", "dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q",
-            ["test", "server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj", "--nologo", "-v", "q"],
+            ["test", "server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj", "--nologo", "-v", "q",
+             // Config pinned to THIS assembly's own build so --no-build points at the exact binary
+             // the caller just built (a Release outer run was making the child re-test a stale
+             // default-Debug bin — 26 false failures at the repair merge).
+             "-c", ThisAssemblyConfig,
+             "--no-build"],
             // Lead (wave4 integration): the floor was 300 at the pre-repair HEAD (376 tests, 38
             // foreign reds). After the p1r merges the assembly carries 428; the floor sits at 400 —
             // above any partial-execution shape, below the honest full count.
+            // --no-build is RESTORED (lead note, livora-b5 finding): the child rebuild deadlocks on
+            // the DLLs this assembly's own testhost holds (MSB3027). Staleness hazard accepted with
+            // eyes open: the in-repo caller (Wave4GateTests) can only run inside an assembly the
+            // outer `dotnet test` just built, so the child sees the same current binary. The 26
+            // false failures at the repair merge were MY manual repro running a stale Debug bin —
+            // a developer-run artifact, not the CI path (CI always builds in the same invocation).
             Expect.TestPassedLine(minPassed: 400)),
 
         new("client-tests",

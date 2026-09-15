@@ -25,10 +25,10 @@ namespace LIVORA.Infrastructure.Cloud;
 /// </summary>
 public sealed class SessionCloudAuthService : ICloudAuthService
 {
-    /// <summary>Reason keys this adapter may report (bilingual; the Wave 3c key is kept for the
-    /// unconfigured case so the existing card copy still resolves).</summary>
-    public const string SignedInKey = "Cloud.Auth.Reason.SignedIn";
-    public const string NoSessionKey = "Cloud.Auth.Reason.NoSession";
+    /// <summary>Reason keys this adapter may report — all from the lane-p1d manifests, verified
+    /// bilingual (the resx integrity suite forbids inventing new vocabulary here).</summary>
+    public const string SignedInKey = "Cloud.Status.Session.SignedIn";
+    public const string NoSessionKey = "Cloud.Sync.Reason.NoSession";
 
     private readonly Func<CloudSessionManager?> _sessions;
     private readonly ICloudApiOptions _options;
