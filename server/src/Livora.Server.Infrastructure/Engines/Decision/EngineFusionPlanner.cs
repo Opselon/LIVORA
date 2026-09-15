@@ -89,11 +89,16 @@ public static class EngineFusionPlanner
 
         if (workout is not null && depleted)
         {
-            bool baselineOk = mRec.BaselineConfidence >= EngineBaselineConfidence.Medium
-                              || (mRec.Value is not null && mRec.Value < NumericRules.RecoveryBelow);
+            // Client law (PlanAdaptationEngine.cs:74,129-137): a metric whose BaselineConfidence
+            // is None or Low can never drive a plan RESHAPE — an absolute floor may still fire the
+            // *rule* (walk/recommendation) but does not launder thin history into workout surgery.
+            // The old engine bypassed this with `|| mRec.Value < RecoveryBelow`; gone.
+            var driver = lowRecovery ? mRec : mSleep;
+            string driverName = lowRecovery ? "recovery-score" : "sleep-minutes";
+            bool baselineOk = driver.BaselineConfidence >= EngineBaselineConfidence.Medium;
             if (!baselineOk)
             {
-                refusals.Add($"intensity-change-refused:recovery-score-baseline-confidence-low:{mRec.BaselineSamples}samples");
+                refusals.Add($"intensity-change-refused:{driverName}-baseline-confidence-low:{driver.BaselineSamples}samples");
             }
             else
             {

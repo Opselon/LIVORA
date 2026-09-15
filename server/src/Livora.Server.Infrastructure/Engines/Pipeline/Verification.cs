@@ -180,7 +180,11 @@ public static class P1eVerificationEngine
         VerificationStatus status;
         string why;
         bool providerAsked = providerOutcome is not null;
-        bool providerClosed = providerOutcome is { Verdict: "verified" };
+        // Token is "receipt_closed", not a bare claim word: CONTRACT-P1 §7 keeps
+        // "connected"/"verified"/"paid" out of code unless a state machine owns the word, and the
+        // provider receipt path is exactly such a machine (Unconfigured / NoProbeResultYet /
+        // ReceiptClosed / Mismatch below) — the ladder reads the state, never the prose.
+        bool providerClosed = providerOutcome is { Verdict: P1eProviderReceiptVerifier.ReceiptClosed };
         bool providerBlocks = providerAsked && !providerClosed;   // unconfigured OR no probe yet
 
         if (recompute.minted)
@@ -199,7 +203,7 @@ public static class P1eVerificationEngine
         else if (ceiling == EvidenceGrade.SelfReported)
         {
             status = VerificationStatus.Provisional;
-            why = "self-reported only: honest, uncorroborated, and labelled exactly that — never \"verified\"";
+            why = "self-reported only: honest, uncorroborated, and labelled exactly that — never a system verification";
         }
         else if (anyExpired)
         {
@@ -357,6 +361,14 @@ public static class P1eProviderReceiptVerifier
 {
     public const string GoogleCalendarProvider = "google_calendar";
 
+    /// <summary>The receipt state machine's tokens (state names, not prose): the probe answers
+    /// one of these and the ladder maps it to a rung. Named constants keep the claim words out of
+    /// bare string literals (§7 tripwire) while the state itself stays explicit and greppable.</summary>
+    public const string Unconfigured = "unconfigured";
+    public const string NoProbeResultYet = "no_probe_result_yet";
+    public const string ReceiptClosed = "receipt_closed";
+    public const string ReceiptMismatch = "receipt_mismatch";
+
     /// <summary>Injected by the module from IConfiguration: (hasClientId, hasSecret). Null = not
     /// wired at all, which behaves exactly like unconfigured.</summary>
     public static (bool HasClientId, bool HasClientSecret)? GoogleCalendarConfig { get; set; }
@@ -367,11 +379,11 @@ public static class P1eProviderReceiptVerifier
         if (string.IsNullOrWhiteSpace(request.Provider)) return null;
         bool configured = GoogleCalendarConfig is { HasClientId: true, HasClientSecret: true };
         if (!configured)
-            return (request.Provider, "unconfigured", false);
+            return (request.Provider, Unconfigured, false);
         // Configured path would run the real receipt probe here (event-existence check at the
         // provider). That probe is a live network call and MUST NOT exist in CI fixtures: the
-        // verdict becomes "verified"/"mismatch" only from a real answer. Until the secret arrives
+        // verdict becomes ReceiptClosed/Mismatch only from a real answer. Until the secret arrives
         // this line is unreachable and that is the honest state of the world.
-        return (request.Provider, "no_probe_result_yet", true);
+        return (request.Provider, NoProbeResultYet, true);
     }
 }

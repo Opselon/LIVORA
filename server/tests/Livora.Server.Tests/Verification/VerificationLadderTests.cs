@@ -101,7 +101,7 @@ public sealed class VerificationLadderTests
         Assert.Equal("accepted", v.Status);
         var cross = Assert.Single(v.AttemptedRules,
             o => o.RuleKey == "system_verified.cross_source_agreement");
-        Assert.Equal("rejected", cross.Result);
+        Assert.Equal("rejected", cross.StatusToken);
         Assert.Equal("independent_evidence_disagrees_beyond_tolerance", cross.Detail);
     }
 

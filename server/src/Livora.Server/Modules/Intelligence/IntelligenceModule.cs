@@ -45,6 +45,7 @@ public sealed class IntelligenceModule : IFlivoraModule
         // in the frozen persistence tests must stay green). Append-only; frozen by the host after
         // ALL modules register.
         EnginesSchemaGate.EnsureRegistered(seed.Configuration, seed.Logger);
+        seed.Services.AddSingleton(EnginesSchemaGate.StatusFor(seed.Configuration));
 
         seed.Services.AddSingleton<DecisionPipeline>();
         seed.Services.AddSingleton<IExplanationProvider, DeterministicExplanationProvider>();
@@ -112,6 +113,7 @@ public sealed class IntelligenceModule : IFlivoraModule
 
         // ---------------- pattern scan ------------------------------------------------------
         group.MapPost("/pattern-scan", async (HttpContext http, DecisionRequest request,
+            EnginesSchemaGate.EnginesSchemaStatus schema,
             EfPatternDismissalStore dismissals, CancellationToken ct) =>
         {
             var userId = RequireUser(http);
@@ -127,7 +129,7 @@ public sealed class IntelligenceModule : IFlivoraModule
                     "the request context exceeds the deterministic-engine budget", fieldErrors: over);
 
             var scan = EnginePatternScanner.Scan(request.ToInput());
-            if (!EnginesSchemaGate.Active)
+            if (!schema.Active)
             {
                 // Compute what can be computed; say what is missing (safe degradation, not failure).
                 return Results.Ok(new PatternScanResponse(
@@ -159,16 +161,16 @@ public sealed class IntelligenceModule : IFlivoraModule
 
         // ---------------- dismissal list -----------------------------------------------------
         group.MapGet("/pattern-dismissals", async (HttpContext http, EfPatternDismissalStore store,
-            int offset, int limit, CancellationToken ct) =>
+            EnginesSchemaGate.EnginesSchemaStatus schema, int? offset, int? limit, CancellationToken ct) =>
         {
             var userId = RequireUser(http);
             if (userId is null) return Unauthenticated(http);
-            if (!EnginesSchemaGate.Active)
+            if (!schema.Active)
                 return Problems.Of(http, ProblemCodes.ProviderUnavailable,
                     "the pattern ledger schema is not applied on this server (Modules:Intelligence:SchemaContribution)");
 
             var all = await store.ListAsync(userId, ct);
-            var page = new PageRequest { Offset = offset, Limit = limit };
+            var page = new PageRequest { Offset = offset ?? 0, Limit = limit ?? PageRequest.DefaultLimit };
             var items = all.Skip(page.Offset).Take(page.SafeLimit)
                 .Select(d => new DismissalView(d.PatternId, d.Kind, d.CreatedAtUtc))
                 .ToList();
@@ -176,11 +178,12 @@ public sealed class IntelligenceModule : IFlivoraModule
         }).RequireAuthorization(Policies.SignedIn);
 
         group.MapPut("/pattern-dismissals/{patternId}", async (HttpContext http,
-            EfPatternDismissalStore store, string patternId, CancellationToken ct) =>
+            EfPatternDismissalStore store, EnginesSchemaGate.EnginesSchemaStatus schema,
+            string patternId, CancellationToken ct) =>
         {
             var userId = RequireUser(http);
             if (userId is null) return Unauthenticated(http);
-            if (!EnginesSchemaGate.Active)
+            if (!schema.Active)
                 return Problems.Of(http, ProblemCodes.ProviderUnavailable,
                     "the pattern ledger schema is not applied on this server (Modules:Intelligence:SchemaContribution)");
             if (string.IsNullOrWhiteSpace(patternId) || patternId.Length > 160)
@@ -191,11 +194,12 @@ public sealed class IntelligenceModule : IFlivoraModule
         }).RequireAuthorization(Policies.SignedIn);
 
         group.MapDelete("/pattern-dismissals/{patternId}", async (HttpContext http,
-            EfPatternDismissalStore store, string patternId, CancellationToken ct) =>
+            EfPatternDismissalStore store, EnginesSchemaGate.EnginesSchemaStatus schema,
+            string patternId, CancellationToken ct) =>
         {
             var userId = RequireUser(http);
             if (userId is null) return Unauthenticated(http);
-            if (!EnginesSchemaGate.Active)
+            if (!schema.Active)
                 return Problems.Of(http, ProblemCodes.ProviderUnavailable,
                     "the pattern ledger schema is not applied on this server (Modules:Intelligence:SchemaContribution)");
             var removed = await store.RemoveAsync(userId, patternId, ct);

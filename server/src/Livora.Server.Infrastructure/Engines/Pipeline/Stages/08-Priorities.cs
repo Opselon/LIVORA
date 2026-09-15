@@ -191,14 +191,18 @@ public static class Prioritiser
 {
     public const string StageName = "priorities";
 
-    // ---- weight table (see file header: client weights × 0.8 + W6 = 0.20) ----------------------
+    // ---- weight table (see file header: client weights × 0.8 + W6 = the remainder) -------------
     public const double WeightScale = 0.8;
     public const double W1GoalAlignment = 0.35 * WeightScale;   // 0.280
     public const double W2Urgency = 0.30 * WeightScale;         // 0.240
-    public const double W3Confidence = 0.25 * WeightScale;      // 0.200
-    public const double W4ScheduleFit = 0.20 * WeightScale;     // 0.160
-    public const double W5Effort = 0.25 * WeightScale;          // 0.200 (penalty)
-    public const double W6Execution = 0.20;
+    public const double W3Confidence = 0.25 * WeightScale;       // 0.200
+    public const double W4ScheduleFit = 0.20 * WeightScale;      // 0.160
+    public const double W5Effort = 0.25 * WeightScale;           // 0.200 (penalty)
+    /// <summary>The execution-likelihood share is the REMAINDER to 1.0 of the four scaled positive
+    /// weights: the client's W1..W4 sum to 1.10 (RecommendationRanker.cs:28-32) because W5 is a
+    /// subtracted penalty, not a share, so 0.8 × 1.10 = 0.88 and W6 = 0.12. (It previously read
+    /// 0.20, which double-counted the 0.20 gap and pushed every positive score past 1.0.)</summary>
+    public const double W6Execution = 0.12;
     public const double MaxHighPriorityCards = 1;               // RecommendationRanker.cs:48
     public const int EffortDivisorMinutes = 120;                // RecommendationRanker.cs:32
 

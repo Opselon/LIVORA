@@ -31,7 +31,7 @@ public sealed record VerifyClaimRequest(
     /// <summary>Optional explicit rule; unknown key => 503 verification_rule_unknown (never silent).</summary>
     string? RuleKey = null);
 
-public sealed record RuleOutcomeDto(string RuleKey, string Result, string Detail);
+public sealed record RuleOutcomeDto(string RuleKey, string StatusToken, string Detail);
 
 public sealed record VerdictResponse(
     string ClaimId, string ClaimType, string TrustLevel, string Status, double Confidence,
@@ -86,7 +86,7 @@ public static class VerificationBoundary
 
     public static VerdictResponse ToResponse(this VerificationVerdict v) => new(
         v.ClaimId, v.ClaimType, v.TrustLevel, v.Status, v.Confidence,
-        v.AttemptedRules.Select(o => new RuleOutcomeDto(o.RuleKey, o.Result, o.Detail)).ToList(),
+        v.AttemptedRules.Select(o => new RuleOutcomeDto(o.RuleKey, o.StatusToken, o.Detail)).ToList(),
         v.ContributingRuleKeys, v.EvidenceFactIds, v.RefusalReason, v.GeneratedAtUtc,
         GeneratedBy: "deterministic_verification_engine");
 }

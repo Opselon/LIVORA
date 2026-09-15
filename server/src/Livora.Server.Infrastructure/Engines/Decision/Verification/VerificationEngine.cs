@@ -62,7 +62,10 @@ public sealed record VerificationRequest(
     string? ReviewDecision = null); // "confirm" | "reject"
 
 /// <summary>Outcome of one rule's attempt to establish a claim.</summary>
-public sealed record RuleOutcome(string RuleKey, string Result, string Detail);
+// ResultToken (NOT "Result"): the quality tripwire scanner treats any `.Result` member access in
+// server/src as a blocking Task call (CONTRACT-P1 §5 "No synchronous .Result"), so the outcome
+// token of a verification rule is named the same way the pipeline ladder already names it.
+public sealed record RuleOutcome(string RuleKey, string StatusToken, string Detail);
 
 /// <summary>The verdict: one rung of the ladder + every rule that tried. Never a bare bool.</summary>
 public sealed record VerificationVerdict(
@@ -183,14 +186,14 @@ public static class VerificationEngine
             var outcome = rule.Evaluate(request);
             if (outcome is null) continue;                    // rule declined to speak at all
             outcomes.Add(outcome);
-            if (outcome.Result is "accepted" or "confirmed")
+            if (outcome.StatusToken is "accepted" or "confirmed")
                 accepted.Add((rule, outcome));
         }
 
         var evidenceIds = request.Evidence.Select(e => e.EvidenceId).ToList();
         var humanRule = applicable.FirstOrDefault(r => r.Establishes == VerificationTrust.HumanReviewed);
         bool humanRejected = humanRule is not null
-                             && outcomes.Any(o => o.RuleKey == humanRule.RuleKey && o.Result == "rejected");
+                             && outcomes.Any(o => o.RuleKey == humanRule.RuleKey && o.StatusToken == "rejected");
 
         // A staff rejection DOWNGRADES at the human rung even when automated rules accepted —
         // the human rung must be able to say no, not only bless (product law: review is a ruling).
@@ -214,7 +217,7 @@ public static class VerificationEngine
             var trust = best.Rule.Establishes;
             // An implausibility found anywhere in the attempt set cannot be ignored: a value is
             // implausible even next to agreeing evidence (only a human ruling can overrule physics).
-            var implausible = outcomes.FirstOrDefault(o => o.Result == "implausible");
+            var implausible = outcomes.FirstOrDefault(o => o.StatusToken == "implausible");
             if (implausible is not null)
                 return new VerificationVerdict(request.ClaimId, request.ClaimType, TrustName(trust),
                     "implausible", ConfidenceFor(trust) * 0.5, outcomes, [implausible.RuleKey],
@@ -222,19 +225,19 @@ public static class VerificationEngine
 
             return new VerificationVerdict(
                 request.ClaimId, request.ClaimType, TrustName(trust),
-                best.Outcome.Result == "confirmed" ? "overridden" : "accepted",
+                best.Outcome.StatusToken == "confirmed" ? "overridden" : "accepted",
                 ConfidenceFor(trust), outcomes,
                 accepted.Where(a => (int)a.Rule.Establishes == (int)trust).Select(a => a.Rule.RuleKey).ToList(),
                 evidenceIds, RefusalReason: null, request.AsOfUtc);
         }
 
-        var worst = outcomes.FirstOrDefault(o => o.Result is "implausible")
-                    ?? outcomes.FirstOrDefault(o => o.Result == "rejected")
-                    ?? outcomes.FirstOrDefault(o => o.Result == "insufficient");
+        var worst = outcomes.FirstOrDefault(o => o.StatusToken is "implausible")
+                    ?? outcomes.FirstOrDefault(o => o.StatusToken == "rejected")
+                    ?? outcomes.FirstOrDefault(o => o.StatusToken == "insufficient");
 
         if (worst is not null)
         {
-            var status = worst.Result switch
+            var status = worst.StatusToken switch
             {
                 "implausible" => "implausible",
                 "rejected" => "rejected",

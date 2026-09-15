@@ -134,7 +134,14 @@ public sealed record ConstraintSet(
     bool RecoveryLow,
     IReadOnlyList<TrailEntry> Trail)
 {
-    public int CapMinutes => (int)Math.Round(BaselinePlanMinutes * ConstraintStage.TotalMinutesCapFactor);
+    /// <summary>Committed-minutes ceiling (ported PlanAdaptationEngine.cs:348-350: the cap compares
+    /// against the INPUT plan's base total, and the client always receives a non-empty skeleton).
+    /// With no base plan at all, "1.2× nothing" would forbid every recommendation of a free day —
+    /// a degenerate reading of the ported rule — so an empty plan carries no growth cap and the
+    /// DEMANDING-minutes ceiling (MaxNewDemandingMinutes) remains the guard on what gets added.</summary>
+    public int CapMinutes => BaselinePlanMinutes <= 0
+        ? int.MaxValue
+        : (int)Math.Round(BaselinePlanMinutes * ConstraintStage.TotalMinutesCapFactor);
     public int MaxNewDemandingMinutes => RecoveryLow
         ? ConstraintStage.MaxNewDemandingMinutesWhenRecoveryLow
         : ConstraintStage.MaxNewDemandingMinutesNormal;
