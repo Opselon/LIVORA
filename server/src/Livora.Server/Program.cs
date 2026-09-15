@@ -28,8 +28,14 @@ builder.Services.AddLivoraAuthentication(builder.Configuration);
 // FlivoraActivity.Source is self-contained; no global ActivityListener registry needed here.
 
 // ---- persistence: provider switch here, the model lives in Infrastructure ---------------------
+// R-r2-1 (lead): pass the configuration object and let AddLivoraDbContext resolve provider +
+// connection string LAZILY at first materialization. An eager GetConnectionString here ran before a
+// WebApplicationFactory fixture applied its ConfigureAppConfiguration overrides, so every parallel
+// test host fell back to the shared appsettings livora.db. Production sees the identical final
+// config; the change only removes a test-host race. (dbProvider below is DISPLAY-ONLY for
+// /healthz + the startup banner; the DbContext resolves its own provider lazily.)
+builder.Services.AddLivoraDbContext(builder.Configuration);
 var dbProvider = builder.Configuration["Database:Provider"] ?? "sqlite";
-builder.Services.AddLivoraDbContext(dbProvider, builder.Configuration.GetConnectionString("Livora"));
 
 // ---- modules: discover once, use twice (services pre-Build, endpoints post-Build) -------------
 var modules = FlivoraModuleScanner.Discover(typeof(Program).Assembly);

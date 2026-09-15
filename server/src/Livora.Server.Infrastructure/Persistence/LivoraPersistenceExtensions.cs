@@ -96,27 +96,48 @@ public static class LivoraPersistenceExtensions
     public static IServiceCollection AddLivoraDbContext(
         this IServiceCollection services, string provider, string? connectionString)
     {
-        services.AddDbContext<LivoraDbContext>(options =>
+        services.AddDbContext<LivoraDbContext>(options => ConfigureLivora(options, provider, connectionString));
+        return services;
+    }
+
+    /// <summary>
+    /// R-r2-1 (lead): configuration-driven registration that resolves provider + connection string
+    /// LAZILY, at first DbContext materialization. A WebApplicationFactory fixture adds its config
+    /// overrides during builder.Build() — an eager read in the entry point therefore hands every
+    /// parallel test host the appsettings default (one shared bin/livora.db) instead of its own
+    /// file, which is the cross-fixture flake R-r2-1 documented. Production reads the same final
+    /// configuration either way; the difference only exists where hosts override config in tests.
+    /// </summary>
+    public static IServiceCollection AddLivoraDbContext(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<LivoraDbContext>((sp, options) =>
         {
-            switch (provider.ToLowerInvariant())
-            {
-                case "inmemory":
-                    // Tests only: same LINQ surface, no disk, no FK enforcement (documented limit).
-                    options.UseInMemoryDatabase("livora-tests");
-                    break;
-                case "postgres":
-                    options.UseNpgsql(Resolve(provider, connectionString));
-                    break;
-                default:
-                    options.UseSqlite(Resolve(provider, connectionString),
-                        sqlite => sqlite.CommandTimeout(30));
-                    // Foreign keys are OFF by default in SQLite; WAL keeps readers unblocked by the
-                    // sync writer. Registered per DbContext instance so pooled connections re-apply it.
-                    options.AddInterceptors(new SqliteConnectionInterceptor());
-                    break;
-            }
+            var cfg = sp.GetService(typeof(IConfiguration)) as IConfiguration ?? configuration;
+            ConfigureLivora(options, cfg["Database:Provider"] ?? "sqlite", cfg.GetConnectionString("Livora"));
         });
         return services;
+    }
+
+    private static void ConfigureLivora(DbContextOptionsBuilder options, string provider, string? connectionString)
+    {
+        switch (provider.ToLowerInvariant())
+        {
+            case "inmemory":
+                // Tests only: same LINQ surface, no disk, no FK enforcement (documented limit).
+                options.UseInMemoryDatabase("livora-tests");
+                break;
+            case "postgres":
+                options.UseNpgsql(Resolve(provider, connectionString));
+                break;
+            default:
+                options.UseSqlite(Resolve(provider, connectionString),
+                    sqlite => sqlite.CommandTimeout(30));
+                // Foreign keys are OFF by default in SQLite; WAL keeps readers unblocked by the
+                // sync writer. Registered per DbContext instance so pooled connections re-apply it.
+                options.AddInterceptors(new SqliteConnectionInterceptor());
+                break;
+        }
     }
 
     private static string Resolve(string provider, string? connectionString) => provider.ToLowerInvariant() switch
