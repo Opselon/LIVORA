@@ -1,7 +1,8 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Livora.Server.Application;
 using Livora.Server.Infrastructure.Persistence;
 using Livora.Server.Infrastructure.Sync;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -25,7 +26,7 @@ namespace Livora.Server.Modules.Sync;
 ///   - Idempotency-Key is mandatory on the batch. A replay of the same key + same canonical body
 ///     returns the ORIGINAL 200 bytes; same key + different body answers
 ///     409 idempotency_key_reuse_mismatch. The decision is enforced by a unique index, not a check.
-///   - optimistic revision conflict: baseRevision != server entity head ⇒ outcome "conflict" with a
+///   - optimistic revision conflict: baseRevision != server entity head ⇒ outcome 'conflict' with a
 ///     detail naming BOTH revisions. Newer server data is never silently overwritten.
 ///   - offline-safe ordering: applied operations take strictly increasing per-user revisions in
 ///     array order, and only applied operations enter the feed, so any device pulling
@@ -70,6 +71,10 @@ public sealed class SyncModule : IFlivoraModule
             HttpContext http,
             SyncBatchService service,
             SyncLimits limits,
+            // Bound from the header ONLY so the published OpenAPI document carries it (the frozen
+            // §5c header is part of the contract, not tribal knowledge); enforcement below still
+            // reads the same value and owns the refusal.
+            [FromHeader(Name = SyncLimits.IdempotencyKeyHeader)] string? idempotencyKeyHeader,
             CancellationToken ct) =>
         {
             var log = http.RequestServices.GetRequiredService<ILogger<SyncModule>>();
@@ -171,21 +176,18 @@ public sealed class SyncModule : IFlivoraModule
                         result.ProblemDetail ?? "The batch conflicts with newer server data.");
 
                 case SyncBatchStatus.Replay:
-                    // The ORIGINAL answer, byte-for-byte and status-for-status. A replayed problem
-                    // rebuilds the shared envelope (fresh correlation id: it identifies this
-                    // response); a replayed 200 returns the stored bytes verbatim.
+                    // The ORIGINAL answer, status-for-status. A replayed problem rebuilds the shared
+                    // envelope (fresh correlation id: it identifies this response); a replayed 200
+                    // returns the stored bytes verbatim. Only 409 problems are ever stored for replay
+                    // today (a wholly-stale batch), so the constant below is exactly the stored code —
+                    // §5c forbids a silent success where a conflict was the original verdict.
                     log.LogInformation(
                         "sync batch replayed from stored result: user={UserId} key={Key} " +
                         "correlationId={CorrelationId}", userId, idempotencyKey, correlationId);
                     if (result.ResponseStatus != StatusCodes.Status200OK)
-                    {
-                        var replayCode = result.ProblemCode == ProblemCodes.VersionConflict
-                            ? ProblemCodes.VersionConflict
-                            : ProblemCodes.Conflict;
-                        return Problems.Of(http, replayCode,
+                        return Problems.Of(http, ProblemCodes.VersionConflict,
                             result.ProblemDetail ?? "Replayed batch conflict; nothing was applied.",
                             status: result.ResponseStatus);
-                    }
                     return Results.Content(result.ResponseJson ?? "{}",
                         "application/json; charset=utf-8", statusCode: StatusCodes.Status200OK);
 

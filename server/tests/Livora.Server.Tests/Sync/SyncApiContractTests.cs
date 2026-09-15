@@ -416,7 +416,7 @@ public sealed class SyncApiContractTests : LivoraApiTest
             Body(("op-2", "goal", entity, "update", 1, "{\"t\":2}")));
 
         var conflicted = await PostBatchAsync(client, NewKey("r3"),
-            Body(("op-3", "goal", entity, "update", 1, "{\"t\":mine}"),
+            Body(("op-3", "goal", entity, "update", 1, "{\"t\":\"mine\"}"),
                  ("keep", "goal", entity + "-k", "create", 0, "{}")));
         Assert.Equal("conflict", conflicted.GetProperty("results").EnumerateArray()
             .First(r => r.GetProperty("operationId").GetString() == "op-3").GetProperty("outcome").GetString());

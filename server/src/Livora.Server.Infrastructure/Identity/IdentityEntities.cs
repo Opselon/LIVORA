@@ -1,4 +1,4 @@
-using Livora.Server.Infrastructure.Persistence;
+﻿using Livora.Server.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Livora.Server.Infrastructure.Identity;
@@ -6,20 +6,21 @@ namespace Livora.Server.Infrastructure.Identity;
 // ============================================================================
 // Identity-lane additions (P1-C) ON TOP of the frozen core tables.
 //
-// WHY A SECOND CONTEXT — and the reproducible platform fact behind it:
-// CONTRACT-P1 §4 says "one LivoraDbContext, extend via IModelContribution".
-// Executed evidence in this worktree (2026-09-14): ANY contribution registered
-// before a MigrateAsync makes the FROZEN Persistence/SqliteMigrationTests throw
-//   InvalidOperationException: PendingModelChangesWarning (model vs the frozen
-//   InitialCore snapshot) — 5/21 server tests red, deterministic across three runs.
-// Lanes may not write migrations (§4) and may not touch that test (out of scope),
-// so the shared-model contribution path is blocked for the entire lane phase.
-// The identity state that must persist (lockout, rotation families, tombstones)
-// therefore lives in IdentitySideDbContext below: the SAME database (same
-// ConnectionStrings:Livora, same SqliteConnectionInterceptor), its own model.
-// IdentityModelContribution is shipped UNREGISTERED so the lead's integration-time
-// Wave4P1Schema pass can fold these types into the shared model by flipping ONE
-// line (requests/p1c.md R-p1c-1 records this with the repro).
+// CURRENT SHAPE (Wave 4 P1 integration + repair lane R2): these entity types ride
+// the SHARED LivoraDbContext through IdentityModelContribution (§4 as written):
+//   - design time: the host's HostDesignTimeFactory calls EnsureRegistered() before
+//     the lead generated the single Wave4P1Schema migration (tables:
+//     identity_security_profiles, auth_session_lineage, auth_revoked_refresh_tokens);
+//   - runtime: IdentityModule.ConfigureServices calls EnsureRegistered() before the
+//     registry freezes, so the live model, the migration, and every test context
+//     agree on one schema (proved by the Identity* tests running against the fixture
+//     host's EnsureCreated schema — a second context would have to be created
+//     separately and could silently drift; it was deleted for exactly that reason).
+// The P1-C lane originally shipped a private IdentitySideDbContext because
+// PendingModelChangesWarning made the frozen migration test order-dependent before
+// Wave4P1Schema existed (R-p1c-1). That precondition is gone: keeping the side
+// context now would be two sources of truth for one schema. Deletion recorded in
+// docs/quality/wave4/requests/r2.md (R-r2-3).
 // ============================================================================
 
 /// <summary>
@@ -85,10 +86,9 @@ public sealed class RevokedRefreshToken
 }
 
 /// <summary>
-/// PURPOSE: the schema definition of the identity lane's tables. Shared by BOTH paths so there is
-///          one schema truth: <see cref="IdentitySideDbContext"/> (what runs today) and
-///          <see cref="IdentityModelContribution"/> (what the lead folds into the shared model at
-///          integration, per R-p1c-1).
+/// PURPOSE: the schema definition of the identity lane's tables — ONE source of truth, consumed by
+///          <see cref="IdentityModelContribution"/>, which the shared LivoraDbContext applies at
+///          both design time (the lead's HostDesignTimeFactory) and runtime (IdentityModule).
 /// CONVENTIONS (§4 honored): text keys, UTC DateTimeOffset, explicit HasMaxLength, unique indexes
 ///          where idempotency matters (TokenHash is the natural key — the same rotated-out hash can
 ///          be replayed a hundred times and must not create a hundred rows: inserts are guarded by
@@ -134,35 +134,9 @@ public static class IdentitySchema
 }
 
 /// <summary>
-/// PURPOSE: the identity lane's persistence slice — SAME database as LivoraDbContext (same
-///          connection string, same SQLite interceptor for FK/WAL), separate model, so the frozen
-///          core migration snapshot keeps matching. See the banner at the top of this file for why
-///          the shared-contribution path is blocked in the lane phase (R-p1c-1).
-/// OWNER: Agent 03 (identity lane).
-/// INVARIANTS: no FKs declared to the core tables — cross-context referential integrity is
-///           enforced by the application (the deletion path explicitly cleans these tables), and
-///           the ids are app-minted GUIDs. The lead's merge fold-in (R-p1c-1) can restore FKs.
-/// </summary>
-public sealed class IdentitySideDbContext : DbContext
-{
-    public IdentitySideDbContext(DbContextOptions<IdentitySideDbContext> options) : base(options) { }
-
-    public DbSet<IdentitySecurityProfile> SecurityProfiles => Set<IdentitySecurityProfile>();
-    public DbSet<AuthSessionLineage> SessionLineage => Set<AuthSessionLineage>();
-    public DbSet<RevokedRefreshToken> RevokedTokens => Set<RevokedRefreshToken>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-        IdentitySchema.Configure(modelBuilder);
-    }
-}
-
-/// <summary>
-/// The shared-model fold-in vehicle for integration time. Deliberately NOT registered by the lane
-/// (registering it deterministically breaks the frozen SqliteMigrationTests — see file banner and
-/// R-p1c-1). The lead calls <see cref="EnsureRegistered"/> once from the module (or rewrites these
-/// entity types directly into Wave4P1Schema) and flips IdentitySideDbContext away.
+/// THE shared-model vehicle (§4 as written): IdentityModule.ConfigureServices registers it at
+/// runtime and the host's design-time factory registers it before the lead generated
+/// Wave4P1Schema, so live host, migration, and tests all build ONE model from ONE schema body.
 /// </summary>
 public sealed class IdentityModelContribution : IModelContribution
 {
@@ -170,8 +144,8 @@ public sealed class IdentityModelContribution : IModelContribution
     private static bool _registered;
 
     /// <summary>Idempotent, freeze-safe registration into the shared registry; true when the
-    /// contribution is (now) inside it. The lane never calls this today; it exists so the merge
-    /// fold-in is a one-line change with the same schema body.</summary>
+    /// contribution is (now) inside it. Called from IdentityModule.ConfigureServices (runtime) and
+    /// from the host's HostDesignTimeFactory (design time) — both before the registry freezes.</summary>
     public static bool EnsureRegistered()
     {
         lock (RegistrationGate)
