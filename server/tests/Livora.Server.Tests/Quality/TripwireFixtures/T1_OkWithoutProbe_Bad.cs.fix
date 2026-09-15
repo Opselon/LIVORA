@@ -1,0 +1,12 @@
+// PLANTED TRIPWIRE VIOLATION (P1-F proof-of-fire). Extension .cs.fix keeps this OUT of the build;
+// TripwireScanner reads it as text. This module claims DependencyState.Ok with NOTHING behind it:
+// no config read, no probe call, no await anywhere in the class — the exact §7 offence.
+// Do not "fix" it: it is the detector's calibration weight. Its honest twin is the _Good.cs.fix file.
+namespace Livora.QualityFixtures;
+
+public sealed class OkWithNothingBehindItModule : IFlivoraModule
+{
+    public string Key => "pretender";
+
+    public ModuleHealth Report() => new(Key, DependencyState.Ok, "looks fine to me");
+}

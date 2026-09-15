@@ -57,6 +57,10 @@ public sealed class PrivacyService : IPrivacyService
     /// no personal data (language choice, onboarding flag, profile id) and wiping them would send
     /// a confirmed user back through onboarding. Exposed so the audit/tests can state exactly
     /// what remains after a wipe.
+    /// Wave 4 audit fix: theme_mode, last_seen_version and demo_data_seeded were missing here —
+    /// and demo_data_seeded is precisely the retained key that makes a wipe PERMANENT against the
+    /// demo content (DemoDataSeeder's one-shot gate), so hiding it was a live honesty defect in
+    /// the inventory that exists to hide nothing.
     /// </summary>
     internal static readonly string[] RetainedSettingKeys =
     {
@@ -64,6 +68,9 @@ public sealed class PrivacyService : IPrivacyService
         "language_explicitly_set",
         "onboarding_completed",
         "profile_id",
+        "theme_mode",
+        "last_seen_version",
+        "demo_data_seeded",
     };
 
     private readonly JsonFileStore _store;

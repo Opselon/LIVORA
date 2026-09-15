@@ -1,0 +1,15 @@
+// PLANTED TRIPWIRE VIOLATION (P1-F proof-of-fire). §7: "connected"/"verified"/"paid" strings in
+// code without a state machine behind them. This file carries THREE positive claims and no state
+// enum anywhere — a UI-shaped lie factory. The .fix extension keeps it out of the build.
+namespace Livora.QualityFixtures;
+
+public static class ConfidenceLabels
+{
+    public static string Banner(bool show) =>
+        show ? "Your device is connected" : "";
+
+    public static string HealthBadge => "Provider verified";
+
+    public static string CheckoutLine(decimal amount) =>
+        amount > 0m ? "Paid" : "Awaiting payment";
+}

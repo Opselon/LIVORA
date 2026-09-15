@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    PURPOSE: The pure server side of LIVORA — domain, application contracts, ports and the
+             deterministic engines. No HTTP, no EF, no MAUI: it must stay runnable in a unit test.
+    OWNER: contracts + folder layout owned by Agent 01; each subfolder is owned by exactly one lane
+           (see .github/OWNERSHIP.yaml, wave4 lanes).
+    CONSUMES: nothing (BCL only).
+    PROVIDES: IFlivoraModule (the self-registration seam), ProblemCodes, Result, ApiDefaults,
+              and per-feature contract folders that Infrastructure/ and the host consume.
+    INVARIANTS:
+      - NEVER references the MAUI app project, Livora.* client assemblies, or System.Text.Json
+                polyfills beyond the shared contract DTOs defined here.
+      - Contract DTOs are records with explicit JSON names (snake_case) so the client and the
+                backend cannot drift silently.
+      - No EF/ASP.NET types may enter this assembly (guarded by ServerPurityTests).
+    EXTEND: a lane adds its own <Feature>/Contracts.cs — it does not edit a neighbour's file.
+  -->
+  <PropertyGroup>
+    <!-- Isolate from the parent repos/Directory.Packages.props (9.x preview pins) - same rule as
+         the MAUI app project: CPM must be opted out in the project BODY, not in Directory.Build.props,
+         because the discovered props file is imported after the nearest Directory.Build.props. -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Livora.Server.Application</RootNamespace>
+    <AssemblyName>Livora.Server.Application</AssemblyName>
+  </PropertyGroup>
+
+</Project>

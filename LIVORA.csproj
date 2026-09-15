@@ -49,12 +49,18 @@
 		<MauiXaml Update="Resources\Styles\LivoraStyles.xaml" />
 	</ItemGroup>
 
-	<!-- Test sources never ship in the app. -->
+	<!-- Test sources never ship in the app. The Wave 4 server/ tree is its own
+	     solution — its sources (and generated obj/ files) must not be swept into
+	     the app's default **/*.cs glob (root bin/obj excludes are not recursive
+	     into subdirectory projects). -->
 	<ItemGroup>
 		<Compile Remove="Tests\**\*.cs" />
 		<MauiXaml Remove="Tests\**\*.xaml" />
 		<EmbeddedResource Remove="Tests\**" />
 		<None Remove="Tests\**\*" />
+		<Compile Remove="server\**\*.cs" />
+		<None Remove="server\**\*" />
+		<EmbeddedResource Remove="server\**" />
 	</ItemGroup>
 
 	<ItemGroup>

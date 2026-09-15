@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    PURPOSE: Wave 4 backend tests — host boot, contract behaviour, module truthfulness, engines.
+    OWNER: Agent 16 (QA/Security/Performance) owns shared fixtures; each lane adds its own test
+           files under a folder named for its agent, never editing a neighbour's.
+    CONSUMES: the server host (WebApplicationFactory) + Application/Infrastructure assemblies.
+    PROVIDES: the release gate command
+              dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj
+    INVARIANTS:
+      - no test may require a live external service; provider dependencies are faked or reported
+        unconfigured and asserted AS unconfigured
+      - every test that touches the DB uses its own isolated SQLite file or in-memory provider and
+        disposes it; parallel fixtures must not share a database file
+      - warnings are errors: a flaky or obsolete API usage fails the build
+    EXTEND: add Tests/<Area>/<Concern>Tests.cs; keep one behaviour per test with a real assertion.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <AssemblyName>Livora.Server.Tests</AssemblyName>
+    <RootNamespace>Livora.Server.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\..\src\Livora.Server\Livora.Server.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>

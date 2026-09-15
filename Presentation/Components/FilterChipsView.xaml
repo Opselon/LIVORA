@@ -7,8 +7,9 @@
     x:DataType="comp:FilterChipsView">
 
     <!-- Shared filter-chip row (lane 09; lanes 07/08 code against this name). Wrapping
-         FlexLayout so a long Persian chip label never clips; every chip is a ≥40dp touch target;
-         Start/End alignment keeps RTL mirroring intact. Labels arrive already localized via
+         FlexLayout so a long Persian chip label never clips; every chip is a ≥44dp touch
+         target (the app-wide mobile floor); Start/End alignment keeps RTL mirroring intact.
+         Labels arrive already localized via
          ItemsSource — the component stores no strings and does no formatting.
          Brush tokens (Border.Background / Border.Stroke) only, per the design-token rule. -->
     <FlexLayout
@@ -23,7 +24,7 @@
                 <Border
                     Padding="14,8"
                     Margin="0,0,8,8"
-                    MinimumHeightRequest="40"
+                    MinimumHeightRequest="44"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 14"
                     Background="{StaticResource SurfaceBrush}"

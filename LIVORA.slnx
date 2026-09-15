@@ -1,4 +1,10 @@
 <Solution>
   <Project Path="LIVORA.csproj" />
   <Project Path="Tests/LIVORA.Tests.csproj" />
+  <Folder Path="server">
+    <Project Path="server/src/Livora.Server.Application/Livora.Server.Application.csproj" />
+    <Project Path="server/src/Livora.Server.Infrastructure/Livora.Server.Infrastructure.csproj" />
+    <Project Path="server/src/Livora.Server/Livora.Server.csproj" />
+    <Project Path="server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj" />
+  </Folder>
 </Solution>

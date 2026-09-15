@@ -93,7 +93,7 @@
                         <Border Margin="0,0,0,8"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 12"
                                 Background="{Binding FillKey, Converter={StaticResource BrushByKey}}"
-                                Padding="12,8" MinimumHeightRequest="36"
+                                Padding="12,8" MinimumHeightRequest="44"
                                 comp:TappableFeedback.Tappable="True"
                                 comp:TappableFeedback.PressScale="0.97"
                                 SemanticProperties.Description="{Binding Label}"

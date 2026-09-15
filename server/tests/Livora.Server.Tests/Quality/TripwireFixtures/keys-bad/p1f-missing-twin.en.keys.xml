@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PLANTED TRIPWIRE VIOLATION (P1-F, rule T4, defect #4): this EN manifest has NO .fa twin file
+     at all — the "English-only lane" shape the bilingual law (§0.4) forbids. Do not add one. -->
+<root>
+  <data name="Marketplace.Search.Placeholder" xml:space="preserve"><value>Search programs…</value></data>
+</root>

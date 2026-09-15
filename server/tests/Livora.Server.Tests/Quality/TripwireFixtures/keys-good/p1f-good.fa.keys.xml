@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The FA twin of p1f-good.en.keys.xml: same key set, same placeholder indices, real Persian
+     (note the ZWNJ in «همگام‌سازی»). -->
+<root>
+  <data name="Sync.Batch.Progress" xml:space="preserve"><value>{0} از {1} عملیات اعمال شد</value></data>
+  <data name="Profile.Language.Note" xml:space="preserve"><value>هر دو زبان با همهٔ کلیدها عرضه می‌شود.</value></data>
+</root>
