@@ -49,14 +49,35 @@ public sealed class SourceHonestyTests
     }
 
     // ---- (1) blocking calls ------------------------------------------------------------------------
-
-    private static readonly Regex BlockingCall =
-        new(@"\.Result\b|\.Wait\(\)|GetAwaiter\(\)\s*\.\s*GetResult\(\)", RegexOptions.Compiled);
+    //
+    // R3 REFINEMENT (documented in TRIPWIRES.md + AnalyzerRefinements.cs): the law is "do not block
+    // on a Task in the backend", NOT "never write the characters .Result". server/src has record
+    // DTOs with a `Result` member (RuleOutcome(string RuleKey, string Result, …) in the
+    // verification engine), so the old pure-text regex flagged honest property reads and would
+    // have had to be allowlist-padded until it meant nothing. `.Wait()` and
+    // GetAwaiter().GetResult() are still flagged unconditionally; `.Result` is flagged when the
+    // receiver reads as a Task (declared Task/ValueTask symbol in the file, unawaited `…Async(...)`
+    // call, `Task.<factory>(...)`, or a `*Task`-shaped name). Residual false negatives are the
+    // cross-file Task-typed property case — stated in the scanner header, with the compensations.
 
     [Fact]
     public void Tripwire1_no_blocking_task_calls_in_server_src()
     {
-        Assert.Empty(FilesMatching(ServerSrcFiles, BlockingCall));
+        var violations = new List<string>();
+        int declined = 0;
+        foreach (var f in ServerSrcFiles)
+        {
+            var scanned = RepoPaths.ScanFile(RepoPaths.Combine(f));
+            violations.AddRange(BlockingCallScanner.Violations(scanned, f));
+            declined += BlockingCallScanner.TaskShapedMisses(scanned);
+        }
+        Assert.True(violations.Count == 0, "blocking Task access found:\n  " + string.Join("\n  ", violations));
+        // Non-vacuity, in the OTHER direction too: the tree really does contain `.Result` property
+        // reads; if it ever stops containing any, the narrowing above is untested and must be
+        // re-examined rather than trusted.
+        Assert.True(declined >= 1,
+            "the .Result rule declined to judge every occurrence in server/src — either the tree " +
+            "changed shape or the receiver analysis is dead; re-inspect before trusting this green");
     }
 
     [Fact]
@@ -65,17 +86,57 @@ public sealed class SourceHonestyTests
         var sample = SourceTokenizer.Scan("synthetic.cs", """
             class C {
                 void M(Task t, Task t2) {
-                    var v = t.Result;                   // offender 1
+                    var v = t.Result;                   // offender 1 (declared Task parameter)
                     t.Wait();                           // offender 2
                     var w = t.GetAwaiter().GetResult(); // offender 3
                     // t.Result in a comment is NOT code
                     Log($"inside a string {t2.Result} too"); // offender 4 hidden in an interpolation hole
                     Log("prose about .Wait() is NOT code");
+                    var pending = DoAsync();            // unawaited async call → the local is a Task
+                    var x = pending.Result;             // offender 5
+                    var y = Task.Run(() => 1).Result;   // offender 6 (task factory)
+                    var dto = new RuleOutcome("k", "accepted", "d");
+                    var z = dto.Result;                 // NOT an offender: a record's Result member
+                    var z2 = dto.Outcome.Result;        // NOT an offender: member access, no Task shape
                 }
             }
             """);
-        Assert.Equal(new[] { 3, 4, 5, 7 }, SampleMatches(sample, BlockingCall));
+        var hits = BlockingCallScanner.Violations(sample, "synthetic.cs");
+        var lines = hits.Select(h => int.Parse(Regex.Match(h, @":(\d+) col").Groups[1].Value)).OrderBy(n => n).ToList();
+        Assert.Equal(new[] { 3, 4, 5, 7, 10, 11 }, lines);
+        Assert.All(hits, h => Assert.True(h.Contains("blocks", StringComparison.Ordinal)
+                                         || h.Contains("Task-shaped", StringComparison.Ordinal), h));
+        // and the two honest DTO reads are still counted as declined-to-judge, visibly
+        Assert.Equal(2, BlockingCallScanner.TaskShapedMisses(sample));
     }
+
+    [Fact]
+    public void Tripwire1_self_test_an_awaited_call_is_not_mistaken_for_a_Task()
+    {
+        // The `var x = …Async()` evidence must NOT fire when the call is awaited: `x` is then the
+        // RESULT, and `x.Result` on a DTO-shaped result is a property read, not a block.
+        var sample = SourceTokenizer.Scan("synthetic.cs", """
+            class C {
+                async Task M() {
+                    var rows = await LoadAsync();
+                    var v = rows.Result;                // property read on an awaited result
+                }
+            }
+            """);
+        Assert.Empty(BlockingCallScanner.Violations(sample, "synthetic.cs"));
+        Assert.Equal(1, BlockingCallScanner.TaskShapedMisses(sample));
+    }
+
+    [Fact]
+    public void Tripwire1_self_test_a_wait_without_any_task_evidence_still_fires()
+    {
+        // Fail-open check on the narrowing: `.Wait()`/`.GetAwaiter().GetResult()` carry NO receiver
+        // requirement, so a Task hidden behind an opaque name cannot escape through them.
+        var sample = SourceTokenizer.Scan("synthetic.cs",
+            "class C { void M(QueueWidget w) { w.Wait(); w.GetAwaiter().GetResult(); } }");
+        Assert.Equal(2, BlockingCallScanner.Violations(sample, "synthetic.cs").Count);
+    }
+
 
     // ---- (2) secret-looking literals -----------------------------------------------------------------
 
@@ -242,6 +303,13 @@ public sealed class SourceHonestyTests
         // A string literal equal to a code value, or a Problems.Of whose code argument is not a
         // ProblemCodes./nameof() constant, is client-localisation drift waiting to happen — the
         // brief forbids fail-open on ambiguity, so both shapes are REPORTED, never skipped.
+        // R3 REFINEMENT (documented in TRIPWIRES.md): a LOCAL variable is exempt ONLY when the
+        // analyzer can prove every value it can hold is a ProblemCodes/nameof constant
+        // (ProblemCodeArgumentRules). P1-B's sync replay branch does exactly that
+        // (`replayCode = cond ? ProblemCodes.VersionConflict : ProblemCodes.Conflict`), so the old
+        // "any bare identifier fires" rule punished compliant code. The condition of the ternary may
+        // read state; the value positions may not. A name with no provable constant assignment
+        // (including one that is never assigned in this file) still fires — fail-closed.
         var moduleFiles = ServerSrcFiles
             .Where(p => p.Contains("/Modules/", StringComparison.OrdinalIgnoreCase))
             .ToList();
@@ -259,13 +327,18 @@ public sealed class SourceHonestyTests
             foreach (Match m in Regex.Matches(scanned.Code, NonConstantProblemsOfPattern))
             {
                 var arg = m.Groups[1].Value.Trim();
-                if (arg.Length > 0)
-                    violations.Add($"{f}:{scanned.LineOf(m.Index)} Problems.Of carries a non-constant code " +
-                                   $"argument '{arg}' — use a ProblemCodes constant or file a request");
+                if (arg.Length == 0) continue;
+                if (IsBareIdentifier(arg) && ProblemCodeArgumentRules.IsConstantOnlyLocalCodeArgument(scanned, arg))
+                    continue; // proven constant-only local: the law is about the VALUE, not the spelling
+                violations.Add($"{f}:{scanned.LineOf(m.Index)} Problems.Of carries a non-constant code " +
+                               $"argument '{arg}' — use a ProblemCodes constant or file a request");
             }
         }
         Assert.Empty(violations);
     }
+
+    private static bool IsBareIdentifier(string arg) =>
+        Regex.IsMatch(arg, @"^[A-Za-z_]\w*$");
 
     [Fact]
     public void Tripwire4_self_test_a_bare_code_literal_and_a_computed_argument_fire()
@@ -282,6 +355,15 @@ public sealed class SourceHonestyTests
             "return Problems.Of(ctx, code, \"gone\");");
         var m = Assert.Single(Regex.Matches(computed.Code, NonConstantProblemsOfPattern));
         Assert.Equal("code", m.Groups[1].Value.Trim());
+        // `code` has no provable constant-only assignment → NOT excused (unproven = violation)
+        Assert.False(ProblemCodeArgumentRules.IsConstantOnlyLocalCodeArgument(computed, "code"));
+
+        // a local assigned a DB/request value is not excused either
+        var tainted = SourceTokenizer.Scan("synthetic.cs", """
+            string code = result.ProblemCode;
+            return Problems.Of(ctx, code, "gone");
+            """);
+        Assert.False(ProblemCodeArgumentRules.IsConstantOnlyLocalCodeArgument(tainted, "code"));
 
         // the sanctioned form fires neither
         var ok = SourceTokenizer.Scan("synthetic.cs",
@@ -289,6 +371,29 @@ public sealed class SourceHonestyTests
         Assert.DoesNotContain(ok.Literals, l => KnownCodes.Value.Contains(l.Text));
         Assert.Empty(Regex.Matches(ok.Code, NonConstantProblemsOfPattern));
     }
+
+    [Fact]
+    public void Tripwire4_self_test_a_constant_only_local_is_excused_and_a_mixed_one_is_not()
+    {
+        var proven = SourceTokenizer.Scan("synthetic.cs", """
+            var replayCode = result.ProblemCode == ProblemCodes.VersionConflict
+                ? ProblemCodes.VersionConflict
+                : ProblemCodes.Conflict;
+            return Problems.Of(ctx, replayCode, "Replayed batch conflict.", status: result.ResponseStatus);
+            """);
+        Assert.True(ProblemCodeArgumentRules.IsConstantOnlyLocalCodeArgument(proven, "replayCode"));
+        // the shape rule still SEES the call (the exemption is applied by the gate, not by the regex
+        // going blind): proof that the analyzer is judging, not missing.
+        Assert.Single(Regex.Matches(proven.Code, NonConstantProblemsOfPattern));
+
+        var mixed = SourceTokenizer.Scan("synthetic.cs", """
+            var replayCode = ProblemCodes.Conflict;
+            replayCode = http.Request.Headers["x-code"].ToString();
+            return Problems.Of(ctx, replayCode, "x");
+            """);
+        Assert.False(ProblemCodeArgumentRules.IsConstantOnlyLocalCodeArgument(mixed, "replayCode"));
+    }
+
 
     // ---- (5) privacy: log sites never carry secret VALUES -----------------------------------------------
 
