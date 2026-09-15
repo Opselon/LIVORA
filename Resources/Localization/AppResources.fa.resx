@@ -478,7 +478,7 @@
   <data name="Privacy.RedoNo" xml:space="preserve"><value>همین برنامهٔ خالی را نگه دار</value></data>
   <data name="Privacy.RedoYes" xml:space="preserve"><value>دوباره تنظیمش کنم</value></data>
   <data name="Privacy.RetainedNote" xml:space="preserve"><value>انتخاب زبان و تم در تنظیمات خود برنامه می‌ماند. این‌ها دادهٔ شخصی ندارند، پس حذف هم سراغشان نمی‌رود.</value></data>
-  <data name="Privacy.WipeSampleNote" xml:space="preserve"><value>هدف‌ها و عادت‌های نمونه در اجرای بعدی خودشان برمی‌گردند؛ دادهٔ نمایشی‌اند، نه دادهٔ تو.</value></data>
+  <data name="Privacy.WipeSampleNote" xml:space="preserve"><value>هیچ‌چیز خودبه‌خود برنمی‌گردد؛ برنامه تا وقتی دوباره تنظیمش نکنی خالی می‌ماند. هدف‌ها و عادت‌های نمونه‌ای که پاک شد، دادهٔ نمایشی بود، نه دادهٔ تو.</value></data>
   <data name="Profile.AddYourData" xml:space="preserve"><value>دادهٔ خودت را اضافه کن</value></data>
   <data name="Profile.ConnectionCenterHint" xml:space="preserve"><value>هر چه LIVORA همین حالا واقعاً می‌خواند، نه بیشتر.</value></data>
   <data name="Profile.Identity" xml:space="preserve"><value>پروفایل تو</value></data>

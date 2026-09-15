@@ -484,7 +484,7 @@
   <data name="Privacy.RedoNo" xml:space="preserve"><value>Keep the empty app</value></data>
   <data name="Privacy.RedoYes" xml:space="preserve"><value>Set up again</value></data>
   <data name="Privacy.RetainedNote" xml:space="preserve"><value>Language and theme choices live in the app's own settings store. They hold no personal data, so the wipe leaves them in place.</value></data>
-  <data name="Privacy.WipeSampleNote" xml:space="preserve"><value>Sample goals and habits return on their own at the next start — they are demo data, not your data.</value></data>
+  <data name="Privacy.WipeSampleNote" xml:space="preserve"><value>Nothing comes back on its own — the app stays empty until you set it up. The demo goals/habits you wiped were sample data, not your data.</value></data>
   <data name="Profile.AddYourData" xml:space="preserve"><value>Add your data</value></data>
   <data name="Profile.ConnectionCenterHint" xml:space="preserve"><value>What LIVORA can actually read right now — nothing more.</value></data>
   <data name="Profile.Identity" xml:space="preserve"><value>Your profile</value></data>
