@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    PURPOSE: LIVORA cloud backend host (Wave 4) — composition root, versioned HTTP surface,
+             auth wiring, migrations, observability.
+    OWNER: Agent 02 (Cloud Backend & API Platform Engineer) owns this file; feature lanes never
+           edit it (they self-register an IFlivoraModule inside their own folder).
+    CONSUMES: Livora.Server.Application (contracts + engine ports).
+    PROVIDES: runnable API  (dotnet run from this project folder)
+              /healthz      (liveness + dependency report)
+              /api/v1/*     (only versioned route prefix; no unversioned business routes)
+    INVARIANTS:
+      - No connection string or secret in source; configuration + environment only.
+      - Starts and answers /healthz with ZERO external dependencies configured.
+      - An unconfigured third-party dependency reports a truthful status, never success.
+      - Warnings are errors (Directory.Build.props) — this project ships clean or not at all.
+    EXTEND: add a package reference only when code actually calls it; drop the placeholder
+             IFlivoraModule list in Program.cs when the first real module lands (Phase 1).
+  -->
+  <PropertyGroup>
+    <!-- Isolate from the parent repos/Directory.Packages.props (9.x preview pins) - same rule as
+         the MAUI app project: CPM must be opted out in the project BODY, not in Directory.Build.props,
+         because the discovered props file is imported after the nearest Directory.Build.props. -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Livora.Server</RootNamespace>
+    <AssemblyName>Livora.Server</AssemblyName>
+    <UserSecretsId>livora-server-wave4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Livora.Server.Application\Livora.Server.Application.csproj" />
+    <ProjectReference Include="..\Livora.Server.Infrastructure\Livora.Server.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <!-- Design-time factory (HostDesignTimeFactory.cs) needs the IDesignTimeDbContextFactory seam. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>

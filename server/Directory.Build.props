@@ -1,0 +1,21 @@
+<Project>
+  <!--
+    PURPOSE: repo-wide defaults for the LIVORA cloud backend (Wave 4).
+    OWNER: Agent 01 (Principal Integration & Architecture Lead).
+    CONSUMES: nothing.
+    PROVIDES: invariant language version, nullable, warnings-as-errors for the whole server tree.
+    INVARIANTS: applies to every project under server/ only (this file sits inside server/, MSBuild
+                walks up from each project and stops here). The MAUI app project is NOT affected —
+                it keeps its own settings at the repo root, and the root Directory.Packages.props
+                (old 9.x pins) stays irrelevant because ManagePackageVersionsCentrally=false.
+    EXTEND: do not add package pins here; pin per project (same convention as the app csproj).
+  -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+</Project>

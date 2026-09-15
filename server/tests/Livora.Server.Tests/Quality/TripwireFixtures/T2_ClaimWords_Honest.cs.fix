@@ -1,0 +1,20 @@
+// HONEST TWIN of the planted T2 violation (P1-F): the same three WORDS, each in a shape the law
+// permits. Negations claim the opposite (exempt), key shapes carry no rendered text (exempt), and
+// the file's positive label sits behind ConnectionState — the state machine that decides when it
+// may be shown. If the scanner fires here, it matches everything and the rule is broken.
+namespace Livora.QualityFixtures;
+
+public enum ConnectionState { Unknown, NotConnected, Connected }
+
+public static class HonestLabels
+{
+    /// <summary>Resource KEY, not prose: rendering is the resx suite's job (exempt shape).</summary>
+    public static string KeyFor(ConnectionState s) => s switch
+    {
+        ConnectionState.Connected => "Profile.Status.Connected",
+        _ => "Profile.Status.NotConnected",
+    };
+
+    public static string Fallback(ConnectionState s) =>
+        s == ConnectionState.Connected ? "Connected" : "Not connected";
+}

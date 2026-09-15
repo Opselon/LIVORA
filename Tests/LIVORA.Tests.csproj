@@ -44,6 +44,10 @@
 		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Persistence\LocalDataCatalog.cs" LinkBase="Infrastructure" />
 		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\IntelligenceProviders\Wave3c\*.cs" LinkBase="Infrastructure" />
 		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Persistence\Wave3b\*.cs" LinkBase="Infrastructure" />
+		<!-- WAVE4 P1-D: the client<->cloud seam is MAUI-free by contract (HttpClient +
+		     Microsoft.Extensions.* only), so it compiles and unit-tests in this plain-net10.0
+		     project. Pre-wired as a wildcard by the lead so the lane never edits this file. -->
+		<Compile Include="$(MSBuildThisFileDirectory)..\Infrastructure\Cloud\*.cs" LinkBase="Infrastructure" />
 		<!-- WAVE3C: lane suites live under Tests/Wave3c/<area>/ (outside the legacy Tests/Tests glob). -->
 		<Compile Include="$(MSBuildThisFileDirectory)Wave3c\**\*.cs" LinkBase="Wave3c" />
 		<EmbeddedResource Include="$(MSBuildThisFileDirectory)..\Resources\Localization\AppResources.resx">

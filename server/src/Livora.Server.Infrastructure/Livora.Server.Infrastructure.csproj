@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    PURPOSE: server infrastructure — EF Core persistence, migration history, external-provider
+             adapters (identity, calendar, health, AI gateway, payments) live here.
+    OWNER: Agent 02 owns the DbContext + migration pipeline; provider adapters belong to their
+           lane's folder but are registered through an IFlivoraModule in the host, never from here.
+    CONSUMES: Livora.Server.Application (pure contracts).
+    PROVIDES: LivoraDbContext, the sqlite/postgres/in-memory provider switch, audit interceptor.
+    INVARIANTS:
+      - SQLite is the zero-config default so the API runs locally and in CI with no server install.
+      - Foreign keys ON per connection; every model gets a migration; no EnsureCreated in prod paths.
+      - No secrets, no connection strings with credentials in source.
+      - This assembly must not reference ASP.NET Core (ports are declared in Application).
+    EXTEND: new table -> new entity config class + one migration; never hand-edit the model cache.
+  -->
+  <PropertyGroup>
+    <!-- Isolate from the parent repos/Directory.Packages.props (9.x preview pins) - same rule as
+         the MAUI app project: CPM must be opted out in the project BODY, not in Directory.Build.props,
+         because the discovered props file is imported after the nearest Directory.Build.props. -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Livora.Server.Infrastructure</RootNamespace>
+    <AssemblyName>Livora.Server.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Livora.Server.Application\Livora.Server.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.12" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>

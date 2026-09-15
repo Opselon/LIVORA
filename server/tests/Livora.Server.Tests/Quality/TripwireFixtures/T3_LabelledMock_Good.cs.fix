@@ -1,0 +1,15 @@
+// HONEST TWIN of the planted T3 violation (P1-F): a stand-in that LABELS itself, two ways at once
+// (a comment naming it a mock + a DataOrigin.Mock stamp on everything it returns) — the shipped
+// FakeHealthPlatformBridge follows exactly this pattern. If the rule fires here, it matches
+// everything.
+//
+/// A deterministic stand-in (mock) of the platform bridge for tests: every row is stamped
+/// DataOrigin.Mock so fake data can never read as real.
+namespace Livora.QualityFixtures;
+
+public sealed class LabelledDoubleBridge
+{
+    public DataOrigin Origin => DataOrigin.Mock;
+
+    public int StepsFor(DateTime day) => 8_000;
+}
