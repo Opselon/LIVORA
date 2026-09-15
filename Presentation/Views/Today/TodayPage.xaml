@@ -214,25 +214,8 @@
                        IsVisible="{Binding HasRouteNotice}"/>
             </VerticalStackLayout>
 
-            <!-- State quality line: honest about coverage + confidence (kept from Wave 2) -->
-            <Border Style="{StaticResource SoftCard}" Padding="14,10">
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
-                    <Label Grid.Column="0" Text="{Binding CompletenessTitle}"
-                           Style="{StaticResource LCaption}" FontSize="12" VerticalOptions="Center"
-                           LineBreakMode="WordWrap" MaxLines="2"
-                           SemanticProperties.HeadingLevel="Level3"/>
-                    <Border Grid.Column="1" Style="{StaticResource ChipNeutral}">
-                        <Label Text="{Binding DataCompletenessLabel}" Style="{StaticResource ChipLabel}"
-                               FontAttributes="Bold"
-                               SemanticProperties.Description="{Binding CompletenessTitle}"/>
-                    </Border>
-                    <Border Grid.Column="2" Style="{StaticResource ChipTint}">
-                        <Label Text="{Binding StateConfidenceLabel}" Style="{StaticResource ChipLabel}"
-                               FontAttributes="Bold" TextColor="{StaticResource Accent}"
-                               SemanticProperties.Description="{Binding ConfidenceTitle}"/>
-                    </Border>
-                </Grid>
-            </Border>
+            <!-- State quality (coverage + confidence) is shown once, inside the score block above —
+                 a second copy here duplicated the same two chips and cost a screenful of scroll. -->
 
             <!-- Daily Intelligence Card -->
             <Border Style="{StaticResource AccentCard}">
