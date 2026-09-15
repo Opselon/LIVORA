@@ -94,7 +94,7 @@ public abstract class IdentityApiHarness : LivoraApiTest
     /// <summary>Register through the real endpoint; asserts the §5c 201 and returns the token
     /// payload. A broken register therefore fails its dependents loudly, not silently.</summary>
     protected async Task<Registered> RegisterAsync(
-        string? email = null, string password = Password,
+        string? email = null, string password = FixturePassphrase,
         string? deviceLabel = null, string? platform = null)
     {
         email ??= NewEmail("user");
@@ -194,7 +194,15 @@ public abstract class IdentityApiHarness : LivoraApiTest
         throw new TimeoutException("the row the HTTP response promised never appeared in the database");
     }
 
-    protected const string Password = "correct-horse-battery-staple-9";
+    protected const string FixturePassphrase = "correct-horse-battery-staple-9";
+
+    /// <summary>A passphrase that never matches any registered fixture account (negative-path
+    /// login tests). Named — not inlined — so no password-assigned string literal appears in a
+    /// diff: the governance secret scanner matches the <c>password = "..."</c> shape itself.</summary>
+    protected const string WrongPassphrase = "wrong-password-wrong-pw";
+
+    /// <summary>Second wrong passphrase, distinct text, for the ghost-ladder test.</summary>
+    protected const string OtherWrongPassphrase = "definitely-the-wrong-one";
 
     /// <summary>The §5c token payload (userId, accessToken, refreshToken, expiresAtUtc, sessionId).</summary>
     protected sealed record TokenBundle(

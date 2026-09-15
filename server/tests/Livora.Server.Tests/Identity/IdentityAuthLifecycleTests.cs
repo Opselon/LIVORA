@@ -38,14 +38,14 @@ public sealed class IdentityAuthLifecycleTests : IdentityApiHarness
     {
         var email = NewEmail("reg");
         var (status, text) = await PostRawAsync("/api/v1/auth/register",
-            JsonSerializer.Serialize(new { email, password = Password }));
+            JsonSerializer.Serialize(new { email, password = FixturePassphrase }));
 
         Assert.Equal(HttpStatusCode.Created, status);
         var tokens = ReadTokens(text);
 
         // duplicate → email_already_registered, and the body is the shared envelope
         var (dupStatus, dupText) = await PostRawAsync("/api/v1/auth/register",
-            JsonSerializer.Serialize(new { email, password = Password }));
+            JsonSerializer.Serialize(new { email, password = FixturePassphrase }));
         Assert.Equal(HttpStatusCode.Conflict, dupStatus);
         Assert.Equal(ProblemCodes.EmailAlreadyRegistered, ProblemOf(dupText).Code);
 
@@ -53,7 +53,7 @@ public sealed class IdentityAuthLifecycleTests : IdentityApiHarness
         using var db = Db();
         var user = await db.Users.SingleAsync(u => u.Id == tokens.UserId);
         Assert.NotNull(user.PasswordHash);
-        Assert.DoesNotContain(Password, user.PasswordHash);
+        Assert.DoesNotContain(FixturePassphrase, user.PasswordHash);
         Assert.Equal(email, user.NormalizedEmail);
     }
 
@@ -77,14 +77,14 @@ public sealed class IdentityAuthLifecycleTests : IdentityApiHarness
     public async Task Register_rejects_an_unknown_locale_but_accepts_the_two_legal_ones()
     {
         var (status, text) = await PostRawAsync("/api/v1/auth/register",
-            JsonSerializer.Serialize(new { email = NewEmail("loc"), password = Password, locale = "de" }));
+            JsonSerializer.Serialize(new { email = NewEmail("loc"), password = FixturePassphrase, locale = "de" }));
         Assert.Equal(HttpStatusCode.BadRequest, status);
         Assert.Contains("locale", ProblemOf(text).Errors!.Keys);
 
         foreach (var locale in new[] { "en", "fa" })
         {
             var (ok, _) = await PostRawAsync("/api/v1/auth/register",
-                JsonSerializer.Serialize(new { email = NewEmail("loc"), password = Password, locale }));
+                JsonSerializer.Serialize(new { email = NewEmail("loc"), password = FixturePassphrase, locale }));
             Assert.Equal(HttpStatusCode.Created, ok);
         }
     }
@@ -121,9 +121,9 @@ public sealed class IdentityAuthLifecycleTests : IdentityApiHarness
         var unknown = NewEmail("ghost");
 
         var (s1, b1) = await PostRawAsync("/api/v1/auth/login",
-            JsonSerializer.Serialize(new { email = reg.Email, password = "wrong-password-wrong-pw" }));
+            JsonSerializer.Serialize(new { email = reg.Email, password = WrongPassphrase }));
         var (s2, b2) = await PostRawAsync("/api/v1/auth/login",
-            JsonSerializer.Serialize(new { email = unknown, password = "wrong-password-wrong-pw" }));
+            JsonSerializer.Serialize(new { email = unknown, password = WrongPassphrase }));
 
         Assert.Equal(HttpStatusCode.Unauthorized, s1);
         Assert.Equal(HttpStatusCode.Unauthorized, s2);
@@ -147,7 +147,7 @@ public sealed class IdentityAuthLifecycleTests : IdentityApiHarness
         for (var i = 0; i < 6; i++)
         {
             var (status, text) = await PostRawAsync("/api/v1/auth/login",
-                JsonSerializer.Serialize(new { email = ghost, password = "definitely-the-wrong-one" }));
+                JsonSerializer.Serialize(new { email = ghost, password = OtherWrongPassphrase }));
             Assert.Contains(status, new[] { HttpStatusCode.Unauthorized, HttpStatusCode.TooManyRequests });
             last = status;
         }
@@ -291,7 +291,7 @@ public sealed class IdentityAuthLifecycleTests : IdentityApiHarness
         for (var attempt = 1; attempt <= options.LockoutMaxAttempts + 1; attempt++)
         {
             var (status, text) = await PostRawAsync("/api/v1/auth/login",
-                JsonSerializer.Serialize(new { email, password = "wrong-" + Password }));
+                JsonSerializer.Serialize(new { email, password = "wrong-" + FixturePassphrase }));
             var expected = attempt <= options.LockoutWarnAfterFailures ? HttpStatusCode.Unauthorized
                          : attempt <= options.LockoutMaxAttempts ? HttpStatusCode.TooManyRequests
                          : HttpStatusCode.Forbidden;

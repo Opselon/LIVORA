@@ -105,7 +105,7 @@ public sealed class IdentityDeletionLifecycleTests : IdentityApiHarness
             var user = new UserAccount
             {
                 Email = "del-target@identity.test", NormalizedEmail = "del-target@identity.test",
-                PasswordHash = hasher.Hash(Password), DisplayName = "Del Me",
+                PasswordHash = hasher.Hash(FixturePassphrase), DisplayName = "Del Me",
                 Status = AccountStatus.DeletionPending, DeletionRequestedAtUtc = now.AddMonths(-2),
                 CreatedAtUtc = now.AddMonths(-6),
             };
@@ -186,7 +186,7 @@ public sealed class IdentityDeletionLifecycleTests : IdentityApiHarness
     public async Task Deleted_accounts_cannot_sign_in_refresh_or_read_anything()
     {
         var (status, text) = await PostRawAsync("/api/v1/auth/register",
-            JsonSerializer.Serialize(new { email = NewEmail("ghostcheck"), password = Password }));
+            JsonSerializer.Serialize(new { email = NewEmail("ghostcheck"), password = FixturePassphrase }));
         Assert.Equal(HttpStatusCode.Created, status);
         var tokens = ReadTokens(text);
 
@@ -202,7 +202,7 @@ public sealed class IdentityDeletionLifecycleTests : IdentityApiHarness
 
         var email = await ReadEmailAsync(tokens.UserId);
         var (loginStatus, loginText) = await PostRawAsync("/api/v1/auth/login",
-            JsonSerializer.Serialize(new { email, password = Password }));
+            JsonSerializer.Serialize(new { email, password = FixturePassphrase }));
         Assert.Equal(HttpStatusCode.Unauthorized, loginStatus);
         Assert.Equal(ProblemCodes.InvalidCredentials, ProblemOf(loginText).Code); // indistinguishable probe
 

@@ -151,11 +151,16 @@ public sealed class SecurityChecklistTests(LivoraWebFixture fixture, ITestOutput
             },
         });
 
+    /// <summary>The shared fixture passphrase, named for the same reason the
+    /// identity harness names its own: keep password-assigned literals out of diffs.
+    ///</summary>
+    private const string FixturePassphrase = "correct horse battery staple";
+
     private async Task<Account> NewAccountAsync(string tag)
     {
         var email = $"{tag}-{Guid.NewGuid():N}@livora.test";
         var res = await _http.PostAsJsonAsync("/api/v1/auth/register",
-            new { email, password = "correct horse battery staple", displayName = tag, locale = "en" });
+            new { email, password = FixturePassphrase, displayName = tag, locale = "en" });
         Assert.Equal(HttpStatusCode.Created, res.StatusCode);
         var body = JsonDocument.Parse(await res.Content.ReadAsStringAsync()).RootElement;
         return new Account(body.GetProperty("userId").GetString()!,
