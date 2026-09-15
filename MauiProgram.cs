@@ -229,12 +229,59 @@ public static class MauiProgram
             new LIVORA.Infrastructure.Security.LocalPasscodeService(
                 sp.GetRequiredService<LIVORA.Application.Abstractions.ISecureStorageService>(),
                 () => sp.GetRequiredService<SessionState>().CurrentProfile?.Id));
-        // Honest placeholders until wave 4: cloud auth never succeeds (no backend exists), the
-        // sync transport is never configured (queue stays Pending, UI says so).
-        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ICloudAuthService,
-            LIVORA.Infrastructure.Security.CloudAuthService>();
-        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ISyncTransport,
-            LIVORA.Infrastructure.Security.NoopSyncTransport>();
+        // ---- WAVE4-DI: the REAL cloud seam (P1-B server + P1-D client classes) replaces Wave 3c's
+        // honest placeholders. With no base URL provisioned (cloud/cloud-settings.json absent) the
+        // bridge defers to the NoopSyncTransport shape byte-for-byte — queue entries stay Pending,
+        // the connector card says "not configured", nothing is claimed that did not happen. Point it
+        // at a deployed Livora.Server and the same objects push/pull for real. The placeholder
+        // registrations are deleted (not wrapped): deleting them was the designed only-path to a
+        // Synced word (CLIENT-CONTRACT-P1 §4).
+        builder.Services.AddSingleton<LIVORA.Application.Cloud.ICloudApiOptions>(sp =>
+            new LIVORA.Infrastructure.Cloud.CloudApiOptions(
+                new LIVORA.Infrastructure.Persistence.LocalJsonStore(
+                    System.IO.Path.Combine(livoraDataDir, LIVORA.Infrastructure.Cloud.CloudApiOptions.CloudDirName))));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Cloud.CloudTokenStore(
+            sp.GetRequiredService<LIVORA.Application.Abstractions.ISecureStorageService>(),
+            () => (sp.GetRequiredService<LIVORA.Application.Abstractions.ISecureStorageService>()
+                as LIVORA.Infrastructure.Security.SecureStorageService)?.IsPlatformHardwareBacked == true));
+        // The port needs an auth context, and the session manager needs the port: the deferred hop
+        // breaks that construction cycle, resolving the real manager lazily on first network use.
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Cloud.DeferredCloudAuthContext(
+            () => sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudSessionManager>()));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Cloud.LivoraApiPort(
+            sp.GetRequiredService<LIVORA.Application.Cloud.ICloudApiOptions>(),
+            null,
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.DeferredCloudAuthContext>()));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Cloud.CloudSessionManager(
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.LivoraApiPort>(),
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudTokenStore>()));
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ICloudAuthService>(sp =>
+            new LIVORA.Infrastructure.Cloud.SessionCloudAuthService(
+                () => sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudSessionManager>(),
+                sp.GetRequiredService<LIVORA.Application.Cloud.ICloudApiOptions>()));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Cloud.CatalogSyncPayloadSource(
+            () => sp.GetRequiredService<LIVORA.Application.Abstractions.ILocalDataCatalogService>()));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Cloud.CloudSyncTransport(
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.LivoraApiPort>(),
+            sp.GetRequiredService<LIVORA.Application.Cloud.ICloudApiOptions>(),
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudSessionManager>(),
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CatalogSyncPayloadSource>()));
+        builder.Services.AddSingleton(sp => new LIVORA.Infrastructure.Cloud.CloudSyncBridge(
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.LivoraApiPort>(),
+            sp.GetRequiredService<LIVORA.Application.Cloud.ICloudApiOptions>(),
+            sp.GetRequiredService<LIVORA.Application.Sync.SyncQueue>(),
+            new LIVORA.Infrastructure.Cloud.CloudConnectorStateStore(
+                new LIVORA.Infrastructure.Persistence.LocalJsonStore(
+                    System.IO.Path.Combine(livoraDataDir, LIVORA.Infrastructure.Cloud.CloudApiOptions.CloudDirName))),
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudSessionManager>(),
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudSyncTransport>(),
+            restoreSession: () => sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudSessionManager>()
+                .RestoreAsync()));
+        builder.Services.AddSingleton<LIVORA.Application.Abstractions.ISyncTransport>(sp =>
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudSyncBridge>());
+        builder.Services.AddSingleton<LIVORA.Application.Cloud.ICloudConnector>(sp =>
+            sp.GetRequiredService<LIVORA.Infrastructure.Cloud.CloudSyncBridge>());
+        // WAVE4-DI-END
 
         // ---- WAVE3C LANE 02: real AI orchestration (OpenAI-compatible gateway) + safety -------
         // Order: gate (consent + enabled + configured) -> minimal context -> provider -> tolerant
