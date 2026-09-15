@@ -1,0 +1,367 @@
+name: PR Gates v2
+
+# Governance-engine gate (scripts/integration/governance/*). Classifies every
+# open PR against CURRENT master using the LIVORA governance CLI, publishes a
+# stable JSON manifest as an artifact, and posts the roll-up check that the
+# Integrate workflow consumes.
+#
+# COEXISTENCE WITH pr-gates.yml (v1): both workflows define a job named
+# "roll-up status", so only ONE may be enabled at a time — see
+# docs/architecture/governance/workflow-integration-notes.md for the switch and
+# rollback procedure. Job names (gate / build-test / report) and the report job's
+# check name are load-bearing: integrate.yml looks up the check literally.
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "PR number to (re-)evaluate"
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+concurrency:
+  group: gates-v2-${{ github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: .github/OWNERSHIP.yaml
+  INPUT_DIR: gate-inputs
+  MANIFEST: governance-manifest.json
+
+jobs:
+  gate:
+    name: controller-gate-v2
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
+    outputs:
+      verdict: ${{ steps.classify.outputs.verdict }}
+      pr: ${{ steps.prnum.outputs.n }}
+    steps:
+      - name: Resolve PR number
+        id: prnum
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "n=${{ inputs.pr }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "n=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The governance registry loader is fail-closed: without PyYAML it refuses
+      # to parse OWNERSHIP.yaml and returns RED. Install it BEFORE any gate step.
+      - name: Install PyYAML (required by the governance registry loader)
+        run: python3 -m pip install --upgrade pip && pip3 install pyyaml
+
+      - name: Fetch PR metadata + diff (derive from GitHub, never from agent claims)
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: "${{ github.repository }}"
+          PR: ${{ steps.prnum.outputs.n }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$INPUT_DIR"
+          gh pr view "$PR" --json number,title,body,baseRefOid,headRefOid,mergeable,commits,author \
+            > "$INPUT_DIR/pr.json"
+          if ! gh pr diff "$PR" --patch > "$INPUT_DIR/additions.diff" 2>/dev/null; then
+            # GitHub's diff API refuses >20k-line PRs (HTTP 406). Derive the patch
+            # from git instead — same content, no size cap.
+            git fetch -q origin "refs/pull/$PR/head"
+            git diff "origin/master...FETCH_HEAD" > "$INPUT_DIR/additions.diff"
+          fi
+
+      - name: Establish base / head / merge-base topology
+        env:
+          PR: ${{ steps.prnum.outputs.n }}
+        run: |
+          set -euo pipefail
+          base=$(python3 -c "import json;print(json.load(open('$INPUT_DIR/pr.json'))['baseRefOid'])")
+          head=$(python3 -c "import json;print(json.load(open('$INPUT_DIR/pr.json'))['headRefOid'])")
+          git fetch -q origin "refs/pull/$PR/head" "refs/heads/master"
+          mb=$(git merge-base "$base" "$head")
+          {
+            echo "BASE_SHA=$base"
+            echo "HEAD_SHA=$head"
+            echo "MERGE_BASE=$mb"
+          } >> "$GITHUB_ENV"
+          echo "base=$base head=$head merge_base=$mb"
+
+      # The PR itself is UNTRUSTED and may rewrite .github/OWNERSHIP.yaml
+      # (the v1 self-grant bypass). ALL policy reads — validation, drift
+      # detection, classification — use this BASE copy exported from the
+      # merge-base commit, never the PR-head working tree.
+      - name: Export BASE registry (policy from merge-base, not PR head)
+        env:
+          MERGE_BASE: ${{ env.MERGE_BASE }}
+        run: |
+          set -euo pipefail
+          git show "$MERGE_BASE:$REGISTRY" > "$INPUT_DIR/OWNERSHIP.base.yaml"
+          echo "BASE_REGISTRY=$INPUT_DIR/OWNERSHIP.base.yaml" >> "$GITHUB_ENV"
+
+      - name: Compute changed.txt + changed.json (git-derived, with operations)
+        env:
+          BASE_SHA: ${{ env.BASE_SHA }}
+          HEAD_SHA: ${{ env.HEAD_SHA }}
+        run: |
+          set -euo pipefail
+          # -M -C surfaces renames/copies; -z keeps filenames with spaces intact.
+          git diff --name-status -M -C -z "$BASE_SHA...$HEAD_SHA" > "$INPUT_DIR/name-status.z"
+          python3 - <<'PY'
+          import json, os
+          raw = open(os.path.join(os.environ["INPUT_DIR"], "name-status.z"), "rb").read()
+          fields = [f.decode("utf-8", "surrogateescape") for f in raw.split(b"\x00") if f != b""]
+          OPS = {"A": "create", "M": "modify", "D": "delete", "T": "modify"}
+          entries, names = [], []
+          i = 0
+          while i < len(fields):
+              status = fields[i]
+              code = status[0]
+              i += 1
+              if code in ("R", "C"):
+                  old, new = fields[i], fields[i + 1]
+                  i += 2
+                  entries.append({"path": new,
+                                  "operation": "rename" if code == "R" else "copy",
+                                  "old_path": old, "binary": False})
+              else:
+                  new = fields[i]
+                  i += 1
+                  op = OPS.get(code, "unknown")
+                  entries.append({"path": new, "operation": op,
+                                  "old_path": None, "binary": False})
+          for e in entries:
+              if e["path"] not in names:
+                  names.append(e["path"])
+          d = os.environ["INPUT_DIR"]
+          with open(os.path.join(d, "changed.txt"), "w", encoding="utf-8") as f:
+              f.write("\n".join(names) + ("\n" if names else ""))
+          with open(os.path.join(d, "changed.json"), "w", encoding="utf-8") as f:
+              json.dump(entries, f, ensure_ascii=False, indent=0)
+          print(f"changed files: {len(entries)} (name-only list: {len(names)})")
+          PY
+
+      - name: Detect architecture drift after fork + write meta.json
+        env:
+          BASE_SHA: ${{ env.BASE_SHA }}
+          HEAD_SHA: ${{ env.HEAD_SHA }}
+          MERGE_BASE: ${{ env.MERGE_BASE }}
+          BASE_REGISTRY: ${{ env.BASE_REGISTRY }}
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess
+
+          d = os.environ["INPUT_DIR"]
+          pr = json.load(open(os.path.join(d, "pr.json"), encoding="utf-8"))
+          base = os.environ["BASE_SHA"]; head = os.environ["HEAD_SHA"]; mb = os.environ["MERGE_BASE"]
+          reg_path = os.environ["BASE_REGISTRY"]
+
+          def git(*args):
+              return subprocess.run(("git",) + args, capture_output=True, text=True, check=True).stdout
+
+          behind = int(git("rev-list", "--count", f"{mb}..{base}").strip() or 0)
+          ahead = int(git("rev-list", "--count", f"{mb}..{head}").strip() or 0)
+
+          # architecture_changed_after_fork: did MASTER move governance-owned files
+          # (frozen OR architecture_owned patterns) since this branch forked? If so
+          # the PR was classified against a policy it never saw — engine escalates.
+          import yaml
+          reg = yaml.safe_load(open(reg_path, encoding="utf-8")) or {}
+          patterns = []
+          for key in ("frozen", "architecture_owned"):
+              block = reg.get(key) or {}
+              if isinstance(block, dict):
+                  patterns += [p for p in (block.get("paths") or []) if isinstance(p, str)]
+
+          def matches(pattern, path):
+              # Intentionally simple, case-sensitive, POSIX-separator prefix check:
+              # 'x/**' matches anything under 'x/'; '*' is one path segment; anything
+              # else must be an exact path. The engine's own Matcher is authoritative —
+              # this only raises a boolean drift flag in meta.json.
+              if pattern == "**":
+                  return True
+              if pattern.endswith("/**"):
+                  return path.startswith(pattern[:-3] + "/")
+              if "*" in pattern:
+                  import fnmatch
+                  return fnmatch.fnmatchcase(path, pattern)
+              return path == pattern
+
+          master_drift = [l for l in git("diff", "--name-only", f"{mb}..{base}").splitlines() if l.strip()]
+          arch_changed = any(matches(p, f) for f in master_drift for p in patterns)
+
+          # GitHub's mergeable enum -> the engine's evidence vocabulary.
+          # gh pr view --json mergeable returns MERGEABLE | CONFLICTING | UNKNOWN.
+          MERGEABLE = {"MERGEABLE": "clean", "CLEAN": "clean", "CONFLICTING": "dirty",
+                       "HAS_BLOCKS": "dirty", "DIRTY": "dirty", "BLOCKED": "dirty",
+                       "UNSTABLE": "dirty", "DRAFT": "unknown", "UNKNOWN": "unknown",
+                       "BEHIND": "unknown"}
+          gh_mergeable = (pr.get("mergeable") or "UNKNOWN").upper()
+          if gh_mergeable not in MERGEABLE:
+              print(f"::warning::unmapped mergeable state '{gh_mergeable}' -> unknown (fail-closed)")
+
+          changed = [l for l in open(os.path.join(d, "changed.txt"), encoding="utf-8")
+                     if l.strip()]
+          meta = {
+              "pr": pr["number"],
+              "title": pr.get("title") or "",
+              "body": pr.get("body") or "",
+              "base_sha": base,
+              "head_sha": head,
+              "merge_base": mb,
+              "mergeable": MERGEABLE[gh_mergeable],
+              "commits": len(pr.get("commits") or []),
+              "author": (pr.get("author") or {}).get("login", "?"),
+              "commits_behind": behind,
+              "commits_ahead": ahead,
+              "architecture_changed_after_fork": arch_changed,
+          }
+          with open(os.path.join(d, "meta.json"), "w", encoding="utf-8") as f:
+              json.dump(meta, f, ensure_ascii=False)
+          print(f"PR#{meta['pr']} mergeable={meta['mergeable']} behind={behind} "
+                f"ahead={ahead} files={len(changed)} arch_drift_after_fork={arch_changed}")
+          PY
+
+      # Registry FIRST, and specifically the BASE registry: the PR itself is
+      # untrusted and may rewrite .github/OWNERSHIP.yaml (self-grant bypass in
+      # v1). Policy is loaded from the merge-base commit, never from PR head;
+      # a PR touching the registry is classified as an architecture-owned edit
+      # against the base policy (RED for lanes, YELLOW review for the lead).
+      - name: Validate governance registry
+        run: |
+          set -euo pipefail
+          if ! python3 scripts/integration/livora_gates.py --registry "$BASE_REGISTRY" validate-registry; then
+            echo "::error::OWNERSHIP.yaml is invalid — governance gate cannot classify. Fix the registry (see the constraint list above) or revert the registry PR."
+            exit 1
+          fi
+
+      - name: Governance classification (stable JSON manifest)
+        id: classify
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          # Deterministic evidence timestamp for the manifest: the engine never reads
+          # the clock itself, so CI supplies it explicitly (--as-of, UTC ISO-8601).
+          GATE_AS_OF: ${{ github.run_started_at }}
+        run: |
+          set +e
+          python3 scripts/integration/livora_gates.py --registry "$BASE_REGISTRY" classify \
+            --input-dir "$INPUT_DIR" --no-git --json \
+            --manifest-out "$MANIFEST" --as-of "$GATE_AS_OF" | tee gate-output.json
+          rc=${PIPESTATUS[0]}
+          case $rc in
+            0) v=GREEN ;; 1) v=YELLOW ;; *) v=RED ;;
+          esac
+          echo "verdict=$v" >> "$GITHUB_OUTPUT"
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          set -e
+          {
+            echo "## Controller gate v2 — PR#${{ steps.prnum.outputs.n }}"
+            echo
+            echo "Verdict: **$v** (engine exit $rc) — classification only; build/tests are separate gates."
+            echo
+            echo '```'
+            head -c 20000 gate-output.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload governance manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-manifest-PR${{ steps.prnum.outputs.n }}
+          path: ${{ env.MANIFEST }}
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish gate verdict on the PR
+        if: always()
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GH_REPO: "${{ github.repository }}"
+          PR: ${{ steps.prnum.outputs.n }}
+        run: |
+          set -euo pipefail
+          v="${{ steps.classify.outputs.verdict }}"
+          if [ -z "$v" ]; then v=RED; fi
+          reasons=$(python3 <<'PY' || true
+          import json
+          try:
+              m = json.load(open("gate-output.json", encoding="utf-8"))
+          except Exception:
+              print("(manifest unavailable)")
+          else:
+              print(", ".join(m.get("reason_codes") or []) or "-")
+          PY
+          )
+          gh pr comment "$PR" --body "controller gate v2 verdict: **$v** — reasons: ${reasons} (manifest attached to the run)" || true
+
+      - name: Hard stop on RED (YELLOW proceeds so the coordinator sees build results)
+        if: steps.classify.outputs.verdict == 'RED'
+        run: exit 1
+
+  build-test:
+    name: verify merge state (base HEAD + PR applied)
+    needs: gate
+    runs-on: windows-latest
+    steps:
+      - name: Checkout PR merge ref (kills stale-baseline false-greens)
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number || inputs.pr }}/merge
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install MAUI workloads
+        run: dotnet workload install maui-windows
+
+      - name: Unit tests (Release)
+        run: dotnet test Tests/LIVORA.Tests.csproj --configuration Release
+
+      - name: App build (Windows head — test project cannot see XAML/DI breaks)
+        run: dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release
+
+      # GOVERNANCE CI GATE: the engine's Python suite (Tests/Governance) must pass on
+      # Linux as well as Windows, so it runs here as an explicit cross-platform step
+      # rather than only inside the Windows MAUI job. Until that suite lands on master
+      # this step fails the build job — see
+      # docs/architecture/governance/workflow-integration-notes.md ("Known blockers").
+      - name: Governance engine test suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          pip3 install pyyaml pytest hypothesis
+          python3 -m pytest Tests/Governance -q
+
+  report:
+    name: roll-up status
+    needs: [gate, build-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Final classification
+        env:
+          VERDICT: ${{ needs.gate.outputs.verdict }}
+          BUILD: ${{ needs.build-test.result }}
+        run: |
+          echo "gate=$VERDICT build=$BUILD" | tee -a "$GITHUB_STEP_SUMMARY"
+          # This job is the SINGLE merge authority: success => auto-merge eligible.
+          if [ "$BUILD" != "success" ]; then echo "RED — build/tests failed ($BUILD)"; exit 1; fi
+          case "$VERDICT" in
+            GREEN)  echo "GREEN — integrate workflow may merge this PR"; exit 0 ;;
+            YELLOW) echo "::warning::HELD for coordinator review (YELLOW)"; exit 1 ;;
+            *)      echo "RED — gate verdict '$VERDICT'"; exit 1 ;;
+          esac

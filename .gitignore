@@ -366,3 +366,8 @@ server/**/*.db
 server/**/*.db-shm
 server/**/*.db-wal
 server/**/appsettings.Local.json
+# governance local runner artifacts (never commit evidence scratch)
+gate-inputs/
+**/__pycache__/
+.pytest_cache/
+governance-manifest.json
