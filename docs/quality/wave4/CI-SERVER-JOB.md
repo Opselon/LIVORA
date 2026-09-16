@@ -1,8 +1,24 @@
-# Wave 4 P1-F — proposed server CI job (ready to apply — the LEAD applies it)
+# Wave 4 P1-F — proposed server CI job (APPLIED by the lead — note below)
 
-**This file is a proposal, not an edit.** `.github/**` is outside the P1-F write scope
-(`.github/OWNERSHIP.yaml` row `w4-p1f-quality`); applying this is a lead commit. Every command in it
-was executed from a clean checkout path at `wave4/p1f/quality` HEAD before this file was written.
+> **APPLIED (lead, post-v1.3.0, this PR).** The `server-gates` job below landed in
+> `.github/workflows/pr-gates.yml` with two honest deltas from the proposal:
+> (1) the `needs`/receipt references use this workflow's actual job id `gate` (the check it
+> publishes is named `controller-gate`), and the checkout ref carries the `|| inputs.pr`
+> fallback so `workflow_dispatch` runs resolve the merge ref too; (2) the receipt-upload path
+> is `${{ runner.temp }}/livora-wave4-gates` — the harness writes to `Path.GetTempPath()`,
+> which on hosted runners IS the runner temp; the proposal's `docs/quality/wave4/**` glob
+> would have uploaded the docs instead of the logs. Commands otherwise verbatim. Note:
+> `pull_request` events run the BASE branch's workflow definition, so enforcement starts
+> with the first PR merged AFTER this one — this PR itself remains gated by the previous
+> definition. Side effect the lead intends: the split makes the client perf budgets
+> deterministic in CI, which also removes the disclosed GateHarness flake-inheritance
+> (Wave4Gate's client child mirrors Gate 3a/3b; see FLAKE-STORAGE-BUDGET.md).
+
+**Original framing, kept for the record:** this file was a proposal, not an edit —
+`.github/**` is outside the P1-F write scope (`.github/OWNERSHIP.yaml` row `w4-p1f-quality`);
+applying it is a lead commit. Every command in it was executed from a clean checkout path at
+`wave4/p1f/quality` HEAD before this file was written, and re-executed at `7723b23` during the
+v1.3.0 verification battery (server 428/428, client 6 isolated + 1293 parallel, builds 0W/0E).
 
 ## What today's workflows do NOT cover
 
