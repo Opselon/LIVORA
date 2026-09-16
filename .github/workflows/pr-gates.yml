@@ -149,9 +149,24 @@ jobs:
       - name: server build (warnings are errors)
         run: dotnet build server/src/Livora.Server/Livora.Server.csproj -v q --nologo
 
-      # Gate 2 — the real-host contract suite (fixture = WebApplicationFactory, per-fixture file DB).
-      - name: server tests
-        run: dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q
+      # Gate 2a — the real-host contract suite WITHOUT the self-nesting harness test.
+      # WHY split: Wave4GateTests.GateHarness spawns its own child builds+full suites; with xunit
+      # running every other collection against it on a 4-core runner, the nested Quality timing
+      # budgets (Wave4PerformanceBudget) measure SELF-contention, not the product — the exact
+      # contention class FLAKE-STORAGE-BUDGET.md documents. Same no-weakening remedy as 3a/3b:
+      # every test still runs exactly once; the harness gets a quiet machine in 2b.
+      - name: server tests (parallel suite, harness isolated to next step)
+        run: >
+          dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q
+          --filter "FullyQualifiedName!~Wave4GateTests.GateHarness"
+
+      # Gate 2b — the §3 release-gate harness ALONE, serialised: its children then run against an
+      # otherwise-idle runner, so receipts measure the contract commands, not runner contention.
+      - name: release-gate harness (alone, serial)
+        run: >
+          dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q
+          --filter "FullyQualifiedName~Wave4GateTests.GateHarness"
+          -- RunConfiguration.MaxParallelThreads=1
 
       # Gate 3a — client timed budgets, ISOLATED and serialised.
       # WHY: StoragePerformanceBudgetTests reads process-wide GC counters and wall-clock budgets

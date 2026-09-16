@@ -8,11 +8,21 @@
 > is `${{ runner.temp }}/livora-wave4-gates` — the harness writes to `Path.GetTempPath()`,
 > which on hosted runners IS the runner temp; the proposal's `docs/quality/wave4/**` glob
 > would have uploaded the docs instead of the logs. Commands otherwise verbatim. Note:
-> `pull_request` events run the BASE branch's workflow definition, so enforcement starts
-> with the first PR merged AFTER this one — this PR itself remains gated by the previous
-> definition. Side effect the lead intends: the split makes the client perf budgets
+> `pull_request` runs execute the workflow definition from the PR's MERGE commit, so this job
+> is enforced on this very PR — which is exactly how the third delta below was caught.
+> Side effect the lead intends: the split makes the client perf budgets
 > deterministic in CI, which also removes the disclosed GateHarness flake-inheritance
 > (Wave4Gate's client child mirrors Gate 3a/3b; see FLAKE-STORAGE-BUDGET.md).
+>
+> **Third delta, found by the first CI enforcement (PR #15):** the single "server tests" step
+> went red on `Wave4GateTests.GateHarness` — the harness nests its own builds + full suites,
+> and with xunit's parallel collections running against it on the 4-core runner, the nested
+> `Wave4PerformanceBudget` Quality tests measured self-contention rather than the product
+> (local reproduction on the exact merge ref `f30e37e`: full suite 427/428 with the harness the
+> only red; harness-excluded 427/427; full-suite re-run 428/428 — contention, not code). Gate 2
+> is therefore split like the client gate: **2a** runs the suite WITHOUT the harness, **2b**
+> runs the harness ALONE and serialised. Every test still executes exactly once per job; no
+> budget widened, no test removed, retried, or weakened.
 
 **Original framing, kept for the record:** this file was a proposal, not an edit —
 `.github/**` is outside the P1-F write scope (`.github/OWNERSHIP.yaml` row `w4-p1f-quality`);
