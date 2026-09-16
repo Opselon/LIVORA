@@ -131,9 +131,71 @@ jobs:
       - name: App build (Windows head — test project cannot see XAML/DI breaks)
         run: dotnet build LIVORA.csproj -f net10.0-windows10.0.19041.0 -c Release
 
+  server-gates:
+    name: server gates (build + server tests + client perf-isolated suite)
+    needs: gate
+    if: needs.gate.result == 'success' || needs.gate.result == 'skipped'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number || inputs.pr }}/merge
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Gate 1 — backend compiles clean; server/Directory.Build.props sets
+      # TreatWarningsAsErrors=true, so 0W is part of the verdict, not a nicety.
+      - name: server build (warnings are errors)
+        run: dotnet build server/src/Livora.Server/Livora.Server.csproj -v q --nologo
+
+      # Gate 2a — the real-host contract suite WITHOUT the self-nesting harness test.
+      # WHY split: Wave4GateTests.GateHarness spawns its own child builds+full suites; with xunit
+      # running every other collection against it on a 4-core runner, the nested Quality timing
+      # budgets (Wave4PerformanceBudget) measure SELF-contention, not the product — the exact
+      # contention class FLAKE-STORAGE-BUDGET.md documents. Same no-weakening remedy as 3a/3b:
+      # every test still runs exactly once; the harness gets a quiet machine in 2b.
+      - name: server tests (parallel suite, harness isolated to next step)
+        run: >
+          dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q
+          --filter "FullyQualifiedName!~Wave4GateTests.GateHarness"
+
+      # Gate 2b — the §3 release-gate harness ALONE, serialised: its children then run against an
+      # otherwise-idle runner, so receipts measure the contract commands, not runner contention.
+      - name: release-gate harness (alone, serial)
+        run: >
+          dotnet test server/tests/Livora.Server.Tests/Livora.Server.Tests.csproj --nologo -v q
+          --filter "FullyQualifiedName~Wave4GateTests.GateHarness"
+          -- RunConfiguration.MaxParallelThreads=1
+
+      # Gate 3a — client timed budgets, ISOLATED and serialised.
+      # WHY: StoragePerformanceBudgetTests reads process-wide GC counters and wall-clock budgets
+      # while xunit runs every other class in parallel against them — ~19% of one-command full runs
+      # go red without any code change (docs/quality/wave4/FLAKE-STORAGE-BUDGET.md, 26 measured
+      # full-suite runs). The class ships [Trait("category","Wave3c-Perf")]; the split costs ~2 s.
+      - name: client perf budgets (isolated, serial)
+        run: >
+          dotnet test Tests/LIVORA.Tests.csproj --nologo -v q
+          --filter "category=Wave3c-Perf"
+          -- RunConfiguration.MaxParallelThreads=1
+
+      # Gate 3b — the remaining client tests in full parallel (measured: unaffected by 3a).
+      - name: client tests (rest, parallel)
+        run: dotnet test Tests/LIVORA.Tests.csproj --nologo -v q --filter "category!=Wave3c-Perf"
+
+      # Upload receipts: the Wave4Gate harness child logs land under the runner TEMP
+      # (Path.GetTempPath() == %RUNNER_TEMP% on hosted runners).
+      - name: attach gate harness receipts (if the harness ran)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-gate-logs
+          path: '${{ runner.temp }}/livora-wave4-gates'
+          if-no-files-found: ignore
+
   report:
     name: roll-up status
-    needs: [gate, build-test]
+    needs: [gate, build-test, server-gates]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -141,10 +203,14 @@ jobs:
         env:
           VERDICT: ${{ needs.gate.outputs.verdict }}
           BUILD: ${{ needs.build-test.result }}
+          SERVER: ${{ needs.server-gates.result }}
         run: |
-          echo "gate=$VERDICT build=$BUILD" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "gate=$VERDICT build=$BUILD server=$SERVER" | tee -a "$GITHUB_STEP_SUMMARY"
           # This job is the SINGLE merge authority: success => auto-merge eligible.
           if [ "$BUILD" != "success" ]; then echo "RED — build/tests failed ($BUILD)"; exit 1; fi
+          if [ "$SERVER" = "failure" ] || [ "$SERVER" = "cancelled" ]; then
+            echo "RED — server gates failed ($SERVER)"; exit 1
+          fi
           case "$VERDICT" in
             GREEN)  echo "GREEN — integrate workflow may merge this PR"; exit 0 ;;
             YELLOW) echo "::warning::HELD for coordinator review (YELLOW)"; exit 1 ;;
